@@ -4,11 +4,11 @@ import numpy as np
 
 DATA_TYPE = ['png','PNG','jpg','JPG']
 def create_dataset():
-    #print(sys.argv[0] + "\n")
     USAGE = "USAGE: python path/to/make_dataset.py path/to/raw/images dataset_name path/to/CIHP_PGN"
     if len(sys.argv)!=4 or '--help' in sys.argv or '-h' in sys.argv:
         print(USAGE)
         os._exit(0)
+    print("Generating Dataset .....")
     # path to raw images
     path_img = sys.argv[1]
     # name for created dataset
@@ -29,6 +29,8 @@ def create_dataset():
         im = Image.open(os.path.join(path_img, f))
         #im = im.resize((im.size[0]*720//im.size[1],720), Image.LANCZOS) # if you run out of GPU memory
         im1 = Image.new('L', im.size)
+        im = im.rotate(90)
+        im1 = im1.rotate(90)
         im.save(os.path.join(path_images, f))
         im1.save(os.path.join(path_edge, '.'.join(f.split('.')[:-1])+'.png'))
     with open(os.path.join(path_list, 'val.txt'), 'w') as flist:
@@ -37,6 +39,8 @@ def create_dataset():
     with open(os.path.join(path_list, 'val_id.txt'), 'w') as flist:
         for f in files:
             flist.write('%s\n'%'.'.join(f.split('.')[:-1]))
+
+    print('Dataset Completed!')
 
 
 if __name__ == '__main__':
