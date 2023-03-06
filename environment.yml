@@ -33,9 +33,9 @@ dependencies:
   - scipy
   - setuptools
   - six
-  - tensorboard
-  - tensorflow
-  - tensorflow-estimator
+  - tensorboard=1.15.0
+  - tensorflow=1.15.0
+  - tensorflow-estimator=1.15.1
   - termcolor
   - typing-extensions
   - webencodings
