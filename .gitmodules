@@ -1,0 +1,3 @@
+[submodule "CIHP_PGN"]
+	path = CIHP_PGN
+	url = git@github.com:Engineering-Course/CIHP_PGN.git
