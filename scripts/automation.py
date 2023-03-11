@@ -7,19 +7,24 @@ def automate():
         os._exit(0)
     
     ### Variables
-    RAW_INPUT_PATH: str = './raw/input'
-    OUTPUT_PATH: str = './raw'
+    RAW_INPUT_PATH: str = './raw'
+    OUTPUT_PATH: str = './CIHP_PGN'
 
     ### Run MakeDatasets
     try:
-        os.system('python scripts/make_dataset.py ' + RAW_INPUT_PATH + " output " + OUTPUT_PATH)
+        # Store output in CIHP_PGN so test_pgn.py does not need to be modified
+        os.system('python scripts/make_dataset.py ' + RAW_INPUT_PATH + " CIHP " + OUTPUT_PATH)
     except:
         # We would need a cleanup function. And/Or define a checkpoint 
        return RuntimeError('Error')
     
     ### Run CIHP_PGN
     try:
-       os.system('python CIHP_PGN/test_pgn.py')
+       # CD into CIHP_PGN so relative paths in test_pgn is correct
+       os.chdir('./CIHP_PGN')
+       os.system('python test_pgn.py')
+       # CD back to main directory
+       os.chdir('..')
     except:
         return RuntimeError("CIHP_PGN Error")
     

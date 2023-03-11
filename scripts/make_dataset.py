@@ -16,10 +16,9 @@ def create_dataset():
     # place dataset in CIHP_PGN
     path_dataset = os.path.join(sys.argv[3], 'datasets', name_dataset)
     if os.path.isdir(path_dataset):
-        #raise(Exception("the target dataset already exists, please delete that first."))
-        #shutil.rmtree(path_dataset)
+        # Delete directory in CIHP_PGN 
+        shutil.rmtree(path_dataset)
         print('Dataset Already Exists')
-        return
     os.makedirs(path_dataset)
     path_edge = os.path.join(path_dataset, 'edges')
     path_images = os.path.join(path_dataset, 'images')
