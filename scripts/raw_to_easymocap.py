@@ -1,25 +1,39 @@
-import os, sys, shutil
+import click
+from pathlib import Path
+import subprocess
+import shutil
 
-DATA_TYPE = ['png','PNG','jpg','JPG']
-def create_input():
-    USAGE = "USAGE: python path/to/raw_to_easymocap.py path/to/raw_images path/to/intri.yml path/to/extri.yml"
-    if(len(sys.argv) != 4) or '--help' in sys.argv or '-h' in sys.argv:
-        print(USAGE)
-        os._exit(0)
-    # Raw images path
-    path_img = sys.argv[1]
-    dataset_name = 'easymocap_input'
+DATA_TYPE = [".png", ".jpg"]
+
+
+@click.command()
+@click.argument("img_path")
+@click.argument("dataset_name")
+@click.argument("intri")
+@click.argument("extri")
+def create_input(img_path, dataset_name, intri, extri):
+    """Create input dataset for EasyMocap.
+
+    INTRI and EXTRI are the camera config yml files
+    """
     # Create output path and directory
-    output = os.path.join(dataset_name, 'videos')
-    os.makedirs(output)
+    output = Path(".", dataset_name, "videos")
+    Path.mkdir(output, parents=True, exist_ok=True)
     # Check if files have correct extension
-    files = [i for i in os.listdir(path_img) if i.split('.')[-1] in DATA_TYPE]
+    files = [i for i in Path(img_path).iterdir() if i.suffix in DATA_TYPE]
     # Use ffmpeg to convert each png to mp4 for easymocap
     for f in files:
-        os.system('ffmpeg -r 25 -f image2 -i ' + os.path.join(path_img, f) + ' -vcodec libx264 -crf 18 -pix_fmt yuv420p ' + os.path.join(output, (f.split('.')[0] + '.mp4')))
+        subprocess.check_output(
+            "ffmpeg -r 25 -f image2 -i "
+            + str(f)
+            + " -vcodec libx264 -crf 18 -pix_fmt yuv420p "
+            + str(Path(output, (f.stem + ".mp4"))),
+            shell=True,
+        )
     # Move yml files into output directory
-    shutil.move(sys.argv[2], dataset_name)
-    shutil.move(sys.argv[3], dataset_name)
+    shutil.move(intri, dataset_name)
+    shutil.move(extri, dataset_name)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     create_input()
