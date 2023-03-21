@@ -7,11 +7,11 @@ DATA_TYPE = [".png", ".jpg"]
 
 
 @click.command()
+@click.option("--delete", is_flag=True, default=False, help="Delete dst directory.")
 @click.argument("src")
 @click.argument("name")
 @click.argument("dst")
-@click.option("--delete", is_flag=True, default=False, help="Delete dst directory")
-def create_dataset(src, name, dst, delete):
+def create_dataset(delete, src, name, dst):
     """Creates a dataset from raw images for CIHP_PGN"""
     click.echo("Generating dataset ...")
     # Create output path for dataset

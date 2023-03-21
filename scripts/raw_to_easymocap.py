@@ -14,7 +14,7 @@ DATA_TYPE = [".png", ".jpg"]
 def create_input(img_path, dataset_name, intri, extri):
     """Create input dataset for EasyMocap.
 
-    INTRI and EXTRI are the camera config yml files
+    INTRI and EXTRI are the camera intrinsic and extrinsic parameters
     """
     # Create output path and directory
     output = Path(".", dataset_name, "videos")
