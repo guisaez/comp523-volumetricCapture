@@ -3,6 +3,8 @@ FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ=America/New_York
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && \
     apt-get install -y tzdata
@@ -11,8 +13,10 @@ RUN apt-get install -y python3.7 python3-pip git cmake wget libopencv-dev \
     libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
     libhdf5-dev liblmdb-dev libatlas-base-dev libatlas-cpp-0.6-dev ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y locales && \
+    locale-gen en_US.UTF-8
 
-RUN pip3 install virtualenv click Pillow
+RUN pip3 install --no-cache-dir virtualenv click Pillow
 
 RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
 
@@ -49,6 +53,10 @@ RUN cd app/env/ && \
 
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 
+RUN cd/app/env && \
+    source NEURAL_ENV/bin/activate && \
+    pip3 install -r neural-env-reqs.txt && \
+    deactivate
 
 WORKDIR /app
 
