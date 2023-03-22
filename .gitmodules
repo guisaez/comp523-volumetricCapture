@@ -1,6 +1,9 @@
-[submodule "CIHP_PGN"]
-	path = CIHP_PGN
-	url = git@github.com:Engineering-Course/CIHP_PGN.git
-
-
-
+[submodule "volumetricCapture/app/src/models/CIHP_PGN"]
+	path = volumetricCapture/app/src/models/CIHP_PGN
+	url = https://github.com/Engineering-Course/CIHP_PGN.git
+[submodule "volumetricCapture/app/src/models/EasyMocap"]
+	path = volumetricCapture/app/src/models/EasyMocap
+	url = https://github.com/zju3dv/EasyMocap.git
+[submodule "volumetricCapture/app/src/models/neuralbody"]
+	path = volumetricCapture/app/src/models/neuralbody
+	url = https://github.com/zju3dv/neuralbody.git
