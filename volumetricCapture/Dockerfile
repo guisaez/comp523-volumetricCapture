@@ -3,21 +3,25 @@ FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ=America/New_York
+
+RUN apt-get update
+
+# Install necessary packages
+RUN apt-get install -y python3.7 python3-pip git cmake wget libopencv-dev tzdata \
+    libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
+    libhdf5-dev liblmdb-dev libatlas-base-dev libatlas-cpp-0.6-dev ffmpeg locales-all && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the default locale to UTF-8
 ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-RUN apt-get update && \
-    apt-get install -y tzdata
-
-RUN apt-get install -y python3.7 python3-pip git cmake wget libopencv-dev \
-    libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
-    libhdf5-dev liblmdb-dev libatlas-base-dev libatlas-cpp-0.6-dev ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y locales && \
-    locale-gen en_US.UTF-8
-
+# Install Python dependencies globally.
 RUN pip3 install --no-cache-dir virtualenv click Pillow
 
+# Install and build OpenPose
 RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
 
 RUN cd openpose && \
@@ -34,17 +38,20 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 COPY /setup /app/env
 
+# Setup virtual environments
 RUN cd app/env && \
     virtualenv -p python3.7 CIHP_ENV && \
     virtualenv -p python3.7 EASY_ENV && \
     virtualenv -p python3.7 NEURAL_ENV
 
+# Install Dpenedencies for CIHP_ENV
 RUN cd app/env/ && \
     source CIHP_ENV/bin/activate && \
     pip3 install -r cihp-env-reqs.txt && \
     pip3 install -r cihp-env-reqs.pip && \
     deactivate
 
+# Install Dpenedencies for EASY_ENV
 RUN cd app/env/ && \
     source EASY_ENV/bin/activate && \
     pip3 install -r easy-env-reqs.txt && \
@@ -53,7 +60,8 @@ RUN cd app/env/ && \
 
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 
-RUN cd/app/env && \
+# Install Dpenedencies for Neural_ENV
+RUN cd app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
     deactivate
