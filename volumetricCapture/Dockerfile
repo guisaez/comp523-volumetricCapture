@@ -6,11 +6,23 @@ ENV TZ=America/New_York
 
 RUN apt-get update
 
+
+
 # Install necessary packages
-RUN apt-get install -y python3.7 python3-pip git cmake wget libopencv-dev tzdata \
+RUN apt-get install -y curl python3.7 python3-pip git cmake wget libopencv-dev tzdata \
     libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
     libhdf5-dev liblmdb-dev libatlas-base-dev libatlas-cpp-0.6-dev ffmpeg locales-all && \
     apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install NVIDIA Container Toolkit
+ENV PATH /usr/local/nvidia/bin:$PATH
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - && \
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
+    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | tee /etc/apt/sources.list.d/nvidia-docker.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nvidia-container-toolkit && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the default locale to UTF-8
@@ -66,8 +78,12 @@ RUN cd app/env/ && \
     pip3 install -r neural-env-reqs.txt && \
     deactivate
 
+
 WORKDIR /app
 
 COPY /app/src /app/src
 
 CMD ["/bin/bash"]
+
+# docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
+# docker run --gpus all -it --rm volumetric-capture
