@@ -72,7 +72,7 @@ RUN cd app/env/ && \
 
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 
-# Install Dpenedencies for Neural_ENV
+# Install Depeneencies for Neural_ENV
 RUN cd app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
@@ -85,5 +85,9 @@ COPY /app/src /app/src
 
 CMD ["/bin/bash"]
 
+# TRY
+
 # docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
 # docker run --gpus all -it --rm volumetric-capture
+
+# This will not work on macOS
