@@ -43,7 +43,7 @@ The raw images may be placed anywhere on the file system, but the correct path m
 ---
 ## Running Tests
 
-1. Make sure you reviewed the [Folder Structure](#folder-structure).
+1. Make sure you reviewed the [Folder Structure](#folder-structure-1).
 2. Start Docker Image by running the following command in your terminal
 ```
 docker run --gpus all -it --rm volumetric-capture
