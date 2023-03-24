@@ -1,9 +1,9 @@
 # Volumetric Capture
 
 ## Table of Contents
-* #### [Installation](#installation)
-* #### [Folder Structure](#folder-structure)
-* #### [Running Tests](#running-tests)
+* #### [Installation](#installation-1)
+* #### [Folder Structure](#folder-structure-1)
+* #### [Running Tests](#running-tests-1)
 ---
 ## Installation
 ### Setting Up  Docker Environment
