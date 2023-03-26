@@ -2,7 +2,6 @@ import os
 import subprocess
 import click
 
-
 @click.command()
 @click.option("--name", default="EM_input", help="Name for EasyMocap input.")
 @click.option("--openpose", default="./openpose", help="Path to openpose.")
@@ -14,7 +13,7 @@ def automate(name, openpose, raw_path, cihp_path, intri_path, extri_path):
     """Automates the volumetric capture workflow. Creates 3D meshes from raw images."""
     ### Run MakeDatasets
     try:
-        # Store output in CIHP_PGN so test_pgn.py does not need to be modified
+        # Store output in CIHP_PGN so test_pgn.py does not need to be modifie
         subprocess.check_output("python scripts/make_dataset.py --delete " + raw_path + " CIHP " + cihp_path)
     except:
         # We would need a cleanup function. And/Or define a checkpoint

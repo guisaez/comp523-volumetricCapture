@@ -6,8 +6,6 @@ ENV TZ=America/New_York
 
 RUN apt-get update
 
-
-
 # Install necessary packages
 RUN apt-get install -y curl python3.7 python3-pip git cmake wget libopencv-dev tzdata \
     libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
