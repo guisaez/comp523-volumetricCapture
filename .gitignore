@@ -1,2 +1,4 @@
 raw/*
 volumetricCapture/app/src/data/input/*
+volumetricCapture/app/src/data/output/*
+venv
