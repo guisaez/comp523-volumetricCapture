@@ -29,7 +29,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install Python dependencies globally.
-RUN pip3 install --no-cache-dir virtualenv click Pillow
+RUN python3.7 -m pip install click 
+RUN pip3 install --no-cache-dir virtualenv Pillow
 
 # Install and build OpenPose
 RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
@@ -47,6 +48,7 @@ RUN cd openpose/build make -j`nproc`
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 COPY /setup /app/env
+COPY /app/src /app/src
 
 # Setup virtual environments
 RUN cd app/env && \
@@ -66,20 +68,20 @@ RUN cd app/env/ && \
     source EASY_ENV/bin/activate && \
     pip3 install -r easy-env-reqs.txt && \
     pip3 install -r easy-neural-env-reqs.txt && \
+    cd /app/src/models/EasyMocap && \
+    python3.7 setup.py develop && \
     deactivate
 
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 
 # Install Depeneencies for Neural_ENV
-RUN cd app/env/ && \
+RUN cd /app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
     deactivate
 
 
 WORKDIR /app
-
-COPY /app/src /app/src
 
 CMD ["/bin/bash"]
 

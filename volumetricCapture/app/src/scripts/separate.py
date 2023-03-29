@@ -1,5 +1,6 @@
 import click
 import shutil
+import os
 from pathlib import Path
 
 DATA_TYPE = [".png", ".jpg"]
@@ -17,12 +18,14 @@ def separate(src, dst):
     files = [i for i in Path(src).iterdir() if i.suffix in DATA_TYPE]
     for f in files:
         cam = str(f.stem).split("_")[1]
-        click.echo(cam)
         output = Path(dst, cam)
         # Create directory for camera
         Path.mkdir(output, exist_ok=True)
+        # Rename file for ffmpeg
+        name = str(f.stem).split("_")[0] + f.suffix
+        os.rename(f, name)
         # Move file to camera directory
-        shutil.move(f, output)
+        shutil.move(name, output)
 
 
 if __name__ == "__main__":
