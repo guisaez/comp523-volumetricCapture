@@ -29,7 +29,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install Python dependencies globally.
-RUN pip3 install --no-cache-dir virtualenv click Pillow
+RUN pip3 install --no-cache-dir virtualenv click Pillow Flask
 
 # Install and build OpenPose
 RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
@@ -75,7 +75,6 @@ RUN cd app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
     deactivate
-
 
 WORKDIR /app
 
