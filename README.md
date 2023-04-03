@@ -4,6 +4,8 @@
 
 ### [Folder Structure](./documentation/FolderStructure.md)
 
+### [Authentication Service](./documentation/AuthenticationService.md)
+
 ### Running Tests
 
 1. Make sure you reviewed the Folder Structure.
