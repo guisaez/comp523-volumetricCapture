@@ -4,7 +4,7 @@
 
 ### [Folder Structure](./documentation/FolderStructure.md)
 
-### [Authentication Service](./documentation/services/AuthenticationService.md)
+### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
 
 ### Running Tests
 
