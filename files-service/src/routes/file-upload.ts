@@ -3,7 +3,6 @@ import { BadRequestError} from '@teamg2023/common';
 import { File } from '../model/files';
 import { Readable } from 'stream';
 import multer  from 'multer';
-import mongoose from 'mongoose';
 import { GridFS } from '../utils/GridFS';
 
 const router = express.Router();
@@ -27,8 +26,6 @@ router.post('/api/files/upload',
 
         const bucket = await GridFS.getBucket();
 
-        const uploadStream = bucket.openUploadStream(req.file.originalname);
-
         const file = File.build({
             userId: req.currentUser!.id,
             mimetype: req.file.mimetype,
@@ -37,7 +34,8 @@ router.post('/api/files/upload',
             type: req.body.type,
         });
 
-        
+        const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
+
         try{
             for await (const chunk of readable) {
                 if (!uploadStream.write(chunk)) {
