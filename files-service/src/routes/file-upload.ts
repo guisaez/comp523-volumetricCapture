@@ -14,9 +14,6 @@ router.post('/api/files/upload',
     upload.single('file'),
     async (req: Request, res: Response) => {
 
-        try{
-
-        
         if(!req.file){
             throw new BadRequestError('No file uploaded');
         }
@@ -56,10 +53,7 @@ router.post('/api/files/upload',
         }
 
         res.status(200).send({ file: file })
-         } catch(err){
-            console.log(err)
-            res.status(500).send( 'Error')
-         }
+        
     })
 
 export { router as UploadFileRouter };

@@ -68,7 +68,7 @@ it('returns a 401 Not Authorized if different user tries to update the file', as
         .expect(200);
     
     
-    return request(app)
+    await request(app)
         .put(`/api/files/${res.body.file.id}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', global.signin())

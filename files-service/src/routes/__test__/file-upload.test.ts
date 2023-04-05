@@ -5,19 +5,19 @@ import { app } from '../../app';
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');
 const zipData: Buffer =  fs.readFileSync('./src/routes/__test__/test_files/raw_images_zip.zip');
 
-it('returns a 400 if the user is not authenticated', async () => {
-    request(app)
+it('returns a 401 Unauthorized if the user is not authenticated', async () => {
+    await request(app)
         .post('/api/files/upload')
         .set('Content-Type', 'multipart/form-data')
         .attach('file', fileData, { filename: 'test.yml'})
         .field({
             type: "intrinsic"
         })
-        .expect(400);
+        .expect(401);
 });
 
 it('returns a 400 if type of file is not specified', async () => {
-    request(app)
+    await request(app)
         .post('/api/files/upload')
         .set('Cookie', global.signin())
         .set('Content-Type', 'multipart/form-data')
@@ -26,7 +26,7 @@ it('returns a 400 if type of file is not specified', async () => {
 });
 
 it('returns a 400 if file is not attached', async () => {
-    request(app)
+    await request(app)
         .post('/api/files/upload')
         .set('Cookie', global.signin())
         .set('Content-Type', 'multipart/form-data')
@@ -59,7 +59,6 @@ it('successfully uploads the file', async () => {
         .field({
             type: "zip"
         })
-        
         .expect(200)
 
     expect(fileResponse2.body.file.name!).toEqual('raw_images_zip.zip')
