@@ -1,4 +1,3 @@
-import { app } from "../app";
 import express from 'express';
 import { body } from "express-validator";
 import { Password } from "../utils/password";
