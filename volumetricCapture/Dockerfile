@@ -48,7 +48,6 @@ RUN cd openpose/build make -j`nproc`
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 COPY /setup /app/env
-COPY /app/src /app/src
 
 # Setup virtual environments
 RUN cd app/env && \
@@ -68,8 +67,6 @@ RUN cd app/env/ && \
     source EASY_ENV/bin/activate && \
     pip3 install -r easy-env-reqs.txt && \
     pip3 install -r easy-neural-env-reqs.txt && \
-    cd /app/src/models/EasyMocap && \
-    python3.7 setup.py develop && \
     deactivate
 
 ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
@@ -78,8 +75,37 @@ ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 RUN cd /app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
+    pip3 install torch==1.4.0 && \
     deactivate
 
+# Install compatible cmake version for Neuralbody
+RUN apt-get update && apt-get install -y libssl-dev && \
+    curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
+    tar -xvf cmake.tar.gz && \
+    cd cmake-3.20.1 && \
+    ./configure && \
+    make -j4 && make install
+RUN apt-get update && apt-get install -y libboost-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install spconv for Neuralbody
+RUN source /app/env/NEURAL_ENV/bin/activate && \    
+    cd /app && \
+    git clone https://github.com/traveller59/spconv --recursive && \ 
+    cd spconv && \
+    git checkout abf0acf30f5526ea93e687e3f424f62d9cd8313a && \
+    git submodule update --init --recursive && \
+    apt-get update && apt-get install -y libpython3.7-dev && \
+    python3.7 setup.py bdist_wheel && \
+    pip3 install ./dist/spconv-1.2.1-cp37-cp37m-linux_x86_64.whl && \
+    deactivate
+
+
+COPY /app/src /app/src
+
+# Finish EasyMocap setup
+RUN cd /app/src/models/EasyMocap && \
+    /app/env/EASY_ENV/bin/python3.7 setup.py develop
 
 WORKDIR /app
 
