@@ -9,6 +9,7 @@ import { UploadFileRouter } from './routes/file-upload';
 import { UpdateFileRouter } from './routes/file-update';
 import { IndexFiles } from './routes/file-index';
 import { DownloadFilesRouter } from './routes/file-download';
+import { DeleteFileRouter } from './routes/file-delete';
 
 const app = express();
 app.set('trust proxy', true);
@@ -30,10 +31,10 @@ app.use(UploadFileRouter);
 app.use(UpdateFileRouter);
 app.use(IndexFiles);
 app.use(DownloadFilesRouter);
+app.use(DeleteFileRouter);
 
 app.all('*', async () => {
     throw new NotFoundError();
 })
-
 
 export { app };
