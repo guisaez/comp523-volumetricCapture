@@ -3,6 +3,8 @@ export enum ProcessStatus {
 
     Completed = 'completed',
 
-    Error = 'error'
+    Error = 'error',
+
+    NotStarted = 'not-started'
 
 }
