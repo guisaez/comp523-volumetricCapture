@@ -5,6 +5,7 @@ export interface FileDeletedEvent {
 
     data: {
         id: string;
+        projectId: string;
     }
     
 }
