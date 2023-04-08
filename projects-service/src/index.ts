@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
+import { FileUpdatedListener } from './events/listeners/file-updated-listener';
+import { FileUploadedListener } from './events/listeners/file-uploaded-listener';
+import { FileDeletedListener } from './events/listeners/file-deleted-listener';
 
 const start = async () => {
     console.log('Projects Service is Starting...');
@@ -37,6 +40,10 @@ const start = async () => {
 
         process.on('SIGINT', () => natsWrapper.client.close());
         process.on('SIGTERM', () => natsWrapper.client.close());
+
+        new FileUploadedListener(natsWrapper.client).listen();
+        new FileUpdatedListener(natsWrapper.client).listen();
+        new FileDeletedListener(natsWrapper.client).listen();
 
     } catch(err){
         console.log(err);
