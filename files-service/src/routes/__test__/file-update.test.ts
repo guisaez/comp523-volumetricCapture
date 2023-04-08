@@ -55,32 +55,6 @@ it('returns a 400 if type is not provided', async () => {
         .expect(400);
 });
 
-it('returns a 401 Not Authorized if different user tries to update the file', async () => {
-    const user1cookie = global.signin();
-
-    const res = await request(app)
-        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
-        .set('Content-Type', 'multipart/form-data')
-        .set('Cookie', user1cookie)
-        .field({
-            type: "intrinsic"
-        })
-        .attach('file', fileData, { filename: 'test.yml'})
-        .expect(200);
-    
-    
-    await request(app)
-        .put(`/api/files/update/${res.body.file.id}`)
-        .set('Content-Type', 'multipart/form-data')
-        .set('Cookie', global.signin())
-        .field({
-            type: "intrinsic"
-        })
-        .attach('file', fileData, { filename: 'test.yml'})
-        .expect(401);
-    
-});
-
 
 it('returns 404 NotFound if file type is not the same as stored type', async () => {
     const cookie = global.signin();

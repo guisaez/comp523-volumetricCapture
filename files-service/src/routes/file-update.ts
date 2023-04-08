@@ -1,6 +1,6 @@
 import express, { Request, Response} from 'express';
 import multer from 'multer';
-import { File } from '../model/files';
+import { File } from '../models/file';
 import { BadRequestError, NotAuthorizedError, NotFoundError } from '@teamg2023/common';
 import mongoose, { mongo } from 'mongoose';
 import { Readable } from 'stream';
@@ -30,17 +30,18 @@ router.put('/api/files/update/:id',
             throw new BadRequestError('File must be defined');
         }
 
-        const file = await File.findByIdAndType({
-            id: req.params.id,
-            type: type
-        });
+
+        const file = await File.findOneAndUpdate({
+            type: type,
+            _id: req.params.id
+        }, {
+            name: req.file.originalname,
+            mimetype: req.file.mimetype,
+            encoding: req.file.encoding
+        })
 
         if(!file){
             throw new BadRequestError('File Not Found');
-        }
-
-        if(file.userId !== req.currentUser!.id) {
-            throw new NotAuthorizedError();
         }
 
         const buffer = req.file.buffer;
@@ -51,12 +52,6 @@ router.put('/api/files/update/:id',
 
         const uploadStream = bucket.openUploadStreamWithId(fileId, req.file.originalname);
 
-        file.set({
-            name: req.file.originalname,
-            mimetype: req.file.mimetype,
-            encoding: req.file.encoding,
-        })
-
         try{
             for await (const chunk of readable) {
                 if (!uploadStream.write(chunk)) {
@@ -65,8 +60,6 @@ router.put('/api/files/update/:id',
             }
 
             uploadStream.end();
-
-            await file.save();
 
         } catch (err: any) {
             res.status(500).send({ message: err.message })

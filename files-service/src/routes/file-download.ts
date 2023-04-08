@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
-import mongoose, { mongo } from 'mongoose';
+import mongoose from 'mongoose';
 import { GridFS } from '../utils/GridFS';
 import { BadRequestError, NotAuthorizedError, currentUser, requireAuth } from '@teamg2023/common';
-import { File } from '../model/files';
+import { File } from '../models/file';
 
 const router = express.Router();
 

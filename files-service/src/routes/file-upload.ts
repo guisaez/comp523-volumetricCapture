@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { BadRequestError} from '@teamg2023/common';
-import { File } from '../model/files';
+import { File } from '../models/file';
 import { Readable } from 'stream';
 import multer  from 'multer';
 import { GridFS } from '../utils/GridFS';
@@ -39,6 +39,7 @@ router.post('/api/files/upload/:projectId',
             encoding: req.file.encoding,
             name: req.file.originalname,
             type: req.body.type,
+            projectId: req.params.projectId
         });
 
         const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);

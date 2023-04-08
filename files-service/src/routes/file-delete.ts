@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { File } from '../model/files';
+import { File } from '../models/file';
 import mongoose from 'mongoose';
 import { BadRequestError, NotAuthorizedError } from '@teamg2023/common';
 import { GridFS } from '../utils/GridFS';
