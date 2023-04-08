@@ -8,8 +8,6 @@ export interface FileUploadedEvent {
         id: string,
         version: number,
         userId: string,
-        mimetype: string,
-        encoding: string,
         type: FileTypes,
         name: string;
         projectId: string;
