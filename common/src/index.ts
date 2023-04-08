@@ -11,3 +11,4 @@ export * from './middleware/require-auth';
 export * from './middleware/validate-request';
 
 export * from './events/types/process-status';
+export * from './events/types/file-types';
