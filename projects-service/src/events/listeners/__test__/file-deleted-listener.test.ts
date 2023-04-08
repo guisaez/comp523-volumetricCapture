@@ -20,8 +20,6 @@ const setup = async () => {
 
     const file = File.build({
         id: new mongoose.Types.ObjectId().toHexString(),
-        mimetype: 'text/yml',
-        encoding: 'utf-8',
         type: FileTypes.INTRINSIC,
         userId: userId,
         name: 'intri.yml'

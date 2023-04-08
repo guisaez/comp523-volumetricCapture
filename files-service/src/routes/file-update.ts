@@ -44,6 +44,8 @@ router.put('/api/files/update/:id',
             throw new BadRequestError('File Not Found');
         }
 
+        await file.save();
+
         const buffer = req.file.buffer;
         const readable = Readable.from(buffer);
 
@@ -64,7 +66,8 @@ router.put('/api/files/update/:id',
         } catch (err: any) {
             res.status(500).send({ message: err.message })
         }
-        
+
+
         new FileUpdatedPublisher(natsWrapper.client).publish({
             id: file.id,
             version: file.version,

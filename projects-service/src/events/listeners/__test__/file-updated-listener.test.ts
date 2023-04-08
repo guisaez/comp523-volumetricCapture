@@ -11,8 +11,6 @@ const setup = async () => {
 
     const file = await File.build({
         id: new mongoose.Types.ObjectId().toHexString(),
-        mimetype: 'text/yml',
-        encoding: 'utf-8',
         type: FileTypes.INTRINSIC,
         userId: new mongoose.Types.ObjectId().toHexString(),
         name: 'intri.yml'
@@ -24,10 +22,8 @@ const setup = async () => {
         id: file.id,
         version: file.version + 1,
         name: 'intri_updated.yml',
-        mimetype: file.mimetype,
         type: file.type,
-        userId: file.userId,
-        encoding: file.encoding,
+        userId: file.userId
     }
 
     // @ts-ignore
