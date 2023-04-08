@@ -1,13 +1,14 @@
 import request from "supertest";
 import { app } from '../../app';
 import fs from 'fs';
+import mongoose from "mongoose";
 
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');
 
 const uploadFile = async ( cookie: string[] ) => {
 
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Cookie', cookie)
         .set('Content-Type', 'multipart/form-data')
         .field({
@@ -23,8 +24,6 @@ it('downloads the file', async () => {
     const cookie = global.signin();
 
     const { id } = await uploadFile(cookie);
-
-    console.log(id);
     
     const res = await request(app)
         .get(`/api/files/download/${id}`)

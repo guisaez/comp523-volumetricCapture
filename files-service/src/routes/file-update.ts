@@ -5,6 +5,8 @@ import { BadRequestError, NotAuthorizedError, NotFoundError } from '@teamg2023/c
 import mongoose, { mongo } from 'mongoose';
 import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
+import { FileUpdatedPublisher } from '../events/publishers/file-updated-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -65,6 +67,17 @@ router.put('/api/files/:id',
             uploadStream.end();
 
             await file.save();
+
+            new FileUpdatedPublisher(natsWrapper.client).publish({
+                id: file.id,
+                version: file.version,
+                type: file.type,
+                mimetype: file.type,
+                name: file.name,
+                encoding: file.encoding,
+                userId: file.userId
+            });
+            
         } catch (err: any) {
             res.status(500).send({ message: err.message })
         }

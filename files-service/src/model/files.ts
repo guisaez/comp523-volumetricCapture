@@ -1,17 +1,12 @@
 import mongoose from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
-
-enum FileType {
-    ZIP = 'zip',
-    INTRINSIC = 'intrinsic',
-    EXTRINSIC = 'extrinsic',
-}
+import { FileTypes } from "@teamg2023/common";
 
 interface FilesAttrs {
     userId: string;
     mimetype: string;
     encoding: string;
-    type: FileType;
+    type: FileTypes;
     name: string;
 }
 
@@ -19,7 +14,7 @@ interface FilesDoc extends mongoose.Document {
     userId: string;
     mimetype: string;
     encoding: string;
-    type: FileType;
+    type: FileTypes;
     version: number;
     name: string;
 }
@@ -37,8 +32,8 @@ const fileSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: Object.values(FileType),
-        default: FileType.ZIP
+        enum: Object.values(FileTypes),
+        default: FileTypes.ZIP
     },
     mimetype: {
         type: String,

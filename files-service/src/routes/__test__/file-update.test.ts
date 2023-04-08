@@ -1,16 +1,17 @@
 import request from 'supertest';
 import fs from 'fs';
 import { app } from '../../app';
+import mongoose from 'mongoose';
+import { natsWrapper } from '../../nats-wrapper';
 
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');
 const updatedFileData: Buffer = fs.readFileSync('./src/routes/__test__/test_files/test2.yml');
-const zipData: Buffer =  fs.readFileSync('./src/routes/__test__/test_files/raw_images_zip.zip');
 
 it('returns a 400 if file is not provided', async () => {
    const cookie = global.signin();
    
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .field({
@@ -35,7 +36,7 @@ it('returns a 400 if type is not provided', async () => {
     const cookie = global.signin();
    
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .field({
@@ -58,7 +59,7 @@ it('returns a 401 Not Authorized if different user tries to update the file', as
     const user1cookie = global.signin();
 
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', user1cookie)
         .field({
@@ -85,7 +86,7 @@ it('returns 404 NotFound if file type is not the same as stored type', async () 
     const cookie = global.signin();
 
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .field({
@@ -113,7 +114,7 @@ it('successfully updates the file', async () => {
     const cookie = global.signin();
 
     const res = await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .field({
@@ -134,6 +135,8 @@ it('successfully updates the file', async () => {
             type: "intrinsic"
         })
         .expect(200);
+
+    expect(natsWrapper.client.publish).toHaveBeenCalled();
 
     expect(updatedRes.body.file.id).toEqual(fileId);
     expect(updatedRes.body.file.userId).toEqual(res.body.file.userId);
