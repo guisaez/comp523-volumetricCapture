@@ -1,0 +1,13 @@
+name: tests-files
+
+on: 
+  pull_request:
+    paths:
+      - 'files-service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: cd files-service && npm install && npm run test:ci
