@@ -1,14 +1,14 @@
 import request from 'supertest';
 import { app } from '../../app';
 import fs from 'fs';
+import mongoose from 'mongoose';
 
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');
-const zipData: Buffer =  fs.readFileSync('./src/routes/__test__/test_files/raw_images_zip.zip');
 
 const uploadFile = async ( cookie: string[] ) => {
 
     await request(app)
-        .post('/api/files/upload')
+        .post(`/api/files/upload/${new mongoose.Types.ObjectId().toHexString()}`)
         .set('Cookie', cookie)
         .set('Content-Type', 'multipart/form-data')
         .field({

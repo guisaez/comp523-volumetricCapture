@@ -1,7 +1,6 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-import { GridFS } from '../utils/GridFS';
 
 declare global {
     var signin: () => string[];
@@ -20,10 +19,10 @@ beforeAll(async () => {
 
     await mongoose.connect(mongoUri, {});
 
-    await GridFS.setBucket();
 })
 
 beforeEach(async () => {
+
     jest.clearAllMocks();
     
     const collections = await mongoose.connection.db.collections();

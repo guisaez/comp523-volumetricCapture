@@ -3,19 +3,30 @@ import { File } from '../model/files';
 import mongoose from 'mongoose';
 import { BadRequestError, NotAuthorizedError } from '@teamg2023/common';
 import { GridFS } from '../utils/GridFS';
+import { FileDeletedPublisher } from '../events/publishers/file-deleted-publisher';
+import { natsWrapper } from '../nats-wrapper';
+import { body } from 'express-validator';
 
 const router = express.Router();
 
-router.delete('/api/files/delete/:id', async (req: Request, res: Response) => {
+router.delete('/api/files/delete', [
+    body('projectId')
+        .not()
+        .isEmpty(),
+    body('id')
+        .not()
+        .isEmpty()
+], async (req: Request, res: Response) => {
 
-    if(!req.params.id || !mongoose.isObjectIdOrHexString(req.params.id)){
-        throw new BadRequestError('Invalid Id');
+    const { projectId, id } = req.body;
+
+    if(!mongoose.isObjectIdOrHexString(projectId) ||!mongoose.isObjectIdOrHexString(id)){
+        throw new BadRequestError('Invalid projectId of id');
     }
-
 
     // const file = await File.findByIdAndDelete(req.params.id);
 
-    const file = await File.findById(req.params.id);
+    const file = await File.findById(id);
 
     if(!file){
         throw new BadRequestError('File Not Found');
@@ -26,8 +37,14 @@ router.delete('/api/files/delete/:id', async (req: Request, res: Response) => {
     }
 
     try{
-        await File.findByIdAndDelete(req.params.id);
+        await File.findByIdAndDelete(id);
         await (await GridFS.getBucket()).delete(file.id);
+
+        new FileDeletedPublisher(natsWrapper.client).publish({
+            id: id,
+            projectId: projectId,
+        });
+        
     } catch (err) {
         console.log(err);
     }

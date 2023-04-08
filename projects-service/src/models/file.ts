@@ -1,8 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 import { FileTypes } from "@teamg2023/common";
 
 interface FilesAttrs {
+    id: string,
     userId: string;
     mimetype: string;
     encoding: string;
@@ -10,7 +11,7 @@ interface FilesAttrs {
     name: string;
 }
 
-interface FilesDoc extends mongoose.Document {
+export interface FilesDoc extends mongoose.Document {
     userId: string;
     mimetype: string;
     encoding: string;
@@ -21,7 +22,7 @@ interface FilesDoc extends mongoose.Document {
 
 interface FilesModel extends mongoose.Model<FilesDoc>{
     build(attrs: FilesAttrs): FilesDoc;
-    findByIdAndType( attr : {id: string, type: string}): Promise<FilesDoc> | null;
+    findByEvent(event: {id: string, version: number }):Promise<FilesDoc | null>;
 }
 
 const fileSchema = new mongoose.Schema({
@@ -45,7 +46,7 @@ const fileSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: true 
+        required: true
     }
 }, {
     toJSON: {
@@ -60,17 +61,23 @@ fileSchema.set('versionKey', 'version');
 fileSchema.plugin(updateIfCurrentPlugin);
 
 fileSchema.statics.build = (attrs: FilesAttrs) => {
-    return new File(attrs);
+    return new File({
+        _id: attrs.id,
+        userId: attrs.userId,
+        mimetype: attrs.mimetype,
+        encoding: attrs.encoding,
+        type: attrs.type,
+        name: attrs.name
+    });
 }
 
-fileSchema.statics.findByIdAndType = (attrs: { id: string, type: string }) => {
+fileSchema.statics.findByEvent = (event: {id: string, version: number}) => {
     return File.findOne({
-        _id: attrs.id,
-        type: attrs.type
+        _id: event.id,
+        version: event.version - 1
     })
 }
 
 const File = mongoose.model<FilesDoc, FilesModel>('File', fileSchema);
 
 export { File };
-
