@@ -1,7 +1,7 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-
+import { GridFS } from '../utils/GridFS';
 
 declare global {
     var signin: () => string[];
@@ -17,6 +17,8 @@ beforeAll(async () => {
     const mongoUri = mongo.getUri();
 
     await mongoose.connect(mongoUri, {});
+
+    await GridFS.setBucket();
 })
 
 beforeEach(async () => {

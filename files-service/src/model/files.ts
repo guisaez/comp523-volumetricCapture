@@ -11,7 +11,6 @@ interface FilesAttrs {
     userId: string;
     mimetype: string;
     encoding: string;
-                    //data: Buffer;
     type: FileType;
     name: string;
 }
@@ -20,7 +19,6 @@ interface FilesDoc extends mongoose.Document {
     userId: string;
     mimetype: string;
     encoding: string;
-                    // data: Buffer;
     type: FileType;
     version: number;
     name: string;

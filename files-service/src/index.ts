@@ -1,6 +1,6 @@
-
+import mongoose from 'mongoose';
 import { app } from './app';
-import { GridFSBucket, MongoClient } from 'mongodb';
+import { GridFS } from './utils/GridFS';
 
 const start = async () => {
     console.log('Files Service is Starting...');
@@ -26,9 +26,11 @@ const start = async () => {
     */
 
     try{
-        await MongoClient.connect(process.env.MONGO_URI);
-
+        await mongoose.connect(process.env.MONGO_URI);
         console.log('Connected to MongoDB');
+        
+        await GridFS.setBucket();
+        console.log('GridFS Bucket created');
     } catch(err){
         console.log(err);
     }
