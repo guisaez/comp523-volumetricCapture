@@ -7,8 +7,6 @@ import { natsWrapper } from '../../nats-wrapper';
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');
 const zipData: Buffer =  fs.readFileSync('./src/routes/__test__/test_files/raw_images_zip.zip');
 
-
-
 it('returns a 401 Unauthorized if the user is not authenticated', async () => {
     const projectId = new mongoose.Types.ObjectId().toHexString();
 

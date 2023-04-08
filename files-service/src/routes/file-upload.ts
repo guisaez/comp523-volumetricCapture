@@ -17,7 +17,7 @@ router.post('/api/files/upload/:projectId',
     async (req: Request, res: Response) => {
 
         if(!req.params.projectId || !mongoose.isObjectIdOrHexString(req.params.projectId)){
-            throw new BadRequestError('Invalid Project id');
+            throw new BadRequestError('Invalid Project Id');
         }
 
         if(!req.file){
@@ -61,8 +61,6 @@ router.post('/api/files/upload/:projectId',
         new FileUploadedPublisher(natsWrapper.client).publish({
             id: file.id,
             version: file.version,
-            encoding: file.encoding,
-            mimetype: file.mimetype,
             type: file.type,
             userId: file.userId,
             name: file.name,

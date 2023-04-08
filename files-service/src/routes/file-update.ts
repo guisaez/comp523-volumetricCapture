@@ -12,7 +12,7 @@ const router = express.Router();
 
 const upload = multer();
 
-router.put('/api/files/:id',
+router.put('/api/files/update/:id',
     upload.single('file'),
     async (req: Request, res: Response) => {
 
@@ -36,7 +36,7 @@ router.put('/api/files/:id',
         });
 
         if(!file){
-            throw new NotFoundError();
+            throw new BadRequestError('File Not Found');
         }
 
         if(file.userId !== req.currentUser!.id) {
@@ -68,20 +68,18 @@ router.put('/api/files/:id',
 
             await file.save();
 
-            new FileUpdatedPublisher(natsWrapper.client).publish({
-                id: file.id,
-                version: file.version,
-                type: file.type,
-                mimetype: file.type,
-                name: file.name,
-                encoding: file.encoding,
-                userId: file.userId
-            });
-            
         } catch (err: any) {
             res.status(500).send({ message: err.message })
         }
         
+        new FileUpdatedPublisher(natsWrapper.client).publish({
+            id: file.id,
+            version: file.version,
+            type: file.type,
+            name: file.name,
+            userId: file.userId
+        });
+
         res.status(200).send( { file: file });
 });
 

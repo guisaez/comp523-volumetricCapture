@@ -23,7 +23,7 @@ it('returns a 400 if file is not provided', async () => {
     const fileId = res.body.file.id;
 
     await request(app)
-        .put(`/api/files/${fileId}`)
+        .put(`/api/files/update/${fileId}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .field({
@@ -48,7 +48,7 @@ it('returns a 400 if type is not provided', async () => {
     const fileId = res.body.file.id;
 
     await request(app)
-        .put(`/api/files/${fileId}`)
+        .put(`/api/files/update/${fileId}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .attach('file', fileData, { filename: 'test.yml'})
@@ -70,7 +70,7 @@ it('returns a 401 Not Authorized if different user tries to update the file', as
     
     
     await request(app)
-        .put(`/api/files/${res.body.file.id}`)
+        .put(`/api/files/update/${res.body.file.id}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', global.signin())
         .field({
@@ -127,7 +127,7 @@ it('successfully updates the file', async () => {
     const fileId = res.body.file.id;
 
     const updatedRes = await request(app)
-        .put(`/api/files/${fileId}`)
+        .put(`/api/files/update/${fileId}`)
         .set('Content-Type', 'multipart/form-data')
         .set('Cookie', cookie)
         .attach('file', updatedFileData, { filename: 'test2.yml'})
