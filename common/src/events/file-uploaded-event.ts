@@ -12,5 +12,6 @@ export interface FileUploadedEvent {
         encoding: string,
         type: FileTypes,
         name: string;
+        projectId: string;
     }
 }
