@@ -1,9 +1,10 @@
 # Volumetric Capture
 
 ## Table of Contents
-* #### [Installation](#installation-1)
-* #### [Folder Structure](#folder-structure-1)
-* #### [Running Tests](#running-tests-1)
+* ### [Installation](#installation-1)
+* ### [Folder Structure](#folder-structure-1)
+* ### [Running Tests](#running-tests-1)
+* ### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
 ---
 ## Installation
 ### Setting Up  Docker Environment
@@ -51,5 +52,5 @@ docker run --gpus all -it --rm volumetric-capture
 ```
 3. In your terminal, go to the project directory and run
 ```shell
-python scripts/automation.py path/to/raw path/to/intri.yml path/to/extri.yml 
+python scripts/automation.py
 ```
