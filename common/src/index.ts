@@ -21,3 +21,5 @@ export * from './events/subjects';
 export * from './events/file-deleted-event';
 export * from './events/file-updated-event';
 export * from './events/file-uploaded-event'
+
+export * from './events/project-deleted-event';

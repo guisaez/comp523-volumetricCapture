@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
-  name: files-depl
+  name: projects-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: files
+      app: projects
   template:
     metadata:
       labels:
-        app: files
+        app: projects
     spec:
       containers:
-        - name: files
-          image: guisaez/volumetric-files
+        - name: projects
+          image: guisaez/volumetric-projects
           env: 
             - name: MONGO_URI
-              value: 'mongodb://files-mongo-srv:27017/files'
+              value: 'mongodb://projects-mongo-srv:27017/projects'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef: 
@@ -37,12 +37,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: files-srv
+  name: projects-srv
 spec:
   selector:
-    app: files
+    app: projects
   ports:
-    - name: files
+    - name: projects
       protocol: TCP
       port: 3000
       targetPort: 3000

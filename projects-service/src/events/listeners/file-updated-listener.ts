@@ -9,16 +9,15 @@ export class FileUpdatedListener extends Listener<FileUpdatedEvent> {
 
     async onMessage(data: FileUpdatedEvent['data'], msg: Message) {
         
-
         const file = await File.findByEvent(data);
 
         if(!file){
             throw new Error('File Not Found');
         }
 
-        const { mimetype, encoding, name, type } = data;
+        const { name, type } = data;
 
-        file.set({ mimetype, encoding, name, type });
+        file.set({ name, type });
         
         await file.save();
 

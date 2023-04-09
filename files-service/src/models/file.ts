@@ -2,16 +2,18 @@ import mongoose from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 import { FileTypes } from "@teamg2023/common";
 
-interface FilesAttrs {
+interface FileAttrs {
     userId: string;
+    projectId: string;
     mimetype: string;
     encoding: string;
     type: FileTypes;
     name: string;
 }
 
-interface FilesDoc extends mongoose.Document {
+interface FileDoc extends mongoose.Document {
     userId: string;
+    projectId: string;
     mimetype: string;
     encoding: string;
     type: FileTypes;
@@ -19,13 +21,16 @@ interface FilesDoc extends mongoose.Document {
     name: string;
 }
 
-interface FilesModel extends mongoose.Model<FilesDoc>{
-    build(attrs: FilesAttrs): FilesDoc;
-    findByIdAndType( attr : {id: string, type: string}): Promise<FilesDoc> | null;
+interface FileModel extends mongoose.Model<FileDoc>{
+    build(attrs: FileAttrs): FileDoc;
 }
 
 const fileSchema = new mongoose.Schema({
     userId: {
+        type: String,
+        required: true
+    },
+    projectId: {
         type: String,
         required: true
     },
@@ -59,18 +64,12 @@ const fileSchema = new mongoose.Schema({
 fileSchema.set('versionKey', 'version');
 fileSchema.plugin(updateIfCurrentPlugin);
 
-fileSchema.statics.build = (attrs: FilesAttrs) => {
+fileSchema.statics.build = (attrs: FileAttrs) => {
     return new File(attrs);
 }
 
-fileSchema.statics.findByIdAndType = (attrs: { id: string, type: string }) => {
-    return File.findOne({
-        _id: attrs.id,
-        type: attrs.type
-    })
-}
 
-const File = mongoose.model<FilesDoc, FilesModel>('File', fileSchema);
+const File = mongoose.model<FileDoc, FileModel>('File', fileSchema);
 
 export { File };
 

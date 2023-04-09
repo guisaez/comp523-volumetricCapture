@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { File } from '../model/files';
+import { File } from '../models/file';
 
 const router = express.Router();
 

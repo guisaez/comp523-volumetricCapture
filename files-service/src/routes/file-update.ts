@@ -1,7 +1,7 @@
 import express, { Request, Response} from 'express';
 import multer from 'multer';
-import { File } from '../model/files';
-import { BadRequestError, NotAuthorizedError, NotFoundError } from '@teamg2023/common';
+import { File } from '../models/file';
+import { BadRequestError, NotAuthorizedError, NotFoundError, validateRequest } from '@teamg2023/common';
 import mongoose, { mongo } from 'mongoose';
 import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
@@ -13,7 +13,7 @@ const router = express.Router();
 const upload = multer();
 
 router.put('/api/files/update/:id',
-    upload.single('file'),
+    upload.single('file'), validateRequest,
     async (req: Request, res: Response) => {
 
         const { type } = req.body;
@@ -30,47 +30,41 @@ router.put('/api/files/update/:id',
             throw new BadRequestError('File must be defined');
         }
 
-        const file = await File.findByIdAndType({
-            id: req.params.id,
-            type: type
-        });
-
+        const file = await File.findById(req.params.id);
+        
         if(!file){
             throw new BadRequestError('File Not Found');
         }
-
-        if(file.userId !== req.currentUser!.id) {
-            throw new NotAuthorizedError();
-        }
-
-        const buffer = req.file.buffer;
-        const readable = Readable.from(buffer);
-
-        const fileId = new mongoose.Types.ObjectId(req.params.id);
-        const bucket = await GridFS.getBucket();
-
-        const uploadStream = bucket.openUploadStreamWithId(fileId, req.file.originalname);
-
+        
         file.set({
             name: req.file.originalname,
             mimetype: req.file.mimetype,
-            encoding: req.file.encoding,
-        })
+            encoding: req.file.encoding
+        });
+        
+        const buffer = req.file.buffer;
+        const readable = Readable.from(buffer);
 
-        try{
-            for await (const chunk of readable) {
-                if (!uploadStream.write(chunk)) {
-                    await new Promise((resolve) => uploadStream.once('drain', resolve));
-                }
+        const bucket = await GridFS.getBucket();
+
+        const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
+
+        uploadStream.on('error', (err) => {
+            res.status(500).send( err );
+        });
+
+        
+        
+        await bucket.delete(file.id);
+        for await (const chunk of readable) {
+            if (!uploadStream.write(chunk)) {
+                await new Promise((resolve) => uploadStream.once('drain', resolve));
             }
-
-            uploadStream.end();
-
-            await file.save();
-
-        } catch (err: any) {
-            res.status(500).send({ message: err.message })
         }
+
+        uploadStream.end();
+
+        await file.save();
         
         new FileUpdatedPublisher(natsWrapper.client).publish({
             id: file.id,
