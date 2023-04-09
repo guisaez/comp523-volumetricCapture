@@ -6,7 +6,7 @@ import { File } from '../models/file';
 
 const router = express.Router();
 
-router.get('/api/files/download/:id', errorHandler, async (req: Request, res: Response) => {
+router.get('/api/files/download/:id', async (req: Request, res: Response) => {
 
     if(!req.params.id || !mongoose.isObjectIdOrHexString(req.params.id)){
         throw new BadRequestError('Invalid file Id');
@@ -22,16 +22,17 @@ router.get('/api/files/download/:id', errorHandler, async (req: Request, res: Re
         return new BadRequestError('File Not Found!');
     }
 
-    try{
-        const downloadStream = (await GridFS.getBucket()).openDownloadStream(file.id);
+    const bucket = await GridFS.getBucket();
+    
+    const downloadStream = bucket.openDownloadStream(file.id);
 
-        res.set('Content-Type', file.mimetype);
-        res.set('Content-Disposition', `attachment; filename="${file.name}`);
+    res.set('Content-Type', file.mimetype);
+    res.set('Content-Disposition', `attachment; filename="${file.name}`);
 
-        downloadStream.pipe(res);
-    }catch(err){
-        res.status(500).send('Internal Server Error');
-    }
+    downloadStream.pipe(res);
+    
+    res.send();
+
 })
 
 export { router as DownloadFilesRouter };

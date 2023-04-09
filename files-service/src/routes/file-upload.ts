@@ -42,22 +42,21 @@ router.post('/api/files/upload/:projectId',
             projectId: req.params.projectId
         });
 
-        await file.save();
-
         const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
 
-        try{
-            for await (const chunk of readable) {
-                if (!uploadStream.write(chunk)) {
-                    await new Promise((resolve) => uploadStream.once('drain', resolve));
-                }
-            }
-            
-            uploadStream.end();
+        uploadStream.on('error', (err) => {
+           res.status(500).send( err );
+        });
 
-        } catch (err: any) {
-            res.status(500).send({ message: err.message })
+        for await (const chunk of readable) {
+            if (!uploadStream.write(chunk)) {
+                await new Promise((resolve) => uploadStream.once('drain', resolve));
+            }
         }
+            
+        uploadStream.end();
+
+        await file.save();
 
         new FileUploadedPublisher(natsWrapper.client).publish({
             id: file.id,

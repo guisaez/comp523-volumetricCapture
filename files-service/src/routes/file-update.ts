@@ -42,28 +42,29 @@ router.put('/api/files/update/:id',
             encoding: req.file.encoding
         });
         
-        await file.save();
-
         const buffer = req.file.buffer;
         const readable = Readable.from(buffer);
 
         const bucket = await GridFS.getBucket();
 
-        const uploadStream = bucket.openUploadStreamWithId(file.id, req.file.originalname);
+        const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
 
-        try{
-            await bucket.delete(file.id);
-            for await (const chunk of readable) {
-                if (!uploadStream.write(chunk)) {
-                    await new Promise((resolve) => uploadStream.once('drain', resolve));
-                }
+        uploadStream.on('error', (err) => {
+            res.status(500).send( err );
+        });
+
+        
+        
+        await bucket.delete(file.id);
+        for await (const chunk of readable) {
+            if (!uploadStream.write(chunk)) {
+                await new Promise((resolve) => uploadStream.once('drain', resolve));
             }
-
-            uploadStream.end();
-
-        } catch (err: any) {
-            res.status(500).send({ message: err.message })
         }
+
+        uploadStream.end();
+
+        await file.save();
         
         new FileUpdatedPublisher(natsWrapper.client).publish({
             id: file.id,
