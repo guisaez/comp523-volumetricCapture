@@ -41,8 +41,14 @@ comp523-volumetricCapture
 ```
 The raw images may be placed anywhere on the file system, but the correct path must be given to `automation.py` using the `--raw_path` option.
 
+<<<<<<< HEAD
 ---
 ## Running Tests
+=======
+### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
+
+### Running Tests
+>>>>>>> 4f771c91a6ac9dc0c8a147078d7af56f0b1feb50
 
 1. Make sure you reviewed the [Folder Structure](#folder-structure-1).
 2. Start Docker Image by running the following command in your terminal
