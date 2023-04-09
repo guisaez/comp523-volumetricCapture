@@ -12,8 +12,9 @@
 ```
 git submodule update --init --recursive
 ```
-3. Place `raw` images folder and `intri.yml` and `extri.yml` files into `volumetricCapture/app/src/data` 
-4. Build Docker Image by running
+3. Follow step `0.1` in [this](https://github.com/zju3dv/EasyMocap/blob/master/doc/installation.md) guide to download and place the necessary SMPL models for EasyMocap. This must be done before building Docker Image.
+4. Place `raw` images, `intri.yml`, and `extri.yml` files into `volumetricCapture/app/src/data` 
+5. Build Docker Image by running
 ```
 docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
 ```
@@ -26,19 +27,19 @@ comp523-volumetricCapture
 └── volumetricCapture
     ├── setup
     └── app/src
-        └── raw
+        └── data
             ├── 1_Cam1_1234.png
             ├── 2_Cam1_1234.png
-            └── ...
-        ├── intri.yml
-        ├── extri.yml
+            ├── ...
+            ├── intri.yml
+            └── extri.yml
         ├── scripts
         └── models
             ├── CIHP_PGN
             ├── EasyMocap
             └── Neuralbody
 ```
-The raw images may be placed anywhere on the file system, but the correct path must be given to `automation.py`
+The raw images may be placed anywhere on the file system, but the correct path must be given to `automation.py` using the `--raw_path` option.
 
 ---
 ## Running Tests

@@ -4,8 +4,6 @@ import subprocess
 import click
 from pathlib import Path
 
-MOCAP_PATH = "/app/src/models/EasyMocap"
-
 
 @click.command()
 @click.option(
@@ -13,17 +11,26 @@ MOCAP_PATH = "/app/src/models/EasyMocap"
 )
 @click.option("--openpose", default="/openpose", help="Path to openpose.")
 @click.option("--cihp", default="/app/src/models/CIHP_PGN", help="Path to CIHP_PGN.")
+@click.option("--mocap", default="/app/src/models/EasyMocap", help="Path to EasyMocap")
 @click.option("--raw_path", default="/app/src/data/raw", help="Path to raw images.")
-@click.argument("intri_path")
-@click.argument("extri_path")
-def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
+@click.option(
+    "--intri_path", default="/app/src/data", help="Path to intri.yml camera config file"
+)
+@click.option(
+    "--extri_path", default="/app/src/data", help="Path to extri.yml camera config file"
+)
+def automate(mocap_dst, openpose, cihp, mocap, raw_path, intri_path, extri_path):
     """Automates the volumetric capture workflow. Creates 3D meshes from raw images."""
     ### Run MakeDatasets
     try:
         click.echo("Running CIHP_PGN")
         # Store output in CIHP_PGN so test_pgn.py does not need to be modified
         subprocess.check_output(
-            "/app/env/CIHP_ENV/bin/python3.7 scripts/make_dataset.py --delete " + raw_path + " CIHP " + cihp, shell=True
+            "/app/env/CIHP_ENV/bin/python3.7 scripts/make_dataset.py --delete "
+            + raw_path
+            + " CIHP "
+            + cihp,
+            shell=True,
         )
         click.echo("Created dataset")
     except:
@@ -32,10 +39,10 @@ def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
 
     ### Run CIHP_PGN
     try:
-        # CD into CIHP_PGN so relative paths in test_pgn is correct
+        # CD into CIHP_PGN so relative paths in test_pgn are correct
         work_dir = os.getcwd()
         os.chdir(cihp)
-        subprocess.check_output("/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True)
+        # subprocess.check_output("/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True)
         # CD back to main directory
         os.chdir(work_dir)
     except:
@@ -47,7 +54,11 @@ def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
         # Create input structure for EasyMocap
         # Separate raw images by camera
         subprocess.check_output(
-            "/app/env/EASY_ENV/bin/python3.7 scripts/separate.py " + raw_path + " " + raw_path, shell=True
+            "/app/env/EASY_ENV/bin/python3.7 scripts/separate.py "
+            + raw_path
+            + " "
+            + raw_path,
+            shell=True,
         )
         # Turn raw images into video by camera
         cams = [x for x in Path(raw_path).iterdir() if x.is_dir()]
@@ -58,7 +69,7 @@ def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
                 + str(cam)
                 + " "
                 + mocap_dst,
-                shell=True
+                shell=True,
             )
 
         # Move yml files into input directory
@@ -69,18 +80,25 @@ def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
     try:
         # Generate OpenPose parameters
         subprocess.check_output(
-            "/app/env/EASY_ENV/bin/python3.7 ./models/EasyMocap/scripts/preprocess/extract_video.py "
+            "/app/env/EASY_ENV/bin/python3.7 "
+            + mocap
+            + "/scripts/preprocess/extract_video.py "
             + mocap_dst
             + " --openpose "
             + openpose
             + " --handface",
             shell=True,
         )
-        os.chdir(MOCAP_PATH)
+        # CD into EasyMocap before running
+        os.chdir(mocap)
         # Generate SMPL keypoints from EasyMocap
         subprocess.check_output(
-            "/app/env/EASY_ENV/bin/python3.7 ./apps/demo/mv1p.py " + mocap_dst + " --out " + mocap_dst + "/output/smpl --vis_det --vis_repro --undis --sub_vis 1 2 3 4 --vis_smpl",
-            shell=True
+            "/app/env/EASY_ENV/bin/python3.7 ./apps/demo/mv1p.py "
+            + mocap_dst
+            + " --out "
+            + mocap_dst
+            + "/output/smpl --vis_det --vis_repro --undis --sub_vis 1 2 3 4 --vis_smpl",
+            shell=True,
         )
         os.chdir("-")
     except:
