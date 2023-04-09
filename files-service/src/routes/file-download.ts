@@ -1,0 +1,37 @@
+import express, { Request, Response } from 'express';
+import mongoose, { mongo } from 'mongoose';
+import { GridFS } from '../utils/GridFS';
+import { BadRequestError, NotAuthorizedError, currentUser, requireAuth } from '@teamg2023/common';
+import { File } from '../model/files';
+
+const router = express.Router();
+
+router.get('/api/files/download/:id', async (req: Request, res: Response) => {
+
+    if(!req.params.id || !mongoose.isObjectIdOrHexString(req.params.id)){
+        throw new BadRequestError('Invalid file Id');
+    }
+
+    const file = await File.findById(req.params.id);
+
+    if(req.currentUser!.id !== file?.userId){
+        throw new NotAuthorizedError();
+    }
+
+    if(!file){
+        return new BadRequestError('File Not Found!');
+    }
+
+    try{
+        const downloadStream = (await GridFS.getBucket()).openDownloadStream(file.id);
+
+        res.set('Content-Type', file.mimetype);
+        res.set('Content-Disposition', `attachment; filename="${file.name}`);
+
+        downloadStream.pipe(res);
+    }catch(err){
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+export { router as DownloadFilesRouter };
