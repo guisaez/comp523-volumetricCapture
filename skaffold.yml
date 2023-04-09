@@ -33,4 +33,12 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: guisaez/volumetric-client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     
