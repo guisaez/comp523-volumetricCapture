@@ -30,9 +30,6 @@ router.get('/api/files/download/:id', async (req: Request, res: Response) => {
     res.set('Content-Disposition', `attachment; filename="${file.name}`);
 
     downloadStream.pipe(res);
-    
-    res.send();
-
 })
 
 export { router as DownloadFilesRouter };
