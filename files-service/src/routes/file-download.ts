@@ -1,12 +1,12 @@
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { GridFS } from '../utils/GridFS';
-import { BadRequestError, NotAuthorizedError, currentUser, requireAuth } from '@teamg2023/common';
+import { BadRequestError, NotAuthorizedError, errorHandler, requireAuth } from '@teamg2023/common';
 import { File } from '../models/file';
 
 const router = express.Router();
 
-router.get('/api/files/download/:id', async (req: Request, res: Response) => {
+router.get('/api/files/download/:id', errorHandler, async (req: Request, res: Response) => {
 
     if(!req.params.id || !mongoose.isObjectIdOrHexString(req.params.id)){
         throw new BadRequestError('Invalid file Id');

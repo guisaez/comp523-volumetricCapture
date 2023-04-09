@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { BadRequestError} from '@teamg2023/common';
+import { BadRequestError, validateRequest} from '@teamg2023/common';
 import { File } from '../models/file';
 import { Readable } from 'stream';
 import multer  from 'multer';
@@ -13,7 +13,7 @@ const router = express.Router();
 const upload = multer()
 
 router.post('/api/files/upload/:projectId',
-    upload.single('file'),
+    upload.single('file'), validateRequest,
     async (req: Request, res: Response) => {
 
         if(!req.params.projectId || !mongoose.isObjectIdOrHexString(req.params.projectId)){
@@ -42,6 +42,8 @@ router.post('/api/files/upload/:projectId',
             projectId: req.params.projectId
         });
 
+        await file.save();
+
         const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
 
         try{
@@ -52,8 +54,6 @@ router.post('/api/files/upload/:projectId',
             }
             
             uploadStream.end();
-
-            await file.save();
 
         } catch (err: any) {
             res.status(500).send({ message: err.message })

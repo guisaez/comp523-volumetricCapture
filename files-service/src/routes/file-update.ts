@@ -1,7 +1,7 @@
 import express, { Request, Response} from 'express';
 import multer from 'multer';
 import { File } from '../models/file';
-import { BadRequestError, NotAuthorizedError, NotFoundError } from '@teamg2023/common';
+import { BadRequestError, NotAuthorizedError, NotFoundError, validateRequest } from '@teamg2023/common';
 import mongoose, { mongo } from 'mongoose';
 import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
@@ -13,7 +13,7 @@ const router = express.Router();
 const upload = multer();
 
 router.put('/api/files/update/:id',
-    upload.single('file'),
+    upload.single('file'), validateRequest,
     async (req: Request, res: Response) => {
 
         const { type } = req.body;
@@ -30,20 +30,18 @@ router.put('/api/files/update/:id',
             throw new BadRequestError('File must be defined');
         }
 
-
-        const file = await File.findOneAndUpdate({
-            type: type,
-            _id: req.params.id
-        }, {
-            name: req.file.originalname,
-            mimetype: req.file.mimetype,
-            encoding: req.file.encoding
-        })
-
+        const file = await File.findById(req.params.id);
+        
         if(!file){
             throw new BadRequestError('File Not Found');
         }
-
+        
+        file.set({
+            name: req.file.originalname,
+            mimetype: req.file.mimetype,
+            encoding: req.file.encoding
+        });
+        
         await file.save();
 
         const buffer = req.file.buffer;
@@ -55,6 +53,7 @@ router.put('/api/files/update/:id',
         const uploadStream = bucket.openUploadStreamWithId(fileId, req.file.originalname);
 
         try{
+            await bucket.delete(fileId);
             for await (const chunk of readable) {
                 if (!uploadStream.write(chunk)) {
                     await new Promise((resolve) => uploadStream.once('drain', resolve));
@@ -66,8 +65,7 @@ router.put('/api/files/update/:id',
         } catch (err: any) {
             res.status(500).send({ message: err.message })
         }
-
-
+        
         new FileUpdatedPublisher(natsWrapper.client).publish({
             id: file.id,
             version: file.version,
