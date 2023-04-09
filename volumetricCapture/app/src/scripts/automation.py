@@ -35,7 +35,7 @@ def automate(mocap_dst, openpose, cihp, raw_path, intri_path, extri_path):
         # CD into CIHP_PGN so relative paths in test_pgn is correct
         work_dir = os.getcwd()
         os.chdir(cihp)
-        #subprocess.check_output("/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True)
+        subprocess.check_output("/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True)
         # CD back to main directory
         os.chdir(work_dir)
     except:
