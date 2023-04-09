@@ -97,7 +97,6 @@ it('successfully updates the file', async () => {
         .attach('file', fileData, { filename: 'test.yml'})
         .expect(200);
 
-    
     const fileId = res.body.file.id;
 
     const updatedRes = await request(app)

@@ -47,13 +47,12 @@ router.put('/api/files/update/:id',
         const buffer = req.file.buffer;
         const readable = Readable.from(buffer);
 
-        const fileId = new mongoose.Types.ObjectId(req.params.id);
         const bucket = await GridFS.getBucket();
 
-        const uploadStream = bucket.openUploadStreamWithId(fileId, req.file.originalname);
+        const uploadStream = bucket.openUploadStreamWithId(file.id, req.file.originalname);
 
         try{
-            await bucket.delete(fileId);
+            await bucket.delete(file.id);
             for await (const chunk of readable) {
                 if (!uploadStream.write(chunk)) {
                     await new Promise((resolve) => uploadStream.once('drain', resolve));
