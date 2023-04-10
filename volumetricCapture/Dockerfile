@@ -82,7 +82,6 @@ RUN cd /app/env/ && \
     pip3 install torch==1.4.0 && \
     deactivate
 
-<<<<<<< HEAD
 # Install compatible cmake version for Neuralbody
 RUN apt-get update && apt-get install -y libssl-dev && \
     curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
@@ -105,9 +104,6 @@ RUN source /app/env/NEURAL_ENV/bin/activate && \
     pip3 install ./dist/spconv-1.2.1-cp37-cp37m-linux_x86_64.whl && \
     deactivate
 
-=======
-WORKDIR /app
->>>>>>> 4f771c91a6ac9dc0c8a147078d7af56f0b1feb50
 
 COPY /app/src /app/src
 
