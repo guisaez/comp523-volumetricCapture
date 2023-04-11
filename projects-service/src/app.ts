@@ -6,6 +6,7 @@ import cookieSession from 'cookie-session';
 import { projectDeleteRouter } from './routes/delete-project';
 import { projectNewRouter } from './routes/new-project';
 import { projectIndexRouter } from './routes/index-project';
+import { runProjectRouter } from './routes/run-project';
 
 // Import Routers
 
@@ -27,6 +28,7 @@ app.use(errorHandler);
 app.use(projectDeleteRouter);
 app.use(projectNewRouter);
 app.use(projectIndexRouter);
+app.use(runProjectRouter);
 
 app.all('*', async () => {
     throw new NotFoundError();

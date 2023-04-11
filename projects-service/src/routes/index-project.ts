@@ -22,7 +22,7 @@ router.get('/api/projects/:id', requireAuth, async (req: Request, res: Response)
     project.populate('intrinsic_fileId')
     project.populate('output_fileId');
 
-    res.status(200).send(project);
+    res.status(200).send( { project: project });
 })
 
 router.get('/api/projects', requireAuth, async (req: Request, res: Response) => {
@@ -31,7 +31,7 @@ router.get('/api/projects', requireAuth, async (req: Request, res: Response) => 
         userId: req.currentUser!.id
     }).populate('zip_fileId').populate('extrinsic_fileId').populate('intrinsic_fileId').populate('output_fileId')
 
-    res.status(200).send(projects);
+    res.status(200).send({ projects });
 })
 
 export { router as projectIndexRouter}
