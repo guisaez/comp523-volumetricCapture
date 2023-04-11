@@ -5,5 +5,8 @@ export interface ModelRunEvent {
 
     data: {
         projectId: string,
+        zip_fileId: string,
+        intri_fileId: string,
+        extri_fileId: string
     }
 }
