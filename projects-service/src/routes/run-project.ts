@@ -10,10 +10,9 @@ const router = express.Router();
 
 router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, res: Response) => {
 
-    if(!req.params.projectId || !mongoose.isObjectIdOrHexString(req.params.project)){
+    if(!req.params.projectId || !mongoose.isObjectIdOrHexString(req.params.projectId)){
         throw new BadRequestError('Invalid Project Id');
     }
-
     const project = await Project.findById(req.params.projectId).populate('zip_fileId').populate('extrinsic_fileId').populate('intrinsic_fileId');
 
     if(!project){
@@ -31,9 +30,11 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
         zip_fileId: project.zip_fileId.id
     })
 
-    project.set('status', ProcessStatus.Running);
+    project.set('processStatus', ProcessStatus.Running);
 
     await project.save();
 
-    res.send( project );
+    res.send( { project });
 })
+
+export { router as runProjectRouter };
