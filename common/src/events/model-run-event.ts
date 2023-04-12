@@ -11,6 +11,7 @@ export interface ModelRunEvent {
     subject: Subjects.ProcessStarted;
 
     data: {
+        projectId: string,
         files: RunData[];
     }
 }
