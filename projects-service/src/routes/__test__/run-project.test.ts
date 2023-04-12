@@ -1,7 +1,7 @@
 import request from 'supertest'
 import { app } from '../../app';
 import { File } from '../../models/file';
-import mongoose, { mongo } from 'mongoose';
+import mongoose from 'mongoose';
 import { Project } from '../../models/project';
 import { FileTypes, ProcessStatus } from '@teamg2023/common';
 import { natsWrapper } from '../../nats-wrapper';

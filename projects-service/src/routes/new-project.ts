@@ -2,7 +2,6 @@ import { requireAuth, validateRequest } from '@teamg2023/common';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { Project } from '../models/project';
-import { validate } from 'uuid';
 
 const router = express.Router();
 
