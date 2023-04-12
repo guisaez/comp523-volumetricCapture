@@ -10,5 +10,7 @@ export interface RunData {
 export interface ModelRunEvent {
     subject: Subjects.ProcessStarted;
 
-    data: RunData[];
+    data: {
+        files: RunData[];
+    }
 }
