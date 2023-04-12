@@ -1,4 +1,4 @@
-name: tests-projects
+name: tests-model
 
 on: 
   pull_request:
