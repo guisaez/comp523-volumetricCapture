@@ -12,6 +12,13 @@ export class ModelRunListener extends Listener<ModelRunEvent> {
 
     async onMessage(data: ModelRunEvent['data'], msg: Message) {
 
+        if (!fs.existsSync('./src/temp')) {
+            fs.mkdirSync('./src/temp');
+            console.log(`temp folder created successfully!`);
+        }else {
+            console.log(`temp folder already exists.`);
+        }
+
         fs.mkdir(`./src/temp/${data.projectId}`, (err) => {
             if(err) {
                 console.log(err);
