@@ -32,6 +32,13 @@ spec:
                 name: projects-srv
                 port:
                   number: 3000
+          - path: /api/model/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: model-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: Prefix
             backend:

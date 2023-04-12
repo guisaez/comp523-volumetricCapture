@@ -7,7 +7,7 @@ deploy:
       - ./infra/k8s-dev/*
 build:
   local:
-    push: false
+    push: true
   artifacts:
     - image: guisaez/volumetric-files
       context: files-service
@@ -27,6 +27,14 @@ build:
             dest: .
     - image: guisaez/volumetric-projects
       context: projects-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: guisaez/volumetric-model
+      context: model-service
       docker:
         dockerfile: Dockerfile
       sync:

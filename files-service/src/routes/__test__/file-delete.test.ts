@@ -1,7 +1,7 @@
 import request from "supertest";
 import { app } from "../../app";
 import fs from 'fs';
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import { natsWrapper } from "../../nats-wrapper";
 
 const fileData : Buffer = fs.readFileSync('./src/routes/__test__/test_files/test.yml');

@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import { Project } from '../models/project';
 import mongoose from 'mongoose';
 import { BadRequestError, requireAuth } from '@teamg2023/common';
-import { rmSync } from 'fs';
 
 const router = express.Router();
 

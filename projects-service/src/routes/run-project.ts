@@ -1,4 +1,4 @@
-import { BadRequestError, requireAuth, ProcessStatus } from '@teamg2023/common';
+import { BadRequestError, requireAuth, ProcessStatus, RunData } from '@teamg2023/common';
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { Project } from '../models/project';
@@ -23,11 +23,27 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
         throw new BadRequestError('Missing Required Files to Run Project');
     }
 
+    const zipData: RunData = {
+        fileId: project.zip_fileId.id,
+        name: 'zip.zip',
+        type: project.zip_fileId.type
+    }
+
+    const intrinsicData: RunData = {
+        fileId: project.intrinsic_fileId.id,
+        name: 'intrinsic.yml',
+        type: project.intrinsic_fileId.type
+    }
+
+    const extrinsicData: RunData = {
+        fileId: project.intrinsic_fileId.id,
+        name: 'extrinsic.yml',
+        type: project.extrinsic_fileId.type
+    }
+
     new ModelRunPublisher(natsWrapper.client).publish({
         projectId: project.id,
-        intri_fileId: project.intrinsic_fileId.id,
-        extri_fileId: project.extrinsic_fileId.id,
-        zip_fileId: project.zip_fileId.id
+        files: [intrinsicData, zipData, extrinsicData]
     })
 
     project.set('processStatus', ProcessStatus.Running);
