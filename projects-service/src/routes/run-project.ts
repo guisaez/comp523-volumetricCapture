@@ -42,6 +42,7 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
     }
 
     new ModelRunPublisher(natsWrapper.client).publish({
+        projectId: project.id,
         files: [intrinsicData, zipData, extrinsicData]
     })
 
