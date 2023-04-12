@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { GridFS } from './utils/GridFS';
 import { natsWrapper } from './nats-wrapper';
+import { ModelRunListener } from './events/listeners/model-run-listener';
 
 
 const start = async () => {
@@ -42,6 +43,8 @@ const start = async () => {
 
         process.on('SIGINT', () => natsWrapper.client.close());
         process.on('SIGTERM', () => natsWrapper.client.close());
+
+        new ModelRunListener(natsWrapper.client).listen();
         
     } catch(err){
         console.log(err);

@@ -1,6 +1,7 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
+import { GridFS } from '../utils/GridFS';
 
 declare global {
     var signin: () => string[];
@@ -9,6 +10,7 @@ declare global {
 jest.mock('../nats-wrapper.ts');
 
 let mongo: any;
+let bucket: mongoose.mongo.GridFSBucket;
 
 beforeAll(async () => {
     process.env.JWT_KEY = 'test-env-key-random-123';
@@ -19,20 +21,25 @@ beforeAll(async () => {
 
     await mongoose.connect(mongoUri, {});
 
+    bucket = await GridFS.setBucket();
+
 })
 
 beforeEach(async () => {
 
     jest.clearAllMocks();
-    
+
     const collections = await mongoose.connection.db.collections();
 
     for(let collection of collections){
-        await collection.deleteMany({});
+        await collection.deleteMany();
     }
+
 })
 
 afterAll(async () => {
+    await bucket.drop();
+    await mongoose.connection.dropDatabase();
     if(mongo) {
         await mongo.stop();
     }

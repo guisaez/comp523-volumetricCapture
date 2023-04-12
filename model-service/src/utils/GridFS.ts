@@ -18,6 +18,8 @@ export class GridFS {
                 chunkSizeBytes: 1024 * 1024
             });
         }
+
+        return this.bucket;
     }
     
     static async getBucket() {
