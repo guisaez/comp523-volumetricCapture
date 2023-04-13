@@ -42,7 +42,7 @@ router.post('/api/files/upload/:projectId',
             projectId: req.params.projectId
         });
 
-        const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
+        const uploadStream = bucket.openUploadStreamWithId(file._id, file.name);
 
         uploadStream.on('error', (err) => {
            res.status(500).send( err );

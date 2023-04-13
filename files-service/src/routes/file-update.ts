@@ -47,15 +47,13 @@ router.put('/api/files/update/:id',
 
         const bucket = await GridFS.getBucket();
 
-        const uploadStream = bucket.openUploadStreamWithId(file.id, file.name);
+        const uploadStream = bucket.openUploadStreamWithId(file._id, file.name);
 
         uploadStream.on('error', (err) => {
             res.status(500).send( err );
         });
 
-        
-        
-        await bucket.delete(file.id);
+        await bucket.delete(file._id);
         for await (const chunk of readable) {
             if (!uploadStream.write(chunk)) {
                 await new Promise((resolve) => uploadStream.once('drain', resolve));

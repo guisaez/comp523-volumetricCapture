@@ -38,7 +38,7 @@ router.delete('/api/files/delete', [
 
     try{
         await File.findByIdAndDelete(id);
-        await (await GridFS.getBucket()).delete(file.id);
+        await (await GridFS.getBucket()).delete(new mongoose.Types.ObjectId(file.id));
 
         new FileDeletedPublisher(natsWrapper.client).publish({
             id: id,
@@ -68,9 +68,8 @@ router.delete('/api/files/delete-all/:userId', async (req: Request, res: Respons
 
     const bucket = await GridFS.getBucket();
 
-    
     for await (let file of files){
-        await bucket.delete(file.id);
+        await bucket.delete(new mongoose.Types.ObjectId(file.id));
     }
 
     await File.deleteMany({
