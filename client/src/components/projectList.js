@@ -7,6 +7,7 @@ import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
+import timestamp from 'time-stamp'
 //import TESTHOST from '../backend/backendAPI'
 const TESTHOST = ''
 const axios = require('axios').default
@@ -40,7 +41,7 @@ function ProjectCard({ setView, value, setProject, ...props }) {
 //   component='img'
 //   height='140'
 //   image=''
-//   alt='project image'
+//   alt='project image'//? projectInfo.email : ''
 // />
   return (
       <Card style={{ height: '30%', width: '20%', margin: 16, padding: 10 }}>
@@ -49,7 +50,7 @@ function ProjectCard({ setView, value, setProject, ...props }) {
             {projectInfo.projectName ? projectInfo.projectName : 'Project'}
           </Typography>
           <Typography variant='body2' color='text.secondary'>
-            {projectInfo.userId ? projectInfo.userId : 'You have created a new project! Add any descriptions through the edit button.'}
+            {'Created at ' + new Date(projectInfo.createdAt).toLocaleString() }
           </Typography>
         </CardContent>
         <CardActions>
@@ -69,10 +70,17 @@ function ProjectCard({ setView, value, setProject, ...props }) {
   )
 }
 
+// function getDate(date){
+//       mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+//       day = ("0" + date.getDate()).slice(-2);
+//     return [date.getFullYear(), mnth, day].join("-") + date.get;
+// }
+
 function ProjectList({ setView, setProject, ...props }) {
   const [numProjects, setNumProjects] = React.useState([])
   const [uid,setUid] = React.useState('')
   const [email,setEmail] = React.useState('')
+  const [projectName, setProjectName] = React.useState('')
   React.useEffect(() => {
     axios({
       method: 'get',
@@ -92,13 +100,23 @@ function ProjectList({ setView, setProject, ...props }) {
       setNumProjects(res.data)
     })
   }, [])
+  // const handleChange = (type, event) => {
+  //   if (type === 'projectName') {
+  //     setProjectName(event.target.value)
+  //   } 
+  //   // else if (type === 'email') {
+  //   //   setValues({ ...values, email: event.target.value })
+  //   // } 
+  // }
   const handleAddProject = () => {
     axios({
       method: 'post',
       url: TESTHOST + '/api/projects/',
       data: {
-        projectName: "New Project",
-		    userId: uid
+        projectName: "New Project"
+        //createdAt: new Date(),
+        //lastModifiedAt:new Date()
+		    //userId: uid
       }
     }).then((res) => {
       setNumProjects([...numProjects, res.data])
@@ -111,6 +129,7 @@ function ProjectList({ setView, setProject, ...props }) {
       <div>
         <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3>
         <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>SO</Button>
+
         <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
       </div>
       <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
@@ -123,5 +142,4 @@ function ProjectList({ setView, setProject, ...props }) {
     </div>
   )
 }
-
 export default ProjectList
