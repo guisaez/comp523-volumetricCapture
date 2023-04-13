@@ -89,4 +89,4 @@ projectSchema.statics.findByEvent = (event: {projectId: string}) => {
 }
 const Project = mongoose.model<ProjectDoc, ProjectModel>('Project', projectSchema);
 
-export { Project }
+export { Project, ProjectDoc }

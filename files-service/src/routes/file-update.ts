@@ -1,8 +1,8 @@
 import express, { Request, Response} from 'express';
 import multer from 'multer';
 import { File } from '../models/file';
-import { BadRequestError, NotAuthorizedError, NotFoundError, validateRequest } from '@teamg2023/common';
-import mongoose, { mongo } from 'mongoose';
+import { BadRequestError, validateRequest } from '@teamg2023/common';
+import mongoose from 'mongoose';
 import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
 import { FileUpdatedPublisher } from '../events/publishers/file-updated-publisher';
