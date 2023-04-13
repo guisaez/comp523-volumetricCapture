@@ -81,8 +81,8 @@ it('successfully uploads the file', async () => {
 
     expect(fileResponse.body.file.name!).toEqual('test.yml');
     expect(natsWrapper.client.publish).toHaveBeenCalled();
-    // Upload a Zip file
 
+    // Upload a Zip file
 
     const fileResponse2 = await request(app)
         .post(`/api/files/upload/${projectId}`)

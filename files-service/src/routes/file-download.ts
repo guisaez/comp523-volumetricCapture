@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
-import mongoose, { mongo } from 'mongoose';
+import mongoose from 'mongoose';
 import { GridFS } from '../utils/GridFS';
-import { BadRequestError, NotAuthorizedError, currentUser, requireAuth } from '@teamg2023/common';
-import { File } from '../model/files';
+import { BadRequestError, NotAuthorizedError} from '@teamg2023/common';
+import { File } from '../models/file';
 
 const router = express.Router();
 
@@ -22,16 +22,14 @@ router.get('/api/files/download/:id', async (req: Request, res: Response) => {
         return new BadRequestError('File Not Found!');
     }
 
-    try{
-        const downloadStream = (await GridFS.getBucket()).openDownloadStream(file.id);
+    const bucket = await GridFS.getBucket();
+    
+    const downloadStream = bucket.openDownloadStream(file.id);
 
-        res.set('Content-Type', file.mimetype);
-        res.set('Content-Disposition', `attachment; filename="${file.name}`);
+    res.set('Content-Type', file.mimetype);
+    res.set('Content-Disposition', `attachment; filename="${file.name}`);
 
-        downloadStream.pipe(res);
-    }catch(err){
-        res.status(500).send('Internal Server Error');
-    }
+    downloadStream.pipe(res);
 })
 
 export { router as DownloadFilesRouter };

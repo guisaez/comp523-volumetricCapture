@@ -21,3 +21,9 @@ export * from './events/subjects';
 export * from './events/file-deleted-event';
 export * from './events/file-updated-event';
 export * from './events/file-uploaded-event'
+
+export * from './events/project-deleted-event';
+
+export * from './events/model-run-event';
+export * from './events/model-error-event';
+export * from './events/model-complete-event';

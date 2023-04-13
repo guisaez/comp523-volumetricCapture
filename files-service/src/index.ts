@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { GridFS } from './utils/GridFS';
 import { natsWrapper } from './nats-wrapper';
+import { ProjectDeletedListener } from './events/listeners/project-deleted-listener';
 
 const start = async () => {
     console.log('Files Service is Starting...');
@@ -41,6 +42,8 @@ const start = async () => {
 
         process.on('SIGINT', () => natsWrapper.client.close());
         process.on('SIGTERM', () => natsWrapper.client.close());
+        
+        new ProjectDeletedListener(natsWrapper.client).listen();
         
     } catch(err){
         console.log(err);

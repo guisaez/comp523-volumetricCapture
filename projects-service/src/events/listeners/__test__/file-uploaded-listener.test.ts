@@ -21,8 +21,6 @@ const setup = async () => {
     const data: FileUploadedEvent['data'] = {
         id: new mongoose.Types.ObjectId().toHexString(),
         version: 0,
-        mimetype: 'text/yml',
-        encoding: 'utf-8',
         projectId: project.id,
         type: FileTypes.INTRINSIC,
         userId: project.userId,

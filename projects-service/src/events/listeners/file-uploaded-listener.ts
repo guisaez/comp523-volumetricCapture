@@ -9,7 +9,7 @@ export class FileUploadedListener extends Listener<FileUploadedEvent> {
     queueGroupName = queueGroupName;
 
     async onMessage(data: FileUploadedEvent['data'], msg: Message) {
-        const { id, userId, mimetype, encoding, type, name, projectId} = data;
+        const { id, userId, type, name, projectId} = data;
 
         const project = await Project.findByEvent({ projectId });
 
@@ -20,8 +20,6 @@ export class FileUploadedListener extends Listener<FileUploadedEvent> {
         const file = File.build({
             id,
             userId,
-            mimetype,
-            encoding,
             type, 
             name
         });

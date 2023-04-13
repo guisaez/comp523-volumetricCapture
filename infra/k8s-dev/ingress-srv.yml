@@ -25,3 +25,24 @@ spec:
                 name: files-srv
                 port:
                   number: 3000
+          - path: /api/projects/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: projects-srv
+                port:
+                  number: 3000
+          - path: /api/model/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: model-srv
+                port:
+                  number: 3000
+          - path: /?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: client-srv
+                port:
+                  number: 3000
