@@ -43,11 +43,7 @@ comp523-volumetricCapture
 The raw images may be placed anywhere on the file system, but the correct path must be given to `automation.py` using the `--raw_path` option.
 
 ---
-<<<<<<< HEAD
 ## Running Tests
-=======
-### Running Tests
->>>>>>> 5f15cf007dcefe24624c0aea7ef367008bb8ea62
 
 1. Make sure you reviewed the [Folder Structure](#folder-structure-1).
 2. Start Docker Image by running the following command in your terminal

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -7,7 +7,7 @@ ENV TZ=America/New_York
 RUN apt-get update
 
 # Install necessary packages
-RUN apt-get install -y curl python3.7 python3-pip git cmake wget libopencv-dev tzdata \
+RUN apt-get install -y curl python3.7 python3-pip git wget libopencv-dev tzdata \
     libboost-all-dev libprotobuf-dev protobuf-compiler libgoogle-glog-dev libgflags-dev \
     libhdf5-dev liblmdb-dev libatlas-base-dev libatlas-cpp-0.6-dev ffmpeg locales-all && \
     apt-get clean && \
@@ -29,25 +29,8 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install Python dependencies globally.
-<<<<<<< HEAD
 RUN python3.7 -m pip install click 
-RUN pip3 install --no-cache-dir virtualenv Pillow
-=======
-RUN pip3 install --no-cache-dir virtualenv click Pillow Flask
->>>>>>> 4f771c91a6ac9dc0c8a147078d7af56f0b1feb50
-
-# Install and build OpenPose
-RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
-
-RUN cd openpose && \
-    git submodule update --init --recursive
-
-RUN cd openpose && \
-    mkdir build && \
-    cd build
-
-RUN cd openpose/build && cmake ..
-RUN cd openpose/build make -j`nproc`
+RUN pip3 install --no-cache-dir virtualenv Pillow Flask
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
@@ -69,6 +52,7 @@ RUN cd app/env/ && \
 # Install Dpenedencies for EASY_ENV
 RUN cd app/env/ && \
     source EASY_ENV/bin/activate && \
+    pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html && \
     pip3 install -r easy-env-reqs.txt && \
     pip3 install -r easy-neural-env-reqs.txt && \
     deactivate
@@ -79,7 +63,7 @@ ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 RUN cd /app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
-    pip3 install torch==1.4.0 && \
+    pip3 install torch==1.10.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html && \
     deactivate
 
 # Install compatible cmake version for Neuralbody
@@ -92,16 +76,23 @@ RUN apt-get update && apt-get install -y libssl-dev && \
 RUN apt-get update && apt-get install -y libboost-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Install and build OpenPose for EasyMocap
+RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
+
+RUN cd openpose && \
+    git submodule update --init --recursive
+
+RUN cd openpose && \
+    mkdir build && \
+    cd build && \
+    cmake -DUSE_CUDNN=OFF ..
+RUN cd openpose/build && make -j`nproc`
+
+
 # Install spconv for Neuralbody
-RUN source /app/env/NEURAL_ENV/bin/activate && \    
-    cd /app && \
-    git clone https://github.com/traveller59/spconv --recursive && \ 
-    cd spconv && \
-    git checkout abf0acf30f5526ea93e687e3f424f62d9cd8313a && \
-    git submodule update --init --recursive && \
-    apt-get update && apt-get install -y libpython3.7-dev && \
-    python3.7 setup.py bdist_wheel && \
-    pip3 install ./dist/spconv-1.2.1-cp37-cp37m-linux_x86_64.whl && \
+RUN source /app/env/NEURAL_ENV/bin/activate && \
+    pip3 install --upgrade pip && \  
+    python3.7 -m pip install spconv-cu111  && \
     deactivate
 
 
@@ -111,13 +102,28 @@ COPY /app/src /app/src
 RUN cd /app/src/models/EasyMocap && \
     /app/env/EASY_ENV/bin/python3.7 setup.py develop
 
-WORKDIR /app
+RUN source /app/env/EASY_ENV/bin/activate && \
+   pip3 install pyrender==0.1.35
+
+RUN apt-get update && apt-get install -y freeglut3-dev
+RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
+    dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f
+
+RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
+    source /app/env/EASY_ENV/bin/activate && \
+    pip3 uninstall -y pyopengl && \
+    pip3 install ./pyopengl
+    
+ENV PYOPENGL_PLATFORM=osmesa
+
+WORKDIR /app/src
 
 CMD ["/bin/bash"]
 
 # TRY
 
 # docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
+# docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
 # docker run --gpus all -it --rm volumetric-capture
 
 # This will not work on macOS
