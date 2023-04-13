@@ -31,7 +31,6 @@ export class ModelRunListener extends Listener<ModelRunEvent> {
             }
         })
 
-           
         await this.downloadAndWriteFiles(data.files, data.projectId);
         
         msg.ack();
@@ -40,13 +39,15 @@ export class ModelRunListener extends Listener<ModelRunEvent> {
         .pipe(unzipper.Extract({ path: this.folderPath + `${data.projectId}/input/` }));
 
         
+        
         setTimeout(async () => {
             this.cleanup(this.folderPath + `${data.projectId}`);
 
-            new ModelCompletePublisher(natsWrapper.client).publish({
+            new ModelCompletePublisher(natsWrapper.client)?.publish({
                 projectId: data.projectId,
                 output_fileId: new mongoose.Types.ObjectId().toHexString() // this will be the fileId of the update zip file.
             })
+
         }, 5000)
     }
 
