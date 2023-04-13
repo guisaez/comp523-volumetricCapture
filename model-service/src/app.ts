@@ -3,7 +3,6 @@ import 'express-async-errors';
 import { json } from 'body-parser';
 import { currentUser, errorHandler, NotFoundError, requireAuth } from '@teamg2023/common';
 import cookieSession from 'cookie-session';
-import { modelRunRouter } from './routes/run-model';
 
 // Import Routers
 
@@ -23,7 +22,6 @@ app.use(requireAuth);
 app.use(errorHandler);
 
 // Routes
-app.use(modelRunRouter);
 
 app.all('*', async () => {
     throw new NotFoundError();

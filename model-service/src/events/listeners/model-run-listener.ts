@@ -5,49 +5,56 @@ import fs from 'fs';
 import { GridFS } from "../../utils/GridFS";
 import mongoose from "mongoose";
 import unzipper from 'unzipper';
+import { ModelCompletePublisher } from "../publishers/model-complete-publisher";
+import { natsWrapper } from "../../nats-wrapper";
+import { ModelErrorPublisher } from "../publishers/model-error-publisher";
 
 export class ModelRunListener extends Listener<ModelRunEvent> {
     subject: Subjects.ProcessStarted = Subjects.ProcessStarted;
     queueGroupName = queueGroupName;
 
+    private folderPath = './src/temp/';
+
     async onMessage(data: ModelRunEvent['data'], msg: Message) {
 
-        if (!fs.existsSync('./src/temp')) {
-            fs.mkdirSync('./src/temp');
-            console.log(`temp folder created successfully!`);
-        }else {
-            console.log(`temp folder already exists.`);
+        // Ensure temp folder is created!
+        if (!fs.existsSync(this.folderPath)) {
+            fs.mkdirSync(this.folderPath);
         }
 
-        fs.mkdir(`./src/temp/${data.projectId}`, (err) => {
+        // Make projectId folder
+        fs.mkdir(this.folderPath + `${data.projectId}`, async (err) => {
             if(err) {
-                console.log(err);
-            } else{
-                console.log(`Folder for projectId ${data.projectId} created!`)
+                this.handleErrors(data.projectId, err);
+                msg.ack();
+                return this.cleanup(this.folderPath + `${data.projectId}`);
             }
         })
 
-        msg.ack();
-        
+           
         await this.downloadAndWriteFiles(data.files, data.projectId);
+        
+        msg.ack();
+
+        fs.createReadStream(this.folderPath + `${data.projectId}/zip.zip`)
+        .pipe(unzipper.Extract({ path: this.folderPath + `${data.projectId}/input/` }));
 
         
-        fs.createReadStream(`./src/temp/${data.projectId}/zip.zip`)
-        .pipe(unzipper.Extract({ path: `./src/temp/${data.projectId}/input/` }));
+        setTimeout(async () => {
+            this.cleanup(this.folderPath + `${data.projectId}`);
 
-        
-        setTimeout(() => {
-            this.cleanup(`./src/temp/${data.projectId}`);
+            new ModelCompletePublisher(natsWrapper.client).publish({
+                projectId: data.projectId,
+                output_fileId: new mongoose.Types.ObjectId().toHexString() // this will be the fileId of the update zip file.
+            })
         }, 5000)
-       
     }
 
     private downloadAndWriteFiles = async (files: RunData[], projectId: string) => {
         for(let file of files){ 
-            console.log(file.fileId)
             const downloadStream = (await GridFS.getBucket()).openDownloadStream(new mongoose.Types.ObjectId(file.fileId));
 
-            const writeStream = fs.createWriteStream(`./src/temp/${projectId}/${file?.name}`, { flags: 'w'});
+            const writeStream = fs.createWriteStream(this.folderPath + `${projectId}/${file?.name}`, { flags: 'w'});
 
             await this.downloadAndWrite(downloadStream, writeStream);
         }
@@ -80,6 +87,13 @@ export class ModelRunListener extends Listener<ModelRunEvent> {
             });
             fs.rmdirSync(path);
           }
+    }
+
+    private handleErrors = (projectId: string, err: Error): Promise<void> => {
+        return new ModelErrorPublisher(natsWrapper.client).publish({
+            projectId: projectId,
+            errors: [err.message]
+        })
     }
     
 }

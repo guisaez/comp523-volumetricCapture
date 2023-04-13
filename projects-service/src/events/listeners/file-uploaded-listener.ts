@@ -46,7 +46,6 @@ export class FileUploadedListener extends Listener<FileUploadedEvent> {
 
         await project.save();
 
-    
         msg.ack();
     }
 }
