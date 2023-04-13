@@ -73,7 +73,7 @@ it('returns a 204 if the file was successfully deleted', async () => {
         .set('Cookie', cookie)
         .expect(200)
 
-    expect(body).toEqual([]);
+    expect(body.files).toEqual([]);
 })
 
 it('deletes all files associated with an user', async () => {
@@ -93,6 +93,6 @@ it('deletes all files associated with an user', async () => {
         .set('Cookie', cookie)
         .expect(200)
 
-    expect(body).toEqual([]);
+    expect(body.files).toEqual([]);
 
 })

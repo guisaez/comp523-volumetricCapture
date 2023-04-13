@@ -24,7 +24,7 @@ router.get('/api/files/download/:id', async (req: Request, res: Response) => {
 
     const bucket = await GridFS.getBucket();
     
-    const downloadStream = bucket.openDownloadStream(file.id);
+    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(file.id));
 
     res.set('Content-Type', file.mimetype);
     res.set('Content-Disposition', `attachment; filename="${file.name}`);
