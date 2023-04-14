@@ -4,6 +4,8 @@ import subprocess
 import click
 from pathlib import Path
 
+WORK_DIR = Path.cwd()
+
 
 @click.command()
 @click.option(
@@ -11,15 +13,24 @@ from pathlib import Path
 )
 @click.option("--openpose", default="/openpose", help="Path to openpose.")
 @click.option("--cihp", default="/app/src/models/CIHP_PGN", help="Path to CIHP_PGN.")
-@click.option("--mocap", default="/app/src/models/EasyMocap", help="Path to EasyMocap")
-@click.option("--raw_path", default="/app/src/data/raw", help="Path to raw images.")
+@click.option("--mocap", default="/app/src/models/EasyMocap", help="Path to EasyMocap.")
 @click.option(
-    "--intri_path", default="/app/src/data", help="Path to intri.yml camera config file"
+    "--neural", default="/app/src/models/neuralbody", help="Path to Neuralbody."
+)
+@click.option("--raw_path", default="/app/src/data", help="Path to raw images.")
+@click.option(
+    "--intri_path",
+    default="/app/src/data/intri.yml",
+    help="Path to intri.yml camera config file",
 )
 @click.option(
-    "--extri_path", default="/app/src/data", help="Path to extri.yml camera config file"
+    "--extri_path",
+    default="/app/src/data/extri.yml",
+    help="Path to extri.yml camera config file",
 )
-def automate(mocap_dst, openpose, cihp, mocap, raw_path, intri_path, extri_path):
+def automate(
+    mocap_dst, openpose, cihp, mocap, neural, raw_path, intri_path, extri_path
+):
     """Automates the volumetric capture workflow. Creates 3D meshes from raw images."""
     ### Run MakeDatasets
     try:
@@ -40,11 +51,12 @@ def automate(mocap_dst, openpose, cihp, mocap, raw_path, intri_path, extri_path)
     ### Run CIHP_PGN
     try:
         # CD into CIHP_PGN so relative paths in test_pgn are correct
-        work_dir = os.getcwd()
         os.chdir(cihp)
-        # subprocess.check_output("/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True)
+        subprocess.check_output(
+            "/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True
+        )
         # CD back to main directory
-        os.chdir(work_dir)
+        os.chdir(WORK_DIR)
     except:
         return RuntimeError("CIHP_PGN Error")
 
@@ -100,14 +112,38 @@ def automate(mocap_dst, openpose, cihp, mocap, raw_path, intri_path, extri_path)
             + "/output/smpl --vis_det --vis_repro --undis --sub_vis 1 2 3 4 --vis_smpl",
             shell=True,
         )
-        os.chdir("-")
+        os.chdir(WORK_DIR)
+        # Convert parameters to neuralbody format
+        click.echo("Converting EasyMocap parameters to neuralbody format...")
+        # Replace neuralbody script before running
+        dst = neural + "/zju_smpl"
+        fpath = dst + "/easymocap_to_neuralbody.py"
+        if Path(fpath).exists():
+            # Remove old file if it exists
+            os.remove(fpath)
+        shutil.move("/app/src/scripts/easymocap_to_neuralbody.py", dst)
+        # Run easymocap_to_neuralbody script
+        subprocess.check_output(
+            "/app/env/NEURAL_ENV/bin/python3.7 " + fpath, shell=True
+        )
     except:
         return RuntimeError("EasyMocap Error")
 
     ### Run Neuralbody
     try:
-        # Activate Neuralbody env
-        subprocess.check_output("source /app/env/NEURAL_ENV/bin/activate", shell=True)
+        # Setup input for Neuralbody
+        click.echo("Preparing data for Neuralbody...")
+        subprocess.check_output(
+            "/app/env/NEURAL_ENV/bin/python3.7 /app/src/scripts/prep_neuralbody.py",
+            shell=True,
+        )
+        # Generate annots.npy file
+        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 /app/src/scripts/get_annots.py", shell=True)
+        # Begin training of NeRF model
+        os.chdir(neural)
+        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 train_net.py --cfg_file configs/multi_view_custom.yaml exp_name <exp_name> resume False", shell=True)
+        # Generate meshes
+        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 run.py --type visualize --cfg_file configs/multi_view_custom.yaml exp_name <exp_name> vis_mesh True mesh_th 10", shell=True)
 
     except:
         return RuntimeError("Neuralbody Error")

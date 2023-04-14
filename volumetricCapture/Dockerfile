@@ -95,15 +95,9 @@ RUN source /app/env/NEURAL_ENV/bin/activate && \
     python3.7 -m pip install spconv-cu111  && \
     deactivate
 
-
-COPY /app/src /app/src
-
-# Finish EasyMocap setup
-RUN cd /app/src/models/EasyMocap && \
-    /app/env/EASY_ENV/bin/python3.7 setup.py develop
-
+# Setup pyrender for EasyMocap visualization
 RUN source /app/env/EASY_ENV/bin/activate && \
-   pip3 install pyrender==0.1.35
+    pip3 install pyrender==0.1.35
 
 RUN apt-get update && apt-get install -y freeglut3-dev
 RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
@@ -115,6 +109,12 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     pip3 install ./pyopengl
     
 ENV PYOPENGL_PLATFORM=osmesa
+
+COPY /app/src /app/src
+
+# Finish EasyMocap setup
+RUN cd /app/src/models/EasyMocap && \
+    /app/env/EASY_ENV/bin/python3.7 setup.py develop
 
 WORKDIR /app/src
 
