@@ -3,7 +3,8 @@ import Button from "@mui/material/Button";
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Tabs from '@mui/material/Tabs'
-import {Typography} from "@mui/material";
+//import {Typography} from "@mui/material";
+import Typography from '@mui/material/Typography'
 import Tab from '@mui/material/Tab'
 import { useEffect, useState} from "react";
 import ProjectView from '../components/projectView'
@@ -38,8 +39,11 @@ function LandingPage () {
         <div>
             <div>
                 <AppBar position='static' style={{ backgroundColor: '#222222' }}>
-                    <Toolbar variant='dense'>
-                    </Toolbar>
+                <h3 style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+                }}>Volumetric Capture Platform</h3>
                 </AppBar>
             </div>
             <div>

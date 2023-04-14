@@ -11,6 +11,7 @@ import timestamp from 'time-stamp'
 import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
+import Alert from '@mui/material/Alert'
 //import TESTHOST from '../backend/backendAPI'
 const TESTHOST = ''
 const axios = require('axios').default
@@ -23,16 +24,19 @@ const axios = require('axios').default
 // }))
 
 function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
+  const [errorMsg, setErrorMsg] = React.useState('')
+  const [error, setError] = React.useState(false)
   const [projectInfo, setInfo] = React.useState({
     projectName: value.projectName,
     userId: value.userId,
     createdAt:value.createdAt,
     lastModifiedAt:value.lastModifiedAt,
     processStatus:value.processStatus,
-    zip_fileId:value.zip_fileId,
-    extrinsic_fileId: value.extrinsic_fileId,
-    intrinsic_fileId: value.intrinsic_fileId,
-    output_fileId:value.intrinsic_fileId,
+    version:value.version,
+    // zip_fileId:value.zip_fileId,
+    // extrinsic_fileId: value.extrinsic_fileId,
+    // intrinsic_fileId: value.intrinsic_fileId,
+    // output_fileId:value.intrinsic_fileId,
     id:value.id
   })
   const handleEdit = () => {
@@ -55,6 +59,23 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
       })
     }, [])
   }
+
+  const handleDownload = () => {
+    // axios({
+    //   method: 'post',
+    //   url: TESTHOST + '/api/auth/signout/',
+    //   data: {
+    //   }
+    // }).then((res) => {
+    //   setTabValue('vcp')
+    // })
+    console.log("to be done-download")
+    if(projectInfo.processStatus !=  'completed'){
+      setError(true)
+      setErrorMsg("No available model to download!")
+    }
+  }
+
   return (
       <Card style={{ height: '30%', width: '20%', margin: 16, padding: 10 }}>
         <CardContent>
@@ -79,9 +100,10 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
           >
             <Grid item><Button variant='contained' onClick={handleEdit}>Edit</Button></Grid>
             <Grid item><Button variant='contained' onClick={handleDelete}>Delete</Button></Grid>
-            <Grid item><Button variant="outlined">Download Model</Button></Grid>
+            <Grid item><Button variant="outlined" onClick={handleDownload}>Download Model</Button></Grid>
           </Grid>
-        </CardActions>
+        </CardActions> 
+        {error && <Alert style={{justifyContent: 'center' }} severity="error">{errorMsg}</Alert>}
       </Card>
   )
 }
@@ -142,7 +164,9 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
   return (
     <div>
       <div>
-        <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3>
+        <div>
+        <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3> 
+        </div>
         <FormControl variant='contained' style={{ margin: 16 }}>
             <InputLabel >Project Name</InputLabel>
             <Input
@@ -150,8 +174,12 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
               onChange={(e) => { handleChange('projectName', e) }}
             />
           </FormControl>
-        <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
-        <Button variant='contained' style={{ margin: 16 }} onClick={handleLogout}>Log out</Button>
+        <Button variant='contained' style={{ 
+          margin: 16
+        }} onClick={handleAddProject}>New Project</Button>
+        <Button variant='contained' style={{ 
+          margin: 16
+        }} onClick={handleLogout}>Log out</Button>
       </div>
       <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
         <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
