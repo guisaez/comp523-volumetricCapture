@@ -8,6 +8,9 @@ import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
 import timestamp from 'time-stamp'
+import FormControl from '@mui/material/FormControl'
+import Input from '@mui/material/Input'
+import InputLabel from '@mui/material/InputLabel'
 //import TESTHOST from '../backend/backendAPI'
 const TESTHOST = ''
 const axios = require('axios').default
@@ -19,7 +22,11 @@ const axios = require('axios').default
 //   color: theme.palette.text.secondary
 // }))
 
-function ProjectCard({ setView, value, setProject, ...props }) {
+function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
+  //const [isExist, setIsExist] = useState(true)
+  React.useEffect(() => {
+    console.log("use effect")
+  })
   const [projectInfo, setInfo] = React.useState({
     projectName: value.projectName,
     userId: value.userId,
@@ -29,12 +36,41 @@ function ProjectCard({ setView, value, setProject, ...props }) {
     zip_fileId:value.zip_fileId,
     extrinsic_fileId: value.extrinsic_fileId,
     intrinsic_fileId: value.intrinsic_fileId,
-    output_fileId:value.intrinsic_fileId
+    output_fileId:value.intrinsic_fileId,
+    id:value.id
   })
   const handleEdit = () => {
-    console.log(value)
+    //console.log(value)
     setProject(value)
     setView('projectEdit')
+  }
+  const handleDelete = () => {
+    axios({
+      method: 'delete',
+      url: TESTHOST + '/api/projects/' +  value.id
+      // data: {
+      //   projectName: projectName || "New Project"
+      //   //createdAt: new Date(),
+      //   //lastModifiedAt:new Date()
+		  //   //userId: uid
+      // }
+    }).then((res) => {
+      setInfo(res.data)
+      console.log("Deleting ")
+      console.log(projectInfo)
+      //setNumProjects([...numCaptures, res.data])
+      //console.log(numProjects)
+      //setView('projectList')
+      //setIsExist(false)
+      // setNumProjects([...numProjects, res.data])
+      // console.log("numproj")
+      // console.log(numProjects)
+      // console.log("type")
+      // console.log(typeof numProjects)
+    })
+    console.log("Deleted " + value.id)
+    //setProject(value)
+    //setView('projectEdit')
   }
 
 //   <CardMedia
@@ -63,6 +99,7 @@ function ProjectCard({ setView, value, setProject, ...props }) {
             margin="auto"
           >
             <Grid item><Button variant='contained' onClick={handleEdit}>Edit</Button></Grid>
+            <Grid item><Button variant='contained' onClick={handleDelete}>Delete</Button></Grid>
             <Grid item><Button variant="outlined">Download Model</Button></Grid>
           </Grid>
         </CardActions>
@@ -96,31 +133,30 @@ function ProjectList({ setView, setProject, ...props }) {
       method: 'get',
       url: TESTHOST + '/api/projects/'
     }).then((res) => {
-      console.log(res.data)
-      setNumProjects(res.data)
+      console.log(res.data.projects)
+      setNumProjects(res.data.projects)
+    }).catch((err) => {
+      
     })
   }, [])
-  // const handleChange = (type, event) => {
-  //   if (type === 'projectName') {
-  //     setProjectName(event.target.value)
-  //   } 
-  //   // else if (type === 'email') {
-  //   //   setValues({ ...values, email: event.target.value })
-  //   // } 
-  // }
+  const handleChange = (type, event) => {
+    if (type === 'projectName') {
+      setProjectName(event.target.value)
+    } 
+  }
   const handleAddProject = () => {
     axios({
       method: 'post',
       url: TESTHOST + '/api/projects/',
       data: {
-        projectName: "New Project"
-        //createdAt: new Date(),
-        //lastModifiedAt:new Date()
-		    //userId: uid
+        projectName: projectName || "New Project"
       }
     }).then((res) => {
       setNumProjects([...numProjects, res.data])
-      console.log(res.data)
+      console.log("numproj")
+      console.log(numProjects)
+      console.log("type")
+      console.log(typeof numProjects)
     })
     // setNumProjects([...numProjects, numProjects.length + 1])
   }
@@ -128,18 +164,36 @@ function ProjectList({ setView, setProject, ...props }) {
     <div>
       <div>
         <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3>
-        <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>SO</Button>
-
+        <FormControl variant='contained' style={{ margin: 16 }}>
+            <InputLabel >Project Name</InputLabel>
+            <Input
+              value={projectName}
+              onChange={(e) => { handleChange('projectName', e) }}
+            />
+          </FormControl>
         <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
       </div>
       <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
         <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
           {numProjects && numProjects.map((value) => (
-            <ProjectCard key={value.id} setView={setView} value={value} setProject={setProject}/>
+            <ProjectCard key={value.id} setView={setView} value={value} setProject={setProject} setNumProjects={setNumProjects}/>
           ))}
         </Grid>
       </Box>
     </div>
   )
+  //   return (
+  //   <div>
+  //     <div>
+  //       <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3>
+
+  //       <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
+  //     </div>
+  //     <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
+
+  //     </Box>
+  //   </div>
+  // )
+
 }
 export default ProjectList
