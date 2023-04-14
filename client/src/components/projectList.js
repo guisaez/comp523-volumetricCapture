@@ -48,37 +48,17 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
     axios({
       method: 'delete',
       url: TESTHOST + '/api/projects/' +  value.id
-      // data: {
-      //   projectName: projectName || "New Project"
-      //   //createdAt: new Date(),
-      //   //lastModifiedAt:new Date()
-		  //   //userId: uid
-      // }
     }).then((res) => {
-      setInfo(res.data)
-      console.log("Deleting ")
-      console.log(projectInfo)
-      //setNumProjects([...numCaptures, res.data])
-      //console.log(numProjects)
-      //setView('projectList')
-      //setIsExist(false)
-      // setNumProjects([...numProjects, res.data])
-      // console.log("numproj")
-      // console.log(numProjects)
-      // console.log("type")
-      // console.log(typeof numProjects)
-    })
-    console.log("Deleted " + value.id)
-    //setProject(value)
-    //setView('projectEdit')
+      axios({
+        method: 'get',
+        url: TESTHOST + '/api/projects/'
+      }).then((res) => {
+        setNumProjects(res.data.projects)
+      }).catch((err) => {
+        
+      })
+    }, [])
   }
-
-//   <CardMedia
-//   component='img'
-//   height='140'
-//   image=''
-//   alt='project image'//? projectInfo.email : ''
-// />
   return (
       <Card style={{ height: '30%', width: '20%', margin: 16, padding: 10 }}>
         <CardContent>
@@ -107,12 +87,6 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
   )
 }
 
-// function getDate(date){
-//       mnth = ("0" + (date.getMonth() + 1)).slice(-2),
-//       day = ("0" + date.getDate()).slice(-2);
-//     return [date.getFullYear(), mnth, day].join("-") + date.get;
-// }
-
 function ProjectList({ setView, setProject, ...props }) {
   const [numProjects, setNumProjects] = React.useState([])
   const [uid,setUid] = React.useState('')
@@ -133,7 +107,6 @@ function ProjectList({ setView, setProject, ...props }) {
       method: 'get',
       url: TESTHOST + '/api/projects/'
     }).then((res) => {
-      console.log(res.data.projects)
       setNumProjects(res.data.projects)
     }).catch((err) => {
       
