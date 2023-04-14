@@ -23,10 +23,6 @@ const axios = require('axios').default
 // }))
 
 function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
-  //const [isExist, setIsExist] = useState(true)
-  React.useEffect(() => {
-    console.log("use effect")
-  })
   const [projectInfo, setInfo] = React.useState({
     projectName: value.projectName,
     userId: value.userId,
@@ -90,7 +86,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
   )
 }
 
-function ProjectList({ setView, setProject, ...props }) {
+function ProjectList({ setView, setTabValue, setProject, ...props }) {
   const [numProjects, setNumProjects] = React.useState([])
   const [uid,setUid] = React.useState('')
   const [email,setEmail] = React.useState('')
@@ -129,13 +125,20 @@ function ProjectList({ setView, setProject, ...props }) {
       }
     }).then((res) => {
       setNumProjects([...numProjects, res.data])
-      console.log("numproj")
-      console.log(numProjects)
-      console.log("type")
-      console.log(typeof numProjects)
     })
-    // setNumProjects([...numProjects, numProjects.length + 1])
   }
+
+  const handleLogout = () => {
+    axios({
+      method: 'post',
+      url: TESTHOST + '/api/auth/signout/',
+      data: {
+      }
+    }).then((res) => {
+      setTabValue('vcp')
+    })
+  }
+
   return (
     <div>
       <div>
@@ -148,6 +151,7 @@ function ProjectList({ setView, setProject, ...props }) {
             />
           </FormControl>
         <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
+        <Button variant='contained' style={{ margin: 16 }} onClick={handleLogout}>Log out</Button>
       </div>
       <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
         <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>

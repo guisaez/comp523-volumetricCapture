@@ -8,6 +8,8 @@ import Tab from '@mui/material/Tab'
 import { useEffect, useState} from "react";
 import ProjectView from '../components/projectView'
 import User from '../components/user'
+const TESTHOST = ''
+const axios = require('axios').default
 
 function LandingPage () {
     const [isLogged, setisLogged] = useState(false);
@@ -15,64 +17,28 @@ function LandingPage () {
 
     useEffect(() => {
         console.log(isLogged)
-        checkStorage();
+        checkIsLogIn();
         return () => {};
     }, [isLogged]);
-    function checkStorage() {
-        if (localStorage.getItem("currentUser")) {
-            setisLogged(true);
-            console.log("Logged in");
-        } else {
-            setisLogged(false);
-            console.log("Logged out");
-        }
+    function checkIsLogIn(){
+        axios({
+            method: 'get',
+            url: TESTHOST + '/api/auth/user/'
+          }).then((res) => {
+            if(!res.data.currentUser){
+                setisLogged(false)
+                setTabValue('vcp');
+            }else{
+                setisLogged(true)
+                setTabValue('projects')
+            }
+          })
     }
-    // const logout = () => {   
-    //         localStorage.removeItem("token");
-    //         setisLogged(false);
-    //         setTabValue('vcp')
-    //     }
-    const logout = () => {
-        if (localStorage.getItem("currentUser")) {
-            localStorage.removeItem("currentUser");
-            setisLogged(false);
-            setTabValue('vcp');
-            console.log("Logged out");
-        } else {
-            setisLogged(true);
-            setTabValue('projects');
-        }
-    };
-
-    ;
-    const handleChange = (event, newValue) => {
-        setTabValue(newValue)
-    }
-   
     return (
         <div>
             <div>
                 <AppBar position='static' style={{ backgroundColor: '#222222' }}>
                     <Toolbar variant='dense'>
-                        <Tabs
-                            value={tabValue}
-                            onChange={handleChange}
-                            textColor='white'
-                            indicatorColor='secondary'
-                            sx={{ flexGrow: 1 }}
-                        >
-                            <Tab value='Log out' 
-                            label='VCP' 
-                            disabled={isLogged}/>
-                            <Tab
-                                value='projects'
-                                label='Projects'
-                                disabled={!isLogged}
-                            />
-                        </Tabs>
-                        <Button color="inherit" onClick={() => logout()}>
-                            {isLogged ? "Log out" : "Log in"}
-                        </Button>
                     </Toolbar>
                 </AppBar>
             </div>
@@ -80,7 +46,7 @@ function LandingPage () {
                {tabValue === 'vcp' && <User setTabValue={setTabValue} />}
             </div>
             <div>
-                {tabValue === 'projects' && <ProjectView/>} 
+                {tabValue === 'projects' && <ProjectView setTabValue={setTabValue}/>} 
             </div>
         </div>
     )
