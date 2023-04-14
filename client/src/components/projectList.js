@@ -68,6 +68,9 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
           <Typography variant='body2' color='text.secondary'>
             {'Created at ' + new Date(projectInfo.createdAt).toLocaleString() }
           </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {'Status is ' + projectInfo.processStatus}
+          </Typography>
         </CardContent>
         <CardActions>
           <Grid
