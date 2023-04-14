@@ -7,7 +7,7 @@ deploy:
       - ./infra/k8s-dev/*
 build:
   local:
-    push: true
+    push: false
   artifacts:
     - image: guisaez/volumetric-files
       context: files-service
