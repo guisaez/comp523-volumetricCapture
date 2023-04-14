@@ -13,7 +13,7 @@ const axios = require('axios').default
 
 function LandingPage () {
     const [isLogged, setisLogged] = useState(false);
-    const [tabValue, setTabValue] = React.useState('vcp')
+    const [tabValue, setTabValue] = React.useState('')
 
     useEffect(() => {
         console.log(isLogged)
