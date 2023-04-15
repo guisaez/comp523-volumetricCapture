@@ -12,16 +12,9 @@ import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
-//import TESTHOST from '../backend/backendAPI'
+
 const TESTHOST = ''
 const axios = require('axios').default
-
-// const Item = styled(Paper)(({ theme }) => ({
-//   ...theme.typography.body2,
-//   padding: theme.spacing(1),
-//   textAlign: 'center',
-//   color: theme.palette.text.secondary
-// }))
 
 function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
   const [errorMsg, setErrorMsg] = React.useState('')
@@ -33,14 +26,13 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
     lastModifiedAt:value.lastModifiedAt,
     processStatus:value.processStatus,
     version:value.version,
-    // zip_fileId:value.zip_fileId,
-    // extrinsic_fileId: value.extrinsic_fileId,
-    // intrinsic_fileId: value.intrinsic_fileId,
-    // output_fileId:value.intrinsic_fileId,
+    zip_fileId:value.zip_fileId,
+    extrinsic_fileId: value.extrinsic_fileId,
+    intrinsic_fileId: value.intrinsic_fileId,
+    output_fileId:value.output_fileId,
     id:value.id
   })
   const handleEdit = () => {
-    //console.log(value)
     setProject(value)
     setView('projectEdit')
   }
@@ -61,18 +53,24 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
   }
 
   const handleDownload = () => {
-    // axios({
-    //   method: 'post',
-    //   url: TESTHOST + '/api/auth/signout/',
-    //   data: {
-    //   }
-    // }).then((res) => {
-    //   setTabValue('vcp')
-    // })
-    console.log("to be done-download")
     if(projectInfo.processStatus !=  'completed'){
       setError(true)
       setErrorMsg("No available model to download!")
+    }else{
+      console.log(projectInfo.output_fileId.id)
+      axios({
+      method: 'get',
+      url: TESTHOST + '/api/files/download/' + projectInfo.output_fileId.id,
+      responseType: 'blob'
+    }).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      // need to change the extension
+      link.setAttribute('download', projectInfo.projectName+'_Model.model');
+      document.body.appendChild(link);
+      link.click();
+    })
     }
   }
 
@@ -190,18 +188,5 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
       </Box>
     </div>
   )
-  //   return (
-  //   <div>
-  //     <div>
-  //       <h3 style={{ margin: 16 }}>{ 'Welcome, '+email+'!'}</h3>
-
-  //       <Button variant='contained' style={{ margin: 16 }} onClick={handleAddProject}>New Project</Button>
-  //     </div>
-  //     <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
-
-  //     </Box>
-  //   </div>
-  // )
-
 }
 export default ProjectList
