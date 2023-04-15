@@ -17,49 +17,46 @@ import FilledInput from '@mui/material/FilledInput'
 import ProjectList from './projectList'
 import ProjectView from './projectView'
 import LoadingButton from '@mui/lab/LoadingButton'
-import TESTHOST from '../backend/backendAPI'
+//import TESTHOST from '../backend/backendAPI'
 
-
+const TESTHOST = ''
 const axios = require('axios').default
 const Input = styled("input")({
     // display: "none"
 });
 function ProjectEdit({setView, project, setProject, ...props}) {
     const [numCaptures, setNumCaptures] = React.useState([])
+    const [projectName,setProjectName] = React.useState(project.projectName)
     const [info, setInfo] = React.useState(project)
     React.useEffect(() => {
         axios({
             method: 'get',
-            url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token
+            url: TESTHOST + '/api/projects/' + info.id
         }).then((res) => {
-            console.log(res.data)
-            setNumCaptures(res.data)
+            setProjectName(res.data.projectName)
         })
     }, [])
     const handleAddCapture = () => {
-        axios({
-            method: 'post',
-            url: TESTHOST + '/captures/createcapture/',
-            data: {
-                pid: info.pid,
-                token: localStorage.getItem('token')
-            }
-        }).then((res) => {
-            setNumCaptures([...numCaptures, res.data])
-            console.log(res.data)
-        })
+        // axios({
+        //     method: 'post',
+        //     url: TESTHOST + '/captures/createcapture/',
+        //     data: {
+        //         pid: info.pid,
+        //         token: localStorage.getItem('token')
+        //     }
+        // }).then((res) => {
+        //     setNumCaptures([...numCaptures, res.data])
+        //     console.log(res.data)
+        // })
     }
 
 
     const handleSave = () => {
         axios({
             method: 'patch',
-            url: TESTHOST + '/projects/editproject/',
+            url: TESTHOST + '/api/projects/' + info.id,
             data: {
-                project_name: info.project_name,
-                description: info.description,
-                token: localStorage.getItem('token'),
-                pid: info.pid
+                projectName: info.projectName,
             }
         }).then((res) => {
             setProject(info)
@@ -69,9 +66,7 @@ function ProjectEdit({setView, project, setProject, ...props}) {
 
     const handleChange = (type, event) => {
         if (type === 'name') {
-            setInfo({...info, project_name: event.target.value})
-        } else if (type === 'description') {
-            setInfo({...info, description: event.target.value})
+            setInfo({...info, projectName: event.target.value})
         }
     }
     const handleCancel = () => {
@@ -80,14 +75,11 @@ function ProjectEdit({setView, project, setProject, ...props}) {
     const handleDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/projects/deleteproject/',
+            url: TESTHOST + '/api/projects/' + info.id,
             data: {
-                token: localStorage.getItem('token'),
-                pid: info.pid
             }
         }).then((res) => {
-            setProject(info)
-            console.log(res.data)
+            setProject(res.data)
             setView('projectList')
         })
     }
@@ -107,22 +99,9 @@ function ProjectEdit({setView, project, setProject, ...props}) {
                             <FilledInput
                                 id="filled-adornment-project-name"
                                 startAdornment={<InputAdornment position="start"></InputAdornment>}
-                                value={info.project_name}
+                                value={info.projectName}
                                 onChange={(e) => {
                                     handleChange('name', e)
-                                }}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth sx={{m: 1}} variant="filled">
-                            <InputLabel htmlFor="filled-adornment-project-description">Project Description:</InputLabel>
-                            <FilledInput
-                                id="filled-adornment-project-description"
-                                startAdornment={<InputAdornment position="start"></InputAdornment>}
-                                multiline
-                                rows={4}
-                                value={info.description}
-                                onChange={(e) => {
-                                    handleChange('description', e)
                                 }}
                             />
                         </FormControl>

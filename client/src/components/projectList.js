@@ -12,6 +12,7 @@ import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const TESTHOST = ''
 const axios = require('axios').default
@@ -95,7 +96,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
             margin="auto"
           >
             <Grid item><Button variant='contained' onClick={handleEdit}>Edit</Button></Grid>
-            <Grid item><Button variant='contained' onClick={handleDelete}>Delete</Button></Grid>
+            <Grid item><Button variant='contained' startIcon={<DeleteIcon/>} onClick={handleDelete}>Delete</Button></Grid>
             <Grid item><Button variant="outlined" onClick={handleDownload}>Download Model</Button></Grid>
           </Grid>
         </CardActions> 
