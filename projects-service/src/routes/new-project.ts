@@ -21,6 +21,7 @@ router.post('/api/projects', requireAuth, [
     const project = Project.build({
         projectName: projectName,
         userId: req.currentUser!.id,
+        createdAt: new Date()
     })
 
     await project.save();

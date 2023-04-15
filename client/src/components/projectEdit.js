@@ -30,7 +30,7 @@ function ProjectEdit({setView, project, setProject, ...props}) {
     React.useEffect(() => {
         axios({
             method: 'get',
-            url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token //+ '&pid=' + info.pid
+            url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token
         }).then((res) => {
             console.log(res.data)
             setNumCaptures(res.data)

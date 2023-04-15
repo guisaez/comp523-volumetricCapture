@@ -57,7 +57,6 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
       setError(true)
       setErrorMsg("No available model to download!")
     }else{
-      console.log(projectInfo.output_fileId.id)
       axios({
       method: 'get',
       url: TESTHOST + '/api/files/download/' + projectInfo.output_fileId.id,
@@ -65,9 +64,8 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
     }).then((response) => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
-      link.href = url;
-      // need to change the extension
-      link.setAttribute('download', projectInfo.projectName+'_Model.model');
+      link.href = url;s
+      link.setAttribute('download', projectInfo.projectName+"_"+projectInfo.output_fileId.name);
       document.body.appendChild(link);
       link.click();
     })
@@ -116,7 +114,6 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
       method: 'get',
       url: TESTHOST + '/api/auth/user/'
     }).then((res) => {
-      //console.log(res.data)
       setUid(res.data.currentUser.id)
       setEmail(res.data.currentUser.email)
     })
