@@ -32,15 +32,6 @@ function Login({ setView, setTabValue, ...props }) {
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
   
-
-  React.useEffect(() => {
-    if (userInfo !== null) {
-      //localStorage.setItem('token', userInfo.token)
-      //console.log(localStorage.getItem('token'))
-      localStorage.setItem('currentUser', userInfo.email)
-      console.log(localStorage.getItem('currentUser'))
-    }
-  }, [userInfo])
   const handleChange = (type, event) => {
     if (type === 'password') {
       setValues({ ...values, password: event.target.value })
@@ -62,7 +53,6 @@ function Login({ setView, setTabValue, ...props }) {
       data: values
     }).then((response) => {
       setError(false)
-      console.log(response.data.id)
       setUserInfo(response.data)
       setTabValue('projects')
     }).catch((err) => {
