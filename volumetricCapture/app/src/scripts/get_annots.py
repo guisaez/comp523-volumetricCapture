@@ -30,7 +30,7 @@ def get_img_paths():
     all_ims = []
     for i in range(4):
         i = i + 1
-        data_root = 'Camera_D415{}'.format(i)
+        data_root = 'Cam{}'.format(i)
         ims = glob.glob(os.path.join(data_dir, data_root, '*.jpg'))
         ims = [os.path.relpath(x, data_dir) for x in ims]
         ims = np.array(sorted(ims))

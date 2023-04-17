@@ -9,7 +9,14 @@ WORK_DIR = Path.cwd()
 
 @click.command()
 @click.option(
-    "--mocap_dst", default="/app/src/data/mocap_input", help="Name for EasyMocap input."
+    "--mocap_dst",
+    default="/app/src/data/mocap_input",
+    help="Destination for EasyMocap input.",
+)
+@click.option(
+    "--neural_dst",
+    default="/app/src/data/neural_input",
+    help="Destination for Neuralbody input.",
 )
 @click.option("--openpose", default="/openpose", help="Path to openpose.")
 @click.option("--cihp", default="/app/src/models/CIHP_PGN", help="Path to CIHP_PGN.")
@@ -29,7 +36,15 @@ WORK_DIR = Path.cwd()
     help="Path to extri.yml camera config file",
 )
 def automate(
-    mocap_dst, openpose, cihp, mocap, neural, raw_path, intri_path, extri_path
+    mocap_dst,
+    neural_dst,
+    openpose,
+    cihp,
+    mocap,
+    neural,
+    raw_path,
+    intri_path,
+    extri_path,
 ):
     """Automates the volumetric capture workflow. Creates 3D meshes from raw images."""
     ### Run MakeDatasets
@@ -52,9 +67,9 @@ def automate(
     try:
         # CD into CIHP_PGN so relative paths in test_pgn are correct
         os.chdir(cihp)
-        subprocess.check_output(
-            "/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True
-        )
+        #subprocess.check_output(
+        #    "/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True
+        #)
         # CD back to main directory
         os.chdir(WORK_DIR)
     except:
@@ -133,17 +148,31 @@ def automate(
     try:
         # Setup input for Neuralbody
         click.echo("Preparing data for Neuralbody...")
-        subprocess.check_output(
-            "/app/env/NEURAL_ENV/bin/python3.7 /app/src/scripts/prep_neuralbody.py",
-            shell=True,
-        )
+        # Create directory for CIHP mask
+        Path.mkdir(Path(neural_dst, "mask_cihp"), parents=True)
+        # Replace config file for neuralbody
+        shutil.move("/app/src/multi_view_custom.yaml", Path(neural, "configs"))
+        env = "/app/env/NEURAL_ENV/bin/python3.7"
+        # Rename and place raw images into neural_input
+        subprocess.Popen([env, "/app/src/scripts/prep_neuralbody.py"]).wait()
+        # Finish setup my separating CIHP mask by camera and renaming files
+        src = str(Path(cihp, "output/cihp_edge_maps"))
+        dst = str(Path(neural_dst, "mask_cihp"))
+        subprocess.Popen([env, "/app/src/scripts/separate.py", src, dst]).wait()
+        subprocess.Popen([env, "/app/src/scripts/prep_neuralbody.py", "--raw_path", dst, "--dst", dst]).wait()
+        # Move intri and extri yml files into neural_input
+        shutil.move("/app/src/data/mocap_input/intri.yml", neural_dst)
+        shutil.move("/app/src/data/mocap_input/extri.yml", neural_dst)
         # Generate annots.npy file
-        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 /app/src/scripts/get_annots.py", shell=True)
+        click.echo("Generating annots.npy...")
+        subprocess.Popen([env, "/app/src/scripts/get_annots.py", neural_dst]).wait()
         # Begin training of NeRF model
         os.chdir(neural)
-        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 train_net.py --cfg_file configs/multi_view_custom.yaml exp_name <exp_name> resume False", shell=True)
+        #subprocess.Popen([env, "./train_net.py", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodyformat", "resume", "False"]).wait()
+        subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 ./train_net.py --cfg_file ./configs/multi_view_custom.yaml exp_name neuralbodyformat resume False", shell=True)
         # Generate meshes
-        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 run.py --type visualize --cfg_file configs/multi_view_custom.yaml exp_name <exp_name> vis_mesh True mesh_th 10", shell=True)
+        # subprocess.Popen([env, "./run.py", "--type", "visualize", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "test", "vis_mesh", "True", "mesh_th", "10"]).wait()
+        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 ./run.py --type visualize --cfg_file ./configs/multi_view_custom.yaml exp_name test vis_mesh True mesh_th 10", shell=True)
 
     except:
         return RuntimeError("Neuralbody Error")
