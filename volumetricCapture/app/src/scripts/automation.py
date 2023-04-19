@@ -138,9 +138,8 @@ def automate(
             os.remove(fpath)
         shutil.move("/app/src/scripts/easymocap_to_neuralbody.py", dst)
         # Run easymocap_to_neuralbody script
-        subprocess.check_output(
-            "/app/env/NEURAL_ENV/bin/python3.7 " + fpath, shell=True
-        )
+        subprocess.Popen(["/app/env/NEURAL_ENV/bin/python3.7", fpath]).wait()
+
     except:
         return RuntimeError("EasyMocap Error")
 
@@ -168,10 +167,10 @@ def automate(
         subprocess.Popen([env, "/app/src/scripts/get_annots.py", neural_dst]).wait()
         # Begin training of NeRF model
         os.chdir(neural)
-        #subprocess.Popen([env, "./train_net.py", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodyformat", "resume", "False"]).wait()
-        subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 ./train_net.py --cfg_file ./configs/multi_view_custom.yaml exp_name neuralbodyformat resume False", shell=True)
+        subprocess.Popen([env, "./train_net.py", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodydata", "resume", "False"]).wait()
+        click.echo("Finished training.")
         # Generate meshes
-        # subprocess.Popen([env, "./run.py", "--type", "visualize", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "test", "vis_mesh", "True", "mesh_th", "10"]).wait()
+        subprocess.Popen([env, "./run.py", "--type", "visualize", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodydata", "vis_mesh", "True", "mesh_th", "10"]).wait()
         # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 ./run.py --type visualize --cfg_file ./configs/multi_view_custom.yaml exp_name test vis_mesh True mesh_th 10", shell=True)
 
     except:
