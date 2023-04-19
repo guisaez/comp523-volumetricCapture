@@ -3,7 +3,7 @@ import { natsWrapper } from "../../../nats-wrapper"
 import { ModelRunListener } from "../model-run-listener"
 import mongoose from "mongoose";
 import { Message } from "node-nats-streaming";
-import { File } from '../../../models/file';
+import { File } from '../../../db-model/file';
 import fs from 'fs';
 import { GridFS } from "../../../utils/GridFS";
 import { Readable } from "stream";

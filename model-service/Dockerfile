@@ -13,13 +13,16 @@ RUN apt-get install -y curl python3.7 python3-pip git cmake wget libopencv-dev t
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+
 RUN apt-get install -y nodejs
 
 WORKDIR /app
 
 COPY package.json .
+COPY requirements.txt .
 
 RUN npm install -only=prod
+RUN pip3 install -r requirements.txt
 
 COPY . .
 
