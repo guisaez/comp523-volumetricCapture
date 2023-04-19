@@ -8,6 +8,7 @@ export { ProcessStatus };
 interface ProjectAttrs {
     userId: string;
     projectName: string;
+    createdAt:Date;
 }
 
 interface ProjectDoc extends mongoose.Document {
