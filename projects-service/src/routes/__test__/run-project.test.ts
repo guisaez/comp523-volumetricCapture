@@ -10,6 +10,7 @@ const setup = async () => {
     const project = Project.build({
         projectName: 'Test Project',
         userId: new mongoose.Types.ObjectId().toHexString(),
+        createdAt: new Date()
     });
 
     await project.save();

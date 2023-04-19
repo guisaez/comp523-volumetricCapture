@@ -8,7 +8,7 @@ export { ProcessStatus };
 interface ProjectAttrs {
     userId: string;
     projectName: string;
-    createdAt:Date;
+    createdAt: Date;
 }
 
 interface ProjectDoc extends mongoose.Document {
@@ -40,7 +40,7 @@ const projectSchema = new mongoose.Schema({
     },
     createdAt:{
         type: Date,
-        default: new Date()
+        required: true
     },
     lastModifiedAt: {
         type: Date,
