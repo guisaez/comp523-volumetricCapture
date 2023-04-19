@@ -63,7 +63,7 @@ ENV SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
 RUN cd /app/env/ && \
     source NEURAL_ENV/bin/activate && \
     pip3 install -r neural-env-reqs.txt && \
-    pip3 install torch==1.10.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html && \
     deactivate
 
 # Install compatible cmake version for Neuralbody
@@ -92,7 +92,7 @@ RUN cd openpose/build && make -j`nproc`
 # Install spconv for Neuralbody
 RUN source /app/env/NEURAL_ENV/bin/activate && \
     pip3 install --upgrade pip && \  
-    python3.7 -m pip install spconv-cu111  && \
+    python3.7 -m pip install spconv-cu111 && \
     deactivate
 
 # Setup pyrender for EasyMocap visualization
@@ -115,6 +115,16 @@ COPY /app/src /app/src
 # Finish EasyMocap setup
 RUN cd /app/src/models/EasyMocap && \
     /app/env/EASY_ENV/bin/python3.7 setup.py develop
+
+RUN source /app/env/NEURAL_ENV/bin/activate && \
+    pip3 install scikit-learn && \
+    pip3 install protobuf==3.20.1
+
+
+ENV CUDA_HOME="/usr/local/cuda-11.1"
+RUN source /app/env/NEURAL_ENV/bin/activate && python3 -m pip install --upgrade pip && \
+    pip3 install imageio pillow && pip3 install --upgrade pillow imageio
+    
 
 WORKDIR /app/src
 
