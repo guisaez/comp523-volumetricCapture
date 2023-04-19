@@ -13,7 +13,8 @@ const setup = async () => {
     
     const project = Project.build({
         projectName: 'TEST',
-        userId: userId
+        userId: userId,
+        createdAt: new Date()
     });
 
     await project.save();
