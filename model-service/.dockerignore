@@ -1,4 +1,4 @@
 node_modules
 src/temp/*
-src/venv/*
+venv/*
 src/data/*

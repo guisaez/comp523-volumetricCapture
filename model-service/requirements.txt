@@ -62,3 +62,5 @@ imageio
 trimesh
 plyfile
 PyMCubes
+pyrender
+pillow 
