@@ -2,7 +2,9 @@ FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+ENV PYOPENGL_PLATFORM=osmesa
 ENV TZ=America/New_York
+ENV CUDA_HOME="/usr/local/cuda-11.1"
 
 RUN apt-get update && apt-get install -y curl \
     python3.7-dev \
@@ -14,6 +16,8 @@ RUN apt-get update && apt-get install -y curl \
     libopencv-dev \
     tzdata \
     libboost-all-dev \
+    libboost-dev \
+    libssl-dev \
     libprotobuf-dev \
     protobuf-compiler \
     libgoogle-glog-dev \
@@ -43,6 +47,13 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
+#    tar -xvf cmake.tar.gz && \
+#    cd cmake-3.20.1 && \
+#    ./configure && \
+#    make -j4 && make install
+#
+
 # Install and build OpenPose
 RUN git clone https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
 
@@ -53,7 +64,7 @@ RUN cd openpose && \
     mkdir build && \
     cd build
 
-RUN cd openpose/build && cmake .. -DGPU_MODE=GPU
+RUN cd openpose/build && cmake .. -DGPU_MODE=GPU -DUSE_CUDNN=OFF
 RUN cd openpose/build make -j`nproc`
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -86,8 +97,6 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     source /app/venv/bin/activate && \
     pip uninstall -y pyopengl && \
     pip install ./pyopengl
-
-ENV PYOPENGL_PLATFORM=osmesa
 
 RUN ln -s -f /app/venv/bin/python3.7 /usr/bin/python
 
