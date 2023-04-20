@@ -3,6 +3,7 @@ import { Message } from "node-nats-streaming";
 import { File } from "../../models/file";
 import { queueGroupName } from "./queue-group-name";
 import { GridFS } from "../../utils/GridFS";
+import mongoose from "mongoose";
 
 export class ProjectDeletedListener extends Listener<ProjectDeletedEvent> {
     subject: Subjects.ProjectDeleted = Subjects.ProjectDeleted;
@@ -17,7 +18,7 @@ export class ProjectDeletedListener extends Listener<ProjectDeletedEvent> {
 
         const bucket = await GridFS.getBucket();
         for(let file of files){
-            await bucket.delete(file.id);
+            await bucket.delete(new mongoose.Types.ObjectId(file.id));
         }
 
         await File.deleteMany({

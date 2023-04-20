@@ -8,7 +8,7 @@ router.get('/api/files', async (req: Request, res: Response) => {
         userId: req.currentUser!.id
     })
 
-    res.status(200).send(files);
+    res.status(200).send( { files : files } );
 });
 
 export { router as IndexFiles }
