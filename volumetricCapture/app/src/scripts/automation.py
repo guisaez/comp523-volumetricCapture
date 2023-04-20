@@ -67,9 +67,9 @@ def automate(
     try:
         # CD into CIHP_PGN so relative paths in test_pgn are correct
         os.chdir(cihp)
-        #subprocess.check_output(
-        #    "/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True
-        #)
+        subprocess.check_output(
+            "/app/env/CIHP_ENV/bin/python3.7 test_pgn.py", shell=True
+        )
         # CD back to main directory
         os.chdir(WORK_DIR)
     except:
@@ -171,8 +171,7 @@ def automate(
         click.echo("Finished training.")
         # Generate meshes
         subprocess.Popen([env, "./run.py", "--type", "visualize", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodydata", "vis_mesh", "True", "mesh_th", "10"]).wait()
-        # subprocess.check_output("/app/env/NEURAL_ENV/bin/python3.7 ./run.py --type visualize --cfg_file ./configs/multi_view_custom.yaml exp_name test vis_mesh True mesh_th 10", shell=True)
-
+        
     except:
         return RuntimeError("Neuralbody Error")
 
