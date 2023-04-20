@@ -32,7 +32,7 @@ def create_dataset(delete, src, name, dst):
 
     for f in files:
         im = Image.open(f)
-        # im = im.resize((im.size[0]*720//im.size[1],720), Image.LANCZOS) # if you run out of GPU memory
+        im = im.resize((im.size[0]*720//im.size[1],720), Image.LANCZOS) # if you run out of GPU memory
         im1 = Image.new("L", im.size)
         im = im.rotate(90)
         im1 = im1.rotate(90)
