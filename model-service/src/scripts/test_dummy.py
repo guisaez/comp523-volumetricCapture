@@ -1,11 +1,13 @@
 import time
+import subprocess
 
 def test_dummy():
-    for i in range(1):
-        print("Loop iteration", i)
-        time.sleep(60)
-
-    print("Automation Working")
+    try:
+        print(subprocess.check_output(
+            'source /app/venv/bin/activate && pip list'
+        , shell = True))
+    except:
+        return "Error"
     
     return "e234322dee32243123"
 

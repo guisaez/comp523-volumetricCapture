@@ -2,8 +2,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import { GridFS } from '../utils/GridFS';
-import { natsWrapper } from '../nats-wrapper';
-import { Subjects } from '@teamg2023/common';
 
 declare global {
     var signin: () => string[];
