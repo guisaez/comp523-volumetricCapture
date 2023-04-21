@@ -96,10 +96,10 @@ RUN cd /app/venv/ && \
 RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     source /app/venv/bin/activate && \
     pip uninstall -y pyopengl && \
-    pip install ./pyopengl
+    pip install ./pyopengl && \
+    deactivate
 
-RUN source /app/venv/bin/activate && \
-    ln -s -f /app/venv/bin/python3.7 python
+ENV PATH /app/venv/bin:$PATH
 
 WORKDIR /app
 
@@ -109,6 +109,6 @@ RUN npm install -only=prod
 
 COPY . .
 
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
 
-#CMD ["/bin/bash"]
+CMD ["/bin/bash"]
