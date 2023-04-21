@@ -3,7 +3,9 @@ import time
 def test_dummy():
     for i in range(1):
         print("Loop iteration", i)
-        time.sleep(10)
+        time.sleep(60)
+
+    print("Automation Working")
     
     return "e234322dee32243123"
 

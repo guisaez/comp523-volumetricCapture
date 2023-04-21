@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { app } from './app';
 import { GridFS } from './utils/GridFS';
 import { natsWrapper } from './nats-wrapper';
 import { ModelRunListener } from './events/listeners/model-run-listener';
