@@ -1,108 +1,92 @@
 import * as React from 'react'
+import {styled} from "@mui/material/styles"
 import Box from '@mui/material/Box'
-import { styled } from "@mui/material/styles"
 import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import CardActions from '@mui/material/CardActions'
-import CardMedia from '@mui/material/CardMedia'
+import FilledInput from '@mui/material/FilledInput'
 import Typography from '@mui/material/Typography'
 import DeleteIcon from '@mui/icons-material/Delete'
-import FilledInput from '@mui/material/FilledInput'
-import ProjectList from './projectList'
-import ProjectView from './projectView'
 import LoadingButton from '@mui/lab/LoadingButton'
-import isEmpty from 'validator/lib/isEmpty'
-import Alert from '@mui/material/Alert'
-//import TESTHOST from '../backend/backendAPI'
+import TESTHOST from '../backend/backendAPI'
 
-const TESTHOST = ''
 const axios = require('axios').default
+
 const Input = styled("input")({
     // display: "none"
 });
-function ProjectEdit({ setView, project, setProject, ...props }) {
+
+function TakeEdit({setView, take, setTake, ...props}) {
     const [numCaptures, setNumCaptures] = React.useState([])
-    const [projectName, setProjectName] = React.useState(project.projectName)
-    const [info, setInfo] = React.useState(project)
-    const [error, setError] = React.useState(false)
-    const [errorMessage, setErrorMessage] = React.useState('');
-    const [success, setSuccess] = React.useState(false)
-    const [loading, setLoading] = React.useState(false)
+    const [info, setInfo] = React.useState(take)
     React.useEffect(() => {
         axios({
             method: 'get',
-            url: TESTHOST + '/api/projects/' + info.id
+            url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&tid=' + info.tid
         }).then((res) => {
-            setProjectName(res.data.projectName)
+            console.log(res.data)
+            setNumCaptures(res.data)
         })
     }, [])
     const handleAddCapture = () => {
-        // axios({
-        //     method: 'post',
-        //     url: TESTHOST + '/captures/createcapture/',
-        //     data: {
-        //         pid: info.pid,
-        //         token: localStorage.getItem('token')
-        //     }
-        // }).then((res) => {
-        //     setNumCaptures([...numCaptures, res.data])
-        //     console.log(res.data)
-        // })
-    }
-
-
-    const handleSave = () => {
         axios({
-            method: 'patch',
-            url: TESTHOST + '/api/projects/' + info.id,
+            method: 'post',
+            url: TESTHOST + '/captures/createcapture/',
             data: {
-                projectName: info.projectName,
+                tid: info.tid,
+                token: localStorage.getItem('token')
             }
         }).then((res) => {
-            setProject(info)
-            setView('projectList')
-        }).catch((err) => {
-            if (isEmpty(info.projectName)) {
-                setErrorMessage("The project name must not be empty.")
-                setError(true)
-            }
+            setNumCaptures([...numCaptures, res.data])
+            console.log(res.data)
         })
     }
 
     const handleChange = (type, event) => {
         if (type === 'name') {
-            setInfo({ ...info, projectName: event.target.value })
+            setInfo({...info, take_name: event.target.value})
+        } else if (type === 'description') {
+            setInfo({...info, description: event.target.value})
         }
     }
+
+    const handleSave = () => {
+        axios({
+            method: 'patch',
+            url: TESTHOST + '/takes/edittake/',
+            data: {
+                take_name: info.take_name,
+                description: info.description,
+                token: localStorage.getItem('token'),
+                tid: info.tid
+            }
+        }).then((res) => {
+            setTake(info)
+            setView('sceneEdit')
+        })
+    }
     const handleCancel = () => {
-        setView('projectList')
-    }
-
-    const handleUpload = () => {
-        console.log('handle upload')
-
-    }
-    const handleClick = () => {
-        console.log('handle click')
-
+        setView('sceneEdit')
     }
     const handleDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/api/projects/' + info.id,
+            url: TESTHOST + '/takes/deletetake/',
             data: {
+                token: localStorage.getItem('token'),
+                tid: info.tid
             }
         }).then((res) => {
-            setProject(res.data)
-            setView('projectList')
+            setTake(info)
+            console.log(res.data)
+            setView('sceneEdit')
         })
     }
+
     return (
         <div>
             <Stack spacing={1}>
@@ -114,19 +98,31 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                         alignItems="center"
                         margin="auto"
                     >
-                        <FormControl fullWidth sx={{ m: 1 }} variant="filled">
-                            <InputLabel htmlFor="filled-adornment-project-name">Project Name:</InputLabel>
+                        <FormControl fullWidth sx={{m: 1}} variant="filled">
+                            <InputLabel htmlFor="filled-adornment-take-name">Take Name:</InputLabel>
                             <FilledInput
-                                id="filled-adornment-project-name"
+                                id="filled-adornment-take-name"
                                 startAdornment={<InputAdornment position="start"></InputAdornment>}
-                                value={info.projectName}
+                                value={info.take_name}
                                 onChange={(e) => {
                                     handleChange('name', e)
                                 }}
                             />
                         </FormControl>
+                        <FormControl fullWidth sx={{m: 1}} variant="filled">
+                            <InputLabel htmlFor="filled-adornment-take-description">Take Description:</InputLabel>
+                            <FilledInput
+                                id="filled-adornment-take-description"
+                                startAdornment={<InputAdornment position="start"></InputAdornment>}
+                                multiline
+                                rows={4}
+                                value={info.description}
+                                onChange={(e) => {
+                                    handleChange('description', e)
+                                }}
+                            />
+                        </FormControl>
                     </Grid>
-                    {error && <Alert severity="error">{errorMessage}</Alert>}
                     <Grid
                         container
                         direction="row"
@@ -145,11 +141,13 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                         alignItems="center"
                         margin="auto"
                     >
-                        <Grid item><Typography gutterBottom variant='h5' component='div' sx={{ m: 1 }}>
-                            Project Files
+                        <Grid item><Typography gutterBottom variant='h5' component='div' sx={{m: 1}}>
+                            Captures
                         </Typography></Grid>
-                        <Grid item><Button variant='contained' style={{ margin: 16 }} size="large"
-                            onClick={handleAddCapture}>New Capture</Button></Grid>
+                        <Grid item><Button variant='contained' style={{margin: 16}} size="large"
+                                           onClick={handleAddCapture}>+ New Capture</Button>
+                            <Button variant='contained' style={{margin: 16}} size="large">Upload Audio</Button>
+                            <Button variant='contained' style={{margin: 16}} size="large">Submit Job</Button></Grid>
                     </Grid>
                     <Grid container spacing={1} style={{
                         display: 'flex',
@@ -158,24 +156,9 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                         padding: '30px 30px'
                     }}>
                         {numCaptures && numCaptures.map((value) => (
-                            <CaptureCard key={value.cid} value={value} setNumCaptures={setNumCaptures} info={info} />
+                            <CaptureCard key={value.cid} value={value} setNumCaptures={setNumCaptures} info={info}/>
                         ))}
                     </Grid>
-                    <Grid item>
-                        <Card m={1} pt={1} style={{ padding: '20px 10px' ,justifyContent:"right" }}>
-                            <label id={info.id} htmlFor="contained-button-file">
-                                <Input
-                                    accept=".zip"
-                                    id="contained-button-file"
-                                    type="file"
-                                    onChange={handleUpload}
-                                />
-                            </label>
-                            {success ? <Button variant="contained" style={{ margin: 16, backgroundColor: '#21d284' }}
-                                size="small" component="span">Success</Button> :
-                                <LoadingButton loading={loading} variant='contained' style={{ margin: 16 }} size="small"
-                                    component="span" onClick={handleClick}>Upload Zip</LoadingButton>}
-                        </Card></Grid>
                     <Grid
                         container
                         direction="row"
@@ -183,8 +166,9 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                         alignItems="center"
                         margin="auto"
                     >
-                        <Button variant="outlined" startIcon={<DeleteIcon />} size="large" onClick={handleDelete}>
-                            Delete Project
+                        <Button variant="outlined" startIcon={<DeleteIcon/>} size="large" onClick={handleDelete}
+                                style={{marginTop: '3%'}}>
+                            Delete Take
                         </Button>
                     </Grid>
                 </Box>
@@ -193,7 +177,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     )
 }
 
-function CaptureCard({ setNumCaptures, info, value, ...props }) {
+function CaptureCard({setNumCaptures, info, value, ...props}) {
     const [loading, setLoading] = React.useState(false)
     const [success, setSuccess] = React.useState(false)
     const [file, setFile] = React.useState()
@@ -232,7 +216,7 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
         }).then((res) => {
             axios({
                 method: 'get',
-                url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&pid=' + info.pid
+                url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&tid=' + info.tid
             }).then((res) => {
                 console.log(res.data)
                 setNumCaptures(res.data)
@@ -241,7 +225,7 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
     }
 
     return (
-        <Card m={1} pt={1} style={{ padding: '20px 10px' }}>
+        <Card m={1} pt={1} style={{padding: '20px 10px'}}>
             <Grid
                 container
                 direction="row"
@@ -250,7 +234,7 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
                 margin="auto"
             >
                 <Stack>
-                    <Typography gutterBottom variant='h5' component='div' sx={{ m: 1 }}>
+                    <Typography gutterBottom variant='h5' component='div' sx={{m: 1}}>
                         Camera
                     </Typography>
                 </Stack>
@@ -264,18 +248,21 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
                         <Grid item>
                             <label id={value.cid} htmlFor="contained-button-file">
                                 <Input
+                                    // original 
+                                    //accept="video/*"
+                                    //
                                     accept=".7z,.zip"
                                     id="contained-button-file"
                                     type="file"
                                     onChange={handleUpload}
                                 />
                             </label>
-                            {success ? <Button variant="contained" style={{ margin: 16, backgroundColor: '#21d284' }}
-                                size="small" component="span">Success</Button> :
-                                <LoadingButton loading={loading} variant='contained' style={{ margin: 16 }} size="small"
-                                    component="span" onClick={handleClick}>Upload Zip</LoadingButton>}
+                            {success ? <Button variant="contained" style={{margin: 16, backgroundColor: '#21d284'}}
+                                               size="small" component="span">Success</Button> :
+                                <LoadingButton loading={loading} variant='contained' style={{margin: 16}} size="small"
+                                               component="span" onClick={handleClick}>Upload Video</LoadingButton>}
                         </Grid>
-                        <Grid item><Button disabled variant='contained' style={{ margin: 16 }} size="small">Upload Point
+                        <Grid item><Button disabled variant='contained' style={{margin: 16}} size="small">Upload Point
                             Cloud</Button></Grid>
                     </Grid>
                     <Grid
@@ -284,9 +271,9 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
                         justifyContent="space-between"
                         alignItems="center"
                     >
-                        <Button variant="outlined" style={{ margin: 16 }} size="small" disabled>Download</Button>
-                        <Button variant="outlined" style={{ margin: 16 }} startIcon={<DeleteIcon />} onClick={handleDelete}
-                            size="small">
+                        <Button variant="outlined" style={{margin: 16}} size="small" disabled>Download</Button>
+                        <Button variant="outlined" style={{margin: 16}} startIcon={<DeleteIcon/>} onClick={handleDelete}
+                                size="small">
                             Remove Capture
                         </Button>
                     </Grid>
@@ -296,5 +283,4 @@ function CaptureCard({ setNumCaptures, info, value, ...props }) {
     )
 }
 
-
-export default ProjectEdit
+export default TakeEdit
