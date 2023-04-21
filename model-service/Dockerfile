@@ -72,7 +72,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get install -y nodejs
 
-RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
+RUN wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
     dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f
 
 RUN python3.7 -m pip install --upgrade pip
@@ -82,7 +82,6 @@ RUN pip install virtualenv
 
 WORKDIR /app
 
-COPY package.json .
 COPY requirements.txt .
 
 RUN virtualenv -p python3.7 venv
@@ -99,13 +98,16 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     pip uninstall -y pyopengl && \
     pip install ./pyopengl
 
-RUN ln -s -f /app/venv/bin/python3.7 /usr/bin/python
+RUN source /app/venv/bin/activate && \
+    ln -s -f /app/venv/bin/python3.7 python
+
+WORKDIR /app
+
+COPY package.json .
 
 RUN npm install -only=prod
 
 COPY . .
-
-WORKDIR /app
 
 CMD ["npm", "start"]
 

@@ -41,6 +41,8 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+          - src: 'src/**/*.py'
+            dest: .
     - image: guisaez/volumetric-client
       context: client
       docker:
@@ -49,4 +51,3 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    
