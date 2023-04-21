@@ -1,10 +1,9 @@
 import time
 
-
 def test_dummy():
     for i in range(1):
         print("Loop iteration", i)
-        time.sleep(40)
+        time.sleep(10)
     
     return "e234322dee32243123"
 

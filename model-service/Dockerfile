@@ -89,6 +89,7 @@ RUN virtualenv -p python3.7 venv
 
 RUN cd /app/venv/ && \
     source bin/activate && \
+    pip install --upgrade pip && \
     cd .. && \
     pip install -r requirements.txt && \
     deactivate

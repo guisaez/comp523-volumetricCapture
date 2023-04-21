@@ -6,11 +6,7 @@ import { ModelRunListener } from './events/listeners/model-run-listener';
 
 
 const start = async () => {
-    console.log('Files Service is Starting...');
-
-    if(!process.env.JWT_KEY){
-        throw new Error('JWT_KEY must be defined');
-    }
+    console.log('Model Service is Starting...');
 
     if(!process.env.MONGO_URI){
         throw new Error('MONGO_URI must be defined');
@@ -50,10 +46,7 @@ const start = async () => {
         console.log(err);
     }
 
-    app.listen(3000, () => {
-        console.log('Models-Service Listening on Port: 3000')
-    })
-
+    console.log('Model Service Started');
 }
 
 start();

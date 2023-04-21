@@ -161,4 +161,6 @@ it('automation test', async () => {
     const { listener, data, msg } = await setup();
 
     await listener.onMessage(data, msg);
-})
+
+    expect(msg.ack).toHaveBeenCalled()
+}, 10000)

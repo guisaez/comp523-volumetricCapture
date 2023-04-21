@@ -63,4 +63,4 @@ trimesh
 plyfile
 PyMCubes
 pyrender
-pillow 
+pillow
