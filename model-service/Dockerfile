@@ -70,6 +70,7 @@ RUN cd openpose/build make -j`nproc`
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
+
 RUN apt-get install -y nodejs
 
 RUN wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
