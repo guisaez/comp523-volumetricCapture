@@ -1,92 +1,230 @@
 import * as React from 'react'
-import {styled} from "@mui/material/styles"
 import Box from '@mui/material/Box'
+import { styled } from "@mui/material/styles"
 import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import FilledInput from '@mui/material/FilledInput'
+import CardActions from '@mui/material/CardActions'
+import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
 import DeleteIcon from '@mui/icons-material/Delete'
+import FilledInput from '@mui/material/FilledInput'
+import ProjectList from './projectList'
+import ProjectView from './projectView'
 import LoadingButton from '@mui/lab/LoadingButton'
-import TESTHOST from '../backend/backendAPI'
+import isEmpty from 'validator/lib/isEmpty'
+import Alert from '@mui/material/Alert'
+//import TESTHOST from '../backend/backendAPI'
 
+const TESTHOST = ''
 const axios = require('axios').default
-
 const Input = styled("input")({
     // display: "none"
 });
-
-function TakeEdit({setView, take, setTake, ...props}) {
+function ProjectEdit({ setView, project, setProject,...props }) {
     const [numCaptures, setNumCaptures] = React.useState([])
-    const [info, setInfo] = React.useState(take)
+    const [projectName, setProjectName] = React.useState(project.projectName)
+    const [projectId, setProjectId] = React.useState(project.projectId)
+    const [info, setInfo] = React.useState(project)
+    const [error, setError] = React.useState(false)
+    const [errorMessage, setErrorMessage] = React.useState('');
+    //const [success, setSuccess] = React.useState(false)
+    //const [loading, setLoading] = React.useState(false)
+    const [file,setFile] = React.useState(null)
+    const [fileType, setFileType] = React.useState('')
+    const [zipId, setZipId] = React.useState('')
+    const [intrinsicId, setIntrinsicId] =  React.useState('')
+    const [extrinsicId, setExtrinsicId] = React.useState('')
+    const [zipStatus, setZipStatus] = React.useState(false)
+    const [intrinsicStatus, setIntrinsicStatus] = React.useState(false)
+    const [extrinsicStatus, setExtrinsicStatus] = React.useState(false)
+    const [id, setId] = React.useState('')
+
     React.useEffect(() => {
         axios({
             method: 'get',
-            url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&tid=' + info.tid
+            url: TESTHOST + '/api/projects/' + info.id
         }).then((res) => {
-            console.log(res.data)
-            setNumCaptures(res.data)
+            setProjectName(res.data.projectName)
         })
     }, [])
     const handleAddCapture = () => {
+        // axios({
+        //     method: 'post',
+        //     url: TESTHOST + '/captures/createcapture/',
+        //     data: {
+        //         pid: info.pid,
+        //         token: localStorage.getItem('token')
+        //     }
+        // }).then((res) => {
+        //     setNumCaptures([...numCaptures, res.data])
+        //     console.log(res.data)
+        // })
+    }
+
+
+    const handleSave = () => {
         axios({
-            method: 'post',
-            url: TESTHOST + '/captures/createcapture/',
+            method: 'patch',
+            url: TESTHOST + '/api/projects/' + info.id,
             data: {
-                tid: info.tid,
-                token: localStorage.getItem('token')
+                projectName: info.projectName,
             }
         }).then((res) => {
-            setNumCaptures([...numCaptures, res.data])
-            console.log(res.data)
+            setProject(info)
+            setView('projectList')
+        }).catch((err) => {
+            if (isEmpty(info.projectName)) {
+                setErrorMessage("The project name must not be empty.")
+                setError(true)
+            }
         })
     }
 
     const handleChange = (type, event) => {
         if (type === 'name') {
-            setInfo({...info, take_name: event.target.value})
-        } else if (type === 'description') {
-            setInfo({...info, description: event.target.value})
+            setInfo({ ...info, projectName: event.target.value })
         }
     }
-
-    const handleSave = () => {
+    const handleCancel = () => {
+        setView('projectList')
+    }
+    const handleZipFileReader = (event) =>{
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+        setFileType('zip');
+    }
+    const handleIntrinsicFileReader = (event) =>{
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+        setFileType('intrinsic');
+    }
+    const handleExtrinsicFileReader = (event) =>{
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+        setFileType('extrinsic');
+    }
+    const handleZipUpload = () => {
+       //const [zipStatus, setZipStatus] = React.useState(false);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', fileType);
+        axios.post(TESTHOST + '/api/files/upload/' + info.id, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },}).then((res) => {
+                setZipStatus(true);
+                setZipId(res.data.file.id);
+                console.log(res.data.file);
+                // handle success here
+              })
+              .catch((err) => {
+                console.error(err);
+                // handle error here
+              });
+       /*axios({
+            method: 'post',
+            url: TESTHOST + '/api/files/upload/' + info.id
+        }).then((res) => {
+            console.log('File Uploaded')
+        }).catch((err) => {
+            console.error(err);
+            // handle error here
+          });*/
+    }
+    const handleIntrinsicUpload = () => {
+        //const [intrinsicStatus, setIntrinsicStatus] = React.useState(false);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', fileType);
+        axios.post(TESTHOST + '/api/files/upload/' + info.id, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },}).then((res) => {
+                setIntrinsicStatus(true);
+                setIntrinsicId(res.data.file.id);
+                console.log(res.data.file);
+                // handle success here
+              })
+              .catch((err) => {
+                console.error(err);
+                // handle error here
+              });}
+    const handleExtrinsicUpload = () => {
+        //const [extrinsicStatus, setExtrinsicStatus] = React.useState(false);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', fileType);
+        axios.post(TESTHOST + '/api/files/upload/' + info.id, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },}).then((res) => {
+                setExtrinsicStatus(true);
+                setExtrinsicId(res.data.file.id);
+                console.log(res.data.file);
+                // handle success here
+              })
+              .catch((err) => {
+                console.error(err);
+                // handle error here
+              });}
+    const handleZipDelete = () =>{
         axios({
-            method: 'patch',
-            url: TESTHOST + '/takes/edittake/',
+            method: 'delete',
+            url: TESTHOST + '/api/files/delete',
             data: {
-                take_name: info.take_name,
-                description: info.description,
-                token: localStorage.getItem('token'),
-                tid: info.tid
+                projectId : info.id,
+                id: zipId
             }
         }).then((res) => {
-            setTake(info)
-            setView('sceneEdit')
+            setZipStatus(false);
         })
     }
-    const handleCancel = () => {
-        setView('sceneEdit')
+    const handleIntrnsicDelete = () =>{
+        axios({
+            method: 'delete',
+            url: TESTHOST + '/api/files/delete',
+            data: {
+                projectId : info.id,
+                id: intrinsicId
+            }
+        }).then((res) => {
+            setIntrinsicStatus(false);
+        })
+    }
+    const handleExtrinsicDelete = () =>{
+        axios({
+            method: 'delete',
+            url: TESTHOST + '/api/files/delete',
+            data: {
+                projectId : info.id,
+                id: extrinsicId
+            }
+        }).then((res) => {
+            setExtrinsicStatus(false);
+        })
+        //setZipStatus(false);
+    }
+    const handleClick = () => {
+        console.log('handle click')
+
     }
     const handleDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/takes/deletetake/',
+            url: TESTHOST + '/api/projects/' + info.id,
             data: {
-                token: localStorage.getItem('token'),
-                tid: info.tid
             }
         }).then((res) => {
-            setTake(info)
-            console.log(res.data)
-            setView('sceneEdit')
+            setProject(res.data)
+            setView('projectList')
         })
     }
-
     return (
         <div>
             <Stack spacing={1}>
@@ -98,31 +236,19 @@ function TakeEdit({setView, take, setTake, ...props}) {
                         alignItems="center"
                         margin="auto"
                     >
-                        <FormControl fullWidth sx={{m: 1}} variant="filled">
-                            <InputLabel htmlFor="filled-adornment-take-name">Take Name:</InputLabel>
+                        <FormControl fullWidth sx={{ m: 1 }} variant="filled">
+                            <InputLabel htmlFor="filled-adornment-project-name">Project Name:</InputLabel>
                             <FilledInput
-                                id="filled-adornment-take-name"
+                                id="filled-adornment-project-name"
                                 startAdornment={<InputAdornment position="start"></InputAdornment>}
-                                value={info.take_name}
+                                value={info.projectName}
                                 onChange={(e) => {
                                     handleChange('name', e)
                                 }}
                             />
                         </FormControl>
-                        <FormControl fullWidth sx={{m: 1}} variant="filled">
-                            <InputLabel htmlFor="filled-adornment-take-description">Take Description:</InputLabel>
-                            <FilledInput
-                                id="filled-adornment-take-description"
-                                startAdornment={<InputAdornment position="start"></InputAdornment>}
-                                multiline
-                                rows={4}
-                                value={info.description}
-                                onChange={(e) => {
-                                    handleChange('description', e)
-                                }}
-                            />
-                        </FormControl>
                     </Grid>
+                    {error && <Alert severity="error">{errorMessage}</Alert>}
                     <Grid
                         container
                         direction="row"
@@ -134,31 +260,68 @@ function TakeEdit({setView, take, setTake, ...props}) {
                         <Grid item><Button variant="contained" size="large" onClick={handleSave}>Save</Button></Grid>
                         <Grid item><Button variant="outlined" size="large" onClick={handleCancel}>Cancel</Button></Grid>
                     </Grid>
-                    <Grid
-                        container
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        margin="auto"
-                    >
-                        <Grid item><Typography gutterBottom variant='h5' component='div' sx={{m: 1}}>
-                            Captures
-                        </Typography></Grid>
-                        <Grid item><Button variant='contained' style={{margin: 16}} size="large"
-                                           onClick={handleAddCapture}>+ New Capture</Button>
-                            <Button variant='contained' style={{margin: 16}} size="large">Upload Audio</Button>
-                            <Button variant='contained' style={{margin: 16}} size="large">Submit Job</Button></Grid>
-                    </Grid>
-                    <Grid container spacing={1} style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        padding: '30px 30px'
-                    }}>
-                        {numCaptures && numCaptures.map((value) => (
-                            <CaptureCard key={value.cid} value={value} setNumCaptures={setNumCaptures} info={info}/>
-                        ))}
-                    </Grid>
+                    
+                    <Grid item>
+                        <Card m={1} pt={1} style={{ padding: '20px 10px' ,justifyContent:"right" }}>
+                            <label id={info.id} htmlFor="contained-button-file">
+                                <Input
+                                    accept=".zip"
+                                    id="contained-button-file"
+                                    type="file"
+                                    onChange={handleZipFileReader}
+                                />
+                                <button onClick={handleZipUpload} disabled={fileType!== 'zip'}>Zip Upload</button>
+                                <button onClick={handleZipDelete}>Zip Delete</button>
+                                {zipStatus ? (
+                                <div className="zipUploadSuccess" role="alert">
+                                    Your zip file was uploaded successfully!
+                                </div>
+                                ) :  <div className="noZip" role="alert">
+                                  You have not uploaded zip file yet!
+                            </div>}
+                            </label>
+
+                        </Card>
+                        <Card m={1} pt={1} style={{ padding: '20px 10px' ,justifyContent:"right" }}>
+                            <label id={info.id} htmlFor="contained-button-file">
+                                <Input
+                                    accept=".yml"
+                                    id="contained-button-file"
+                                    type="file"
+                                    onChange={handleIntrinsicFileReader}
+                                />
+                                 <button onClick={handleIntrinsicUpload} disabled={fileType!== 'intrinsic'}>Intrinsic Upload</button>
+                                 <button onClick={handleIntrnsicDelete}>Intrinsic Delete</button>
+                                 {intrinsicStatus ? (
+                                <div className="intrinsicUploadSuccess" role="alert">
+                                    Your intrinsic file was uploaded successfully!
+                                </div>
+                                ) : <div className="noIntrinsic" role="alert">
+                                You have not uploaded intrinsic file yet!
+                            </div>}
+                            </label>
+                        </Card>
+                        <Card m={1} pt={1} style={{ padding: '20px 10px' ,justifyContent:"right" }}>
+                            <label id={info.id} htmlFor="contained-button-file">
+                                <Input
+                                    accept=".yml"
+                                    id="contained-button-file"
+                                    type="file"
+                                    onChange={handleExtrinsicFileReader}
+                                />
+                                <button onClick={handleExtrinsicUpload} disabled={fileType!== 'extrinsic'}>Extrinsic Upload</button>
+                                <button onClick={handleExtrinsicDelete}>extrinsic Delete</button>
+                                {extrinsicStatus ? (
+                                <div className="extrinsicUploadSuccess" role="alert">
+                                    Your extrinsic file was uploaded successfully!
+                                </div>
+                                ) :  <div className="noExtrinsic" role="alert">
+                                You have not uploaded extrinsic file yet!
+                            </div>}
+                            </label>
+                        </Card>
+
+                        </Grid>
                     <Grid
                         container
                         direction="row"
@@ -166,9 +329,8 @@ function TakeEdit({setView, take, setTake, ...props}) {
                         alignItems="center"
                         margin="auto"
                     >
-                        <Button variant="outlined" startIcon={<DeleteIcon/>} size="large" onClick={handleDelete}
-                                style={{marginTop: '3%'}}>
-                            Delete Take
+                        <Button variant="outlined" startIcon={<DeleteIcon />} size="large" onClick={handleDelete}>
+                            Delete Project
                         </Button>
                     </Grid>
                 </Box>
@@ -177,7 +339,7 @@ function TakeEdit({setView, take, setTake, ...props}) {
     )
 }
 
-function CaptureCard({setNumCaptures, info, value, ...props}) {
+function CaptureCard({ setNumCaptures, info, value, ...props }) {
     const [loading, setLoading] = React.useState(false)
     const [success, setSuccess] = React.useState(false)
     const [file, setFile] = React.useState()
@@ -216,7 +378,7 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
         }).then((res) => {
             axios({
                 method: 'get',
-                url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&tid=' + info.tid
+                url: TESTHOST + '/captures/getcaptures/?token=' + localStorage.token + '&pid=' + info.pid
             }).then((res) => {
                 console.log(res.data)
                 setNumCaptures(res.data)
@@ -225,7 +387,7 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
     }
 
     return (
-        <Card m={1} pt={1} style={{padding: '20px 10px'}}>
+        <Card m={1} pt={1} style={{ padding: '20px 10px' }}>
             <Grid
                 container
                 direction="row"
@@ -234,7 +396,7 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
                 margin="auto"
             >
                 <Stack>
-                    <Typography gutterBottom variant='h5' component='div' sx={{m: 1}}>
+                    <Typography gutterBottom variant='h5' component='div' sx={{ m: 1 }}>
                         Camera
                     </Typography>
                 </Stack>
@@ -248,21 +410,18 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
                         <Grid item>
                             <label id={value.cid} htmlFor="contained-button-file">
                                 <Input
-                                    // original 
-                                    //accept="video/*"
-                                    //
                                     accept=".7z,.zip"
                                     id="contained-button-file"
                                     type="file"
                                     onChange={handleUpload}
                                 />
                             </label>
-                            {success ? <Button variant="contained" style={{margin: 16, backgroundColor: '#21d284'}}
-                                               size="small" component="span">Success</Button> :
-                                <LoadingButton loading={loading} variant='contained' style={{margin: 16}} size="small"
-                                               component="span" onClick={handleClick}>Upload Video</LoadingButton>}
+                            {success ? <Button variant="contained" style={{ margin: 16, backgroundColor: '#21d284' }}
+                                size="small" component="span">Success</Button> :
+                                <LoadingButton loading={loading} variant='contained' style={{ margin: 16 }} size="small"
+                                    component="span" onClick={handleClick}>Upload Zip</LoadingButton>}
                         </Grid>
-                        <Grid item><Button disabled variant='contained' style={{margin: 16}} size="small">Upload Point
+                        <Grid item><Button disabled variant='contained' style={{ margin: 16 }} size="small">Upload Point
                             Cloud</Button></Grid>
                     </Grid>
                     <Grid
@@ -271,9 +430,9 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
                         justifyContent="space-between"
                         alignItems="center"
                     >
-                        <Button variant="outlined" style={{margin: 16}} size="small" disabled>Download</Button>
-                        <Button variant="outlined" style={{margin: 16}} startIcon={<DeleteIcon/>} onClick={handleDelete}
-                                size="small">
+                        <Button variant="outlined" style={{ margin: 16 }} size="small" disabled>Download</Button>
+                        <Button variant="outlined" style={{ margin: 16 }} startIcon={<DeleteIcon />} onClick={handleDelete}
+                            size="small">
                             Remove Capture
                         </Button>
                     </Grid>
@@ -283,4 +442,5 @@ function CaptureCard({setNumCaptures, info, value, ...props}) {
     )
 }
 
-export default TakeEdit
+
+export default ProjectEdit
