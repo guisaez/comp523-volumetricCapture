@@ -15,7 +15,7 @@ def automate(name, openpose, cihp, raw_path, intri_path, extri_path, projectid):
     ### Run MakeDatasets
     try:
         # Store output in CIHP_PGN so test_pgn.py does not need to be modified
-        data_path = 'data/' + projectid
+        data_path = 'data/' + projectid + '/'
         output = subprocess.check_output(
             "python scripts/make_dataset.py " + data_path + " " + "CIHP2 " + data_path
         , shell=True)
@@ -47,17 +47,20 @@ def automate(name, openpose, cihp, raw_path, intri_path, extri_path, projectid):
             + " "
             + name
             + " "
-            + data_path + "/intrinsic.yml"
+            + data_path + "intrinsic.yml"
             + " "
-            + data_path + "/extrinsic.yml"
-        )
-    except:
+            + data_path + "extrinsic.yml"
+            + " "
+            + data_path
+        , shell = True)
+    except Exception as e:
+        print(e)
         return RuntimeError("Error creating EasyMocap input")
     """
     try:
         # Generate OpenPose parameters
         subprocess.check_output(
-            "python ./EasyMocap/scripts/preprocess/extract_video.py "
+            "python models/EasyMocap/scripts/preprocess/extract_video.py "
             + name
             + " --openpose "
             + openpose
@@ -69,11 +72,10 @@ def automate(name, openpose, cihp, raw_path, intri_path, extri_path, projectid):
         #    "python ./EasyMocap/apps/demo/mv1p.py " + name + " --out " + name + "/output/smpl --vis_det --vis_repro --undis --sub_vis 1 2 3 4 --vis_smpl",
         #    shell=True
         # )
-        # Deactivate venv
-        subprocess.check_output("deactivate", shell=True)
     except:
         return RuntimeError("EasyMocap Error")
-
+    """
+    """
     ### Run Neuralbody
     try:
         # Activate Neuralbody env
