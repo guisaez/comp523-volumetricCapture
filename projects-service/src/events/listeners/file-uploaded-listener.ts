@@ -42,6 +42,11 @@ export class FileUploadedListener extends Listener<FileUploadedEvent> {
                     intrinsic_fileId: file
                 });
                 break;
+            case FileTypes.OUTPUT:
+                project.set({
+                    output_fileId: file
+                });
+                break;
         }
 
         await project.save();
