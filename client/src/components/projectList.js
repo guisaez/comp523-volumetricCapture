@@ -140,7 +140,9 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
         >
           <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus == 'running'}>Edit</Button></Grid>
           <Grid item><Button variant='contained' startIcon={<DeleteIcon />} onClick={handleDelete}>Delete</Button></Grid>
-          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={projectInfo.processStatus == 'running'}>{buttonName}</Button></Grid>
+          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus == 'running') || 
+            (buttonName == 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
+          </Grid>
         </Grid>
       </CardActions>
       {error && <Alert style={{ justifyContent: 'center' }} severity="error">{errorMsg}</Alert>}
