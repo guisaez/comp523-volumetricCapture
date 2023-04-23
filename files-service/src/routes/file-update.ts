@@ -16,13 +16,11 @@ router.put('/api/files/update/:id',
     upload.single('file'), validateRequest,
     async (req: Request, res: Response) => {
 
-        const { type } = req.body;
-
         if(!req.params.id && !mongoose.isObjectIdOrHexString(req.params.id)){
             throw new BadRequestError('Invalid File Id');
         }
 
-        if(!type){
+        if(!req.body.type){
             throw new BadRequestError('Type must be defined');
         }
 
