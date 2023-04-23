@@ -19,6 +19,11 @@ import ProjectView from './projectView'
 import LoadingButton from '@mui/lab/LoadingButton'
 import isEmpty from 'validator/lib/isEmpty'
 import Alert from '@mui/material/Alert'
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import ReactMarkdown from 'react-markdown';
+import DeleteButton from "./deleteButton";
+
 //import TESTHOST from '../backend/backendAPI'
 
 const TESTHOST = ''
@@ -30,6 +35,26 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const [info, setInfo] = React.useState(project)
     const [error, setError] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState('');
+    const [openHelp, setOpenHelp] = React.useState(false);
+    const [markdown, setMarkdown] = React.useState('');
+
+
+    const handleOpenHelp = () => {
+
+        axios({
+            method: 'get',
+            url: 'https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md'
+        }).then((response) => {
+            console.log(response.data)
+            setMarkdown(response.data)
+        }
+        ).catch(error => console.error(error));
+        setOpenHelp(true);
+    };
+
+    const handleCloseHelp = () => {
+        setOpenHelp(false);
+    };
 
     //zip
     const [zipId, setZipId] = React.useState('')
@@ -399,25 +424,34 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                     justifyContent="left"
                     alignItems="center"
                     margin="16"
-                    spacing = {3}
+                    spacing={3}
                 >
-                <Grid item>
-                    <FormControl variant="filled" width= '80%'>
-                        <InputLabel htmlFor="filled-adornment-project-name">Project Name:</InputLabel>
-                        <FilledInput
-                            id="filled-adornment-project-name"
-                            startAdornment={<InputAdornment position="start"></InputAdornment>}
-                            value={info.projectName}
-                            
-                            onChange={(e) => {
-                                handleChange('name', e)
-                            }}></FilledInput>
-                       
-                    </FormControl>
-                </Grid>
-                <Grid item>
-                <Button variant="contained" size="large" onClick={handleSave} sx={{ m: 1 }} margin="16">Save Name</Button>     
-                </Grid></Grid>
+                    <Grid item>
+                        <FormControl variant="filled" width='80%'>
+                            <InputLabel htmlFor="filled-adornment-project-name">Project Name:</InputLabel>
+                            <FilledInput
+                                id="filled-adornment-project-name"
+                                startAdornment={<InputAdornment position="start"></InputAdornment>}
+                                value={info.projectName}
+
+                                onChange={(e) => {
+                                    handleChange('name', e)
+                                }}></FilledInput>
+
+                        </FormControl>
+                    </Grid>
+                    <Grid item>
+                        <Button variant="contained" size="large" onClick={handleSave} sx={{ m: 1 }} margin="16">Save Name</Button>
+                        <Button variant="outlined" onClick={handleOpenHelp} size="large">Help</Button>
+                        <Dialog open={openHelp} onClose={handleCloseHelp}>
+                            <DialogContent>
+                                <Button className="close-btn" onClick={handleCloseHelp} size="small" variant="contained" style={{ margin: 16, position: 'absolute', top: 5, right: 5, backgroundColor: 'red' }}>
+                                    X
+                                </Button>
+                                <ReactMarkdown>{markdown}</ReactMarkdown>
+                            </DialogContent>
+                        </Dialog>
+                    </Grid></Grid>
                 {error && <Alert severity="error">{errorMessage}</Alert>}
 
                 <Grid container spacing={1} style={{ display: 'flex', direction: 'column' }} justifyContent="flex-end"
@@ -455,8 +489,9 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                             <Button onClick={handleZipUpload} variant="contained" disabled={(disableZipUpload)} style={{ margin: 8 }}>{zipButtonName}</Button>
                                         </div>
                                         <div>
-                                            <Button onClick={handleZipDelete} variant="outlined" style={{ margin: 8 }} disabled={disableZipDelete} >Delete Zip</Button>
+                                            <DeleteButton onDelete={handleZipDelete} marginVar={8} isDisabled={disableZipDelete} deletedThing="zip file" size="medium" buttonName='Delete Zip'></DeleteButton>
                                             <Button onClick={(e) => { handleDownload(zipId, zipFileName) }} variant="outlined" style={{ margin: 8 }} disabled={zipFileName == 'None'}>Download Zip</Button>
+
                                         </div>
                                     </Stack>
                                 </CardActions>
@@ -495,7 +530,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                             <Button onClick={handleIntrinsicUpload} variant="contained" disabled={(disableIntrinsicUpload)} style={{ margin: 8 }}>{intrinsicButtonName}</Button>
                                         </div>
                                         <div>
-                                            <Button onClick={handleIntrinsicDelete} variant="outlined" style={{ margin: 8 }} disabled={disableIntrinsicDelete} >Delete Intrinsic</Button>
+                                            <DeleteButton onDelete={handleIntrinsicDelete} marginVar={8} isDisabled={disableIntrinsicDelete} deletedThing="intrinsic file" size="medium" buttonName='Delete Intrinsic'></DeleteButton>
                                             <Button onClick={(e) => { handleDownload(intrinsicId, intrinsicFileName) }} variant="outlined" style={{ margin: 8 }} disabled={intrinsicFileName == 'None'}>Download Intrinsic</Button>
                                         </div>
                                     </Stack>
@@ -535,7 +570,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                             <Button onClick={handleExtrinsicUpload} variant="contained" disabled={(disableExtrinsicUpload)} style={{ margin: 8 }}>{extrinsicButtonName}</Button>
                                         </div>
                                         <div>
-                                            <Button onClick={handleExtrinsicDelete} variant="outlined" style={{ margin: 8 }} disabled={disableExtrinsicDelete} >Delete Extrinsic</Button>
+                                            <DeleteButton onDelete={handleExtrinsicDelete} marginVar={8} isDisabled={disableExtrinsicDelete} deletedThing="extrinsic file" size="medium" buttonName='Delete Extrinsic'></DeleteButton>
                                             <Button onClick={(e) => { handleDownload(extrinsicId, extrinsicFileName) }} variant="outlined" style={{ margin: 8 }} disabled={extrinsicFileName == 'None'}>Download Extrinsic</Button>
                                         </div>
                                     </Stack>
@@ -552,11 +587,10 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                     margin={16}
                     spacing={1.5}
                 ><Grid item>
-                    <Button variant="outlined" startIcon={<DeleteIcon />} size="large" onClick={handleDelete}>
-                        Delete Project
-                    </Button></Grid><Grid item>
-                    <Button variant="contained" size="large" onClick={handleCancel}>Back</Button>
-                </Grid></Grid>
+                        <DeleteButton onDelete={handleDelete} isDisabled={false} deletedThing="project" marginVar={0} size="large" buttonName='Delete Project'></DeleteButton>
+                    </Grid><Grid item>
+                        <Button variant="contained" size="large" onClick={handleCancel}>Back</Button>
+                    </Grid></Grid>
             </Stack>
         </div>
     )
