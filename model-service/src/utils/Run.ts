@@ -101,7 +101,7 @@ export class Run {
 
     private pythonAutomation = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const automation = spawn('python', ['./src/scripts/test_dummy.py'])
+            const automation = spawn('python', ['./src/scripts/automation.py'])
             .on('error', (err) => {
                 reject(err)
             })
