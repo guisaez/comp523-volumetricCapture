@@ -4,15 +4,15 @@ import ProjectList from './projectList'
 import ProjectEdit from './projectEdit'
 
 
-function ProjectView ({setTabValue}) {
+function ProjectView({ setTabValue, setisLogged }) {
   const [view, setView] = React.useState('projectList')
   const [project, setProject] = React.useState(null)
 
   return (
     <>
-    {view === 'projectList' && <ProjectList setView={setView} setProject={setProject} setTabValue={setTabValue}/>}
-    {view === 'projectEdit' && <ProjectEdit setView={setView} project={project} setProject={setProject}/>}  
-  </>
+      {view === 'projectList' && <ProjectList setView={setView} setProject={setProject} setTabValue={setTabValue} setisLogged={setisLogged} />}
+      {view === 'projectEdit' && <ProjectEdit setView={setView} project={project} setProject={setProject} setisLogged={setisLogged} />}
+    </>
   )
 }
 

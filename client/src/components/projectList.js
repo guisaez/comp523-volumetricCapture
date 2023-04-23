@@ -5,20 +5,17 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
-import timestamp from 'time-stamp'
 import FormControl from '@mui/material/FormControl'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
-import DeleteIcon from '@mui/icons-material/Delete'
 import DeleteButton from "./deleteButton";
 
-const TESTHOST = ''
+
 const axios = require('axios').default
 
-function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
+function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, ...props }) {
   const [errorMsg, setErrorMsg] = React.useState('')
   const [error, setError] = React.useState(false)
   const [buttonName, setButtonName] = React.useState("")
@@ -55,11 +52,11 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
   const handleDelete = () => {
     axios({
       method: 'delete',
-      url: TESTHOST + '/api/projects/' + value.id
+      url: '/api/projects/' + value.id
     }).then((res) => {
       axios({
         method: 'get',
-        url: TESTHOST + '/api/projects/'
+        url: '/api/projects/'
       }).then((res) => {
         setNumProjects(res.data.projects)
       }).catch((err) => {
@@ -72,7 +69,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
     if (projectInfo.processStatus == 'not-started' || projectInfo.processStatus == 'error') {
       axios({
         method: 'post',
-        url: TESTHOST + '/api/projects/run/' + value.id
+        url: '/api/projects/run/' + value.id
       }).then((res) => {
         setInfo({
           projectName: res.data.project.projectName,
@@ -92,7 +89,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
         setErrorMsg("")
         axios({
           method: 'get',
-          url: TESTHOST + '/api/projects/'
+          url: '/api/projects/'
         }).then((res) => {
           setNumProjects(res.data.projects)
         }).catch((err) => {
@@ -105,7 +102,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
     } else if (projectInfo.processStatus == 'completed') {
       axios({
         method: 'get',
-        url: TESTHOST + '/api/files/download/' + projectInfo.output_fileId.id,
+        url: '/api/files/download/' + projectInfo.output_fileId.id,
         responseType: 'blob'
       }).then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -140,8 +137,8 @@ function ProjectCard({ setNumProjects, setView, value, setProject, ...props }) {
           margin="auto"
         >
           <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus == 'running'}>Edit</Button></Grid>
-          <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={false} deletedThing="project" size="medium" buttonName='Delete Project'></DeleteButton></Grid>
-          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus == 'running') || 
+          <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={false} deletedThing="project" size="medium" buttonName='Delete'></DeleteButton></Grid>
+          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus == 'running') ||
             (buttonName == 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
           </Grid>
         </Grid>
@@ -159,7 +156,7 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
   React.useEffect(() => {
     axios({
       method: 'get',
-      url: TESTHOST + '/api/auth/user/'
+      url: '/api/auth/user/'
     }).then((res) => {
       setUid(res.data.currentUser.id)
       setEmail(res.data.currentUser.email)
@@ -168,7 +165,7 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
   React.useEffect(() => {
     axios({
       method: 'get',
-      url: TESTHOST + '/api/projects/'
+      url: '/api/projects/'
     }).then((res) => {
       setNumProjects(res.data.projects)
     }).catch((err) => {
@@ -183,23 +180,12 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
   const handleAddProject = () => {
     axios({
       method: 'post',
-      url: TESTHOST + '/api/projects/',
+      url: '/api/projects/',
       data: {
         projectName: projectName || "New Project"
       }
     }).then((res) => {
       setNumProjects([...numProjects, res.data])
-    })
-  }
-
-  const handleLogout = () => {
-    axios({
-      method: 'post',
-      url: TESTHOST + '/api/auth/signout/',
-      data: {
-      }
-    }).then((res) => {
-      setTabValue('vcp')
     })
   }
 
@@ -219,9 +205,6 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
         <Button variant='contained' style={{
           margin: 16
         }} onClick={handleAddProject}>New Project</Button>
-        <Button variant='contained' style={{
-          margin: 16
-        }} onClick={handleLogout}>Log out</Button>
       </div>
       <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
         <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>

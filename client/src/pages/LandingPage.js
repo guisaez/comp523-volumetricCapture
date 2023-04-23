@@ -2,58 +2,112 @@ import * as React from 'react'
 import Button from "@mui/material/Button";
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
-import Tabs from '@mui/material/Tabs'
-//import {Typography} from "@mui/material";
+import Box from '@mui/material/Box'
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
 import Typography from '@mui/material/Typography'
-import Tab from '@mui/material/Tab'
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import ProjectView from '../components/projectView'
 import User from '../components/user'
-const TESTHOST = ''
+
 const axios = require('axios').default
 
-function LandingPage () {
+function LandingPage() {
     const [isLogged, setisLogged] = useState(false);
-    const [tabValue, setTabValue] = React.useState('')
+    const [tabValue, setTabValue] = React.useState('');
+    const [openLogout, setOpenLogout] = React.useState(false);
 
     useEffect(() => {
-        console.log(isLogged)
         checkIsLogIn();
-        return () => {};
+        return () => { };
     }, [isLogged]);
-    function checkIsLogIn(){
+    function checkIsLogIn() {
         axios({
             method: 'get',
-            url: TESTHOST + '/api/auth/user/'
-          }).then((res) => {
-            if(!res.data.currentUser){
+            url: '/api/auth/user/'
+        }).then((res) => {
+            if (!res.data.currentUser) {
                 setisLogged(false)
                 setTabValue('vcp');
-            }else{
+            } else {
                 setisLogged(true)
                 setTabValue('projects')
             }
-          })
+        })
     }
+
+    const handleLogout = () => {
+        axios({
+            method: 'post',
+            url: '/api/auth/signout/',
+            data: {
+            }
+        }).then((res) => {
+            setisLogged(false);
+            setOpenLogout(false);
+            setTabValue('vcp');
+        })
+    }
+
+
+    const handleOpenLogOut = () => {
+        setOpenLogout(true);
+    };
+
+    const handleCloseLogOut = () => {
+        setOpenLogout(false);
+    };
+
     return (
         <div>
             <div>
                 <AppBar position='static' style={{ backgroundColor: '#222222' }}>
-                <h3 style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-                }}>Volumetric Capture Platform</h3>
+                    <Toolbar variant='dense'>
+                        <Box sx={{ flexGrow: 1 }}>
+                            <h3 style={{ textAlign: 'center' }}>Volumetric Capture Platform</h3>
+                        </Box>
+                        {isLogged && (
+                            <>
+                                <Button
+                                    onClick={handleOpenLogOut}
+                                    color="inherit"
+                                    sx={{ justifyContent: 'flex-end' }}
+                                >
+                                    Log out
+                                </Button>
+                                <Dialog open={openLogout} onClose={handleCloseLogOut}>
+                                    <DialogTitle>Log Out Confirmation</DialogTitle>
+                                    <DialogContent>
+                                        <Typography variant='body2' color='black'>
+                                            {'Are you sure you want to log out? You may lose all the unsaved changes.'}
+                                        </Typography>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleCloseLogOut} variant="contained" color="primary">
+                                            Cancel
+                                        </Button>
+                                        <Button onClick={handleLogout} variant="contained" style={{ backgroundColor: 'red', color: 'white' }}>
+                                            Continue
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </>
+
+                        )}
+                    </Toolbar>
+
                 </AppBar>
             </div>
             <div>
-               {tabValue === 'vcp' && <User setTabValue={setTabValue} />}
+                {tabValue === 'vcp' && <User setTabValue={setTabValue} setisLogged={setisLogged} />}
             </div>
             <div>
-                {tabValue === 'projects' && <ProjectView setTabValue={setTabValue}/>} 
+                {tabValue === 'projects' && <ProjectView setTabValue={setTabValue} setisLogged={setisLogged} />}
             </div>
         </div>
     )
-    
+
 }
 export default LandingPage
