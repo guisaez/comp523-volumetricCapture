@@ -12,6 +12,7 @@ export interface ModelRunEvent {
 
     data: {
         projectId: string,
+        userId: string,
         files: RunData[];
     }
 }
