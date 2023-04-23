@@ -2,7 +2,6 @@ FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV PYOPENGL_PLATFORM=osmesa
 ENV TZ=America/New_York
 ENV CUDA_HOME="/usr/local/cuda-11.1"
 
@@ -50,12 +49,12 @@ RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add - && 
     apt-get install -y --no-install-recommends nvidia-container-toolkit && \
     rm -rf /var/lib/apt/lists/*
 
-# curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
-#    tar -xvf cmake.tar.gz && \
-#    cd cmake-3.20.1 && \
-#    ./configure && \
-#    make -j4 && make install
-#
+RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
+    tar -xvf cmake.tar.gz && \
+    cd cmake-3.20.1 && \
+    ./configure && \
+    make -j4 && make install
+
 
 # Install and build OpenPose
 WORKDIR /app/src
@@ -69,15 +68,16 @@ RUN cd openpose && \
     mkdir build && \
     cd build
 
-RUN cd openpose/build && cmake -DGPU_MODE=GPU -DUSE_CUDNN=OFF .. 
-RUN cd openpose/build make -j`nproc`
+RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
+RUN cd openpose/build && make -j`nproc`
 
 # Switch to Bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-RUN wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
-    dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f && \
-    rm -rf mesa_18.3.3-0.deb
+WORKDIR /
+
+RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
+    dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f
 
 # Install Node
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
@@ -114,7 +114,7 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     pip install ./pyopengl && \
     deactivate
 
-RUN rm -rf pyopengl
+#RUN rm -rf pyopengl
 
 ENV PATH /app/venv/bin:$PATH
 
@@ -129,6 +129,8 @@ RUN cd /app/src/models/EasyMocap && \
 WORKDIR /app
 
 RUN npm install -only=prod
+
+ENV PYOPENGL_PLATFORM=osmesa
 
 COPY . .
 
