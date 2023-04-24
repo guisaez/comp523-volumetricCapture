@@ -1,6 +1,6 @@
 {
   "name": "@teamg2023/common",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "Common module for application",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
