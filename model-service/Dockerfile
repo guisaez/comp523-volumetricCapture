@@ -76,16 +76,10 @@ RUN cd openpose && \
 
 RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
 RUN cd openpose/build && make -j`nproc`
-RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
-RUN cd openpose/build && make -j`nproc`
 
 # Switch to Bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-WORKDIR /
-
-RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
-    dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f
 WORKDIR /
 
 RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
