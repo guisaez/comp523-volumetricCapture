@@ -55,12 +55,6 @@ RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3
     ./configure && \
     make -j4 && make install
 
-RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
-    tar -xvf cmake.tar.gz && \
-    cd cmake-3.20.1 && \
-    ./configure && \
-    make -j4 && make install
-
 
 # Install and build OpenPose
 WORKDIR /app/src
@@ -76,16 +70,10 @@ RUN cd openpose && \
 
 RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
 RUN cd openpose/build && make -j`nproc`
-RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
-RUN cd openpose/build && make -j`nproc`
 
 # Switch to Bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-WORKDIR /
-
-RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
-    dpkg -i ./mesa_18.3.3-0.deb || true && apt install -y -f
 WORKDIR /
 
 RUN apt update && wget https://github.com/mmatl/travis_debs/raw/master/xenial/mesa_18.3.3-0.deb && \
@@ -127,7 +115,6 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     deactivate
 
 #RUN rm -rf pyopengl
-#RUN rm -rf pyopengl
 
 ENV PATH /app/venv/bin:$PATH
 
@@ -147,4 +134,6 @@ ENV PYOPENGL_PLATFORM=osmesa
 
 COPY . .
 
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
+
+CMD ["/bin/bash"]
