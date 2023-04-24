@@ -1,30 +1,19 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken';
 import { GridFS } from '../utils/GridFS';
-import { natsWrapper } from '../nats-wrapper';
-import { Subjects } from '@teamg2023/common';
-
-declare global {
-    var signin: () => string[];
-}
 
 jest.mock('../nats-wrapper.ts');
 
 let mongo: any;
-let bucket: mongoose.mongo.GridFSBucket;
+let bucket: any;
 
 beforeAll(async () => {
-    process.env.JWT_KEY = 'test-env-key-random-123';
 
     mongo = await MongoMemoryServer.create();
 
     const mongoUri = mongo.getUri();
 
-    await mongoose.connect(mongoUri, {});
-
-    bucket = await GridFS.setBucket();
-
+    const conn = await mongoose.connect(mongoUri, {});
 })
 
 beforeEach(async () => {
@@ -40,28 +29,12 @@ beforeEach(async () => {
 })
 
 afterAll(async () => {
-    await bucket.drop();
+    if(bucket){
+        await bucket.drop();
+    }
     await mongoose.connection.dropDatabase();
     if(mongo) {
         await mongo.stop();
     }
     await mongoose.connection.close();
 })
-
-global.signin = () => {
-    
-    const payload = {
-        id: new mongoose.Types.ObjectId().toHexString(),
-        email: 'test@test.com'
-    }
-
-    const token = jwt.sign(payload, process.env.JWT_KEY!)
-
-    const session = { jwt: token };
-
-    const sessionJSON = JSON.stringify(session);
-
-    const base64 = Buffer.from(sessionJSON).toString('base64');
-
-    return [`session=${base64}`];
-}

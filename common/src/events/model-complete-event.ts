@@ -1,10 +1,17 @@
 import { Subjects } from "./subjects";
+import { FileTypes } from "./types/file-types";
 
 export interface ModelCompleteEvent {
     subject: Subjects.ProcessComplete;
 
     data: {
         projectId: string,
-        output_fileId: string
+        file: {
+            id: string,
+            version: number,
+            userId: string,
+            type: FileTypes,
+            name: string;
+        }
     }
 }

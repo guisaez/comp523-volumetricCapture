@@ -41,14 +41,16 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
         type: project.extrinsic_fileId.type
     }
 
-    new ModelRunPublisher(natsWrapper.client).publish({
-        projectId: project.id,
-        files: [intrinsicData, zipData, extrinsicData]
-    })
 
     project.set('processStatus', ProcessStatus.Running);
 
     await project.save();
+
+    new ModelRunPublisher(natsWrapper.client).publish({
+        projectId: project.id,
+        userId: project.userId,
+        files: [intrinsicData, zipData, extrinsicData]
+    })
 
     res.send( { project });
 })

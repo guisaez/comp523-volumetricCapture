@@ -5,6 +5,7 @@ import { FileUpdatedListener } from './events/listeners/file-updated-listener';
 import { FileUploadedListener } from './events/listeners/file-uploaded-listener';
 import { FileDeletedListener } from './events/listeners/file-deleted-listener';
 import { ModelCompleteListener } from './events/listeners/model-completed-listener';
+import { ModelErrorListener } from './events/listeners/model-error-listener';
 
 const start = async () => {
     console.log('Projects Service is Starting...');
@@ -46,6 +47,7 @@ const start = async () => {
         new FileUpdatedListener(natsWrapper.client).listen();
         new FileDeletedListener(natsWrapper.client).listen();
         new ModelCompleteListener(natsWrapper.client).listen();
+        new ModelErrorListener(natsWrapper.client).listen();
 
     } catch(err){
         console.log(err);

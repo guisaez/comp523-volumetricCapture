@@ -4,6 +4,7 @@ import glob
 import os
 import sys
 import json
+from pathlib import Path
 
 
 # data_dir = r'/home/bhargavb/neuralbody/RIL_test_1'
@@ -30,8 +31,8 @@ def get_img_paths():
     all_ims = []
     for i in range(4):
         i = i + 1
-        data_root = 'Camera_D415{}'.format(i)
-        ims = glob.glob(os.path.join(data_dir, data_root, '*.jpg'))
+        data_root = 'Cam{}'.format(i)
+        ims = Path(data_dir, data_root).glob('*.png')
         ims = [os.path.relpath(x, data_dir) for x in ims]
         ims = np.array(sorted(ims))
         all_ims.append(ims)

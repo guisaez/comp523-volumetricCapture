@@ -1,38 +1,43 @@
 import click
 from pathlib import Path
 import subprocess
+import os
 import shutil
 
 DATA_TYPE = [".png", ".jpg"]
-
+OFFSET = 3
 
 @click.command()
-@click.argument("img_path")
-@click.argument("dataset_name")
-@click.argument("intri")
-@click.argument("extri")
-def create_input(img_path, dataset_name, intri, extri):
-    """Create input dataset for EasyMocap.
-
-    INTRI and EXTRI are the camera intrinsic and extrinsic parameters
-    """
+@click.argument("src")
+@click.argument("dst")
+def create_input(src, dst):
+    """Create input video for EasyMocap from raw images."""
     # Create output path and directory
-    output = Path(".", dataset_name, "videos")
+    output = Path(dst, "videos")
     Path.mkdir(output, parents=True, exist_ok=True)
     # Check if files have correct extension
-    files = [i for i in Path(img_path).iterdir() if i.suffix in DATA_TYPE]
+    files = [i.stem for i in Path(src).iterdir() if i.suffix in DATA_TYPE]
+    # Get starting frame
+    start = min(files)
+    cam = Path(src).stem[OFFSET:]
+    video = cam + ".mp4"
+    # Change to src directory for ffmpeg
+    dir = os.getcwd()
+    os.chdir(src)
     # Use ffmpeg to convert each png to mp4 for easymocap
-    for f in files:
-        subprocess.check_output(
-            "ffmpeg -r 25 -f image2 -i "
-            + str(f)
-            + " -vcodec libx264 -crf 18 -pix_fmt yuv420p "
-            + str(Path(output, (f.stem + ".mp4"))),
-            shell=True,
-        )
-    # Move yml files into output directory
-    shutil.move(intri, dataset_name)
-    shutil.move(extri, dataset_name)
+    subprocess.check_output(
+        "ffmpeg -r 25 -start_number "
+        + start
+        + " -f image2 -i %03d"
+        + DATA_TYPE[0]
+        + " -vcodec libx264 -crf 18 -pix_fmt yuv420p "
+        + video,
+        shell=True,
+    )
+    # Change back to work dir
+    os.chdir(dir)
+    # Move video into output directory
+    shutil.move(str(Path(src, video)), output)
 
 
 if __name__ == "__main__":
