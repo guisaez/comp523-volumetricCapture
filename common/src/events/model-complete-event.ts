@@ -4,7 +4,6 @@ export interface ModelCompleteEvent {
     subject: Subjects.ProcessComplete;
 
     data: {
-        projectId: string,
-        version: number
+        projectId: string
     }
 }
