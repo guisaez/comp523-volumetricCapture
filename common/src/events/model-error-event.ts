@@ -5,6 +5,7 @@ export interface ModelErrorEvent {
 
     data: {
         projectId: string,
+        version: number;
         errors: string[],
     }
 }
