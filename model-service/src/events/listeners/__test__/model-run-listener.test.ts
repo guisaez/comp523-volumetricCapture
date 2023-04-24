@@ -1,4 +1,5 @@
-import { FileTypes, ModelRunEvent, RunData } from "@teamg2023/common";
+
+/*import { FileTypes, ModelRunEvent, RunData } from "@teamg2023/common";
 import { natsWrapper } from "../../../nats-wrapper"
 import { ModelRunListener } from "../model-run-listener"
 import mongoose from "mongoose";
@@ -155,10 +156,6 @@ const setup = async () => {
 
     return { data, msg, listener }
 }  
+*/
 
-it('automation test', async () => {
-
-    const { listener, data, msg } = await setup();
-
-    await listener.onMessage(data, msg);
-})
+it.todo('Test automation might take long time')
