@@ -1,6 +1,4 @@
 import * as React from 'react'
-import Box from '@mui/material/Box'
-import { styled } from "@mui/material/styles"
 import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
@@ -10,34 +8,26 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import CardActions from '@mui/material/CardActions'
-import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
-import DeleteIcon from '@mui/icons-material/Delete'
 import FilledInput from '@mui/material/FilledInput'
-import ProjectList from './projectList'
-import ProjectView from './projectView'
-import LoadingButton from '@mui/lab/LoadingButton'
 import isEmpty from 'validator/lib/isEmpty'
 import Alert from '@mui/material/Alert'
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import ReactMarkdown from 'react-markdown';
 import DeleteButton from "./deleteButton";
-
-//import TESTHOST from '../backend/backendAPI'
-
-const TESTHOST = ''
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
 const axios = require('axios').default
-const Input = styled("input")({
-    // display: "none"
-});
-function ProjectEdit({ setView, project, setProject, ...props }) {
+
+function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
     const [info, setInfo] = React.useState(project)
     const [error, setError] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState('');
     const [openHelp, setOpenHelp] = React.useState(false);
     const [markdown, setMarkdown] = React.useState('');
-
+    const [isSafed, setIsSafed] = React.useState(true);
+    const [openBack, setOpenBack] = React.useState(false);
 
     const handleOpenHelp = () => {
 
@@ -45,7 +35,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
             method: 'get',
             url: 'https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md'
         }).then((response) => {
-            console.log(response.data)
             setMarkdown(response.data)
         }
         ).catch(error => console.error(error));
@@ -55,6 +44,11 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleCloseHelp = () => {
         setOpenHelp(false);
     };
+
+    const handleCloseBack = () => {
+        setOpenBack(false);
+    };
+
 
     //zip
     const [zipId, setZipId] = React.useState('')
@@ -90,16 +84,15 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     React.useEffect(() => {
         axios({
             method: 'get',
-            url: TESTHOST + '/api/projects/' + info.id
+            url: '/api/projects/' + info.id
         }).then((res) => {
             //initialize zip
             if (res.data.project.zip_fileId) {
                 setZipButtonName('Update Zip')
-                console.log(res.data.project.zip_fileId)
                 setZipId(res.data.project.zip_fileId)
                 axios({
                     method: 'get',
-                    url: TESTHOST + '/api/files/' + res.data.project.zip_fileId
+                    url: '/api/files/' + res.data.project.zip_fileId
                 }).then((res) => {
                     setZipFileName(res.data.file.name)
                 })
@@ -113,7 +106,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setIntrinsicId(res.data.project.intrinsic_fileId)
                 axios({
                     method: 'get',
-                    url: TESTHOST + '/api/files/' + res.data.project.intrinsic_fileId
+                    url: '/api/files/' + res.data.project.intrinsic_fileId
                 }).then((res) => {
                     setIntrinsicFileName(res.data.file.name)
                 })
@@ -127,16 +120,13 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setExtrinsicId(res.data.project.extrinsic_fileId)
                 axios({
                     method: 'get',
-                    url: TESTHOST + '/api/files/' + res.data.project.extrinsic_fileId
+                    url: '/api/files/' + res.data.project.extrinsic_fileId
                 }).then((res) => {
                     setExtrinsicFileName(res.data.file.name)
                 })
             } else {
                 setExtrinsicButtonName('Upload Extrinsic')
             }
-
-
-
 
             setDisableZipDelete(!res.data.project.zip_fileId)
             setDisableIntrinsicDelete(!res.data.project.intrinsic_fileId)
@@ -147,26 +137,30 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleSave = () => {
         axios({
             method: 'patch',
-            url: TESTHOST + '/api/projects/' + info.id,
+            url: '/api/projects/' + info.id,
             data: {
                 projectName: info.projectName,
             }
         }).then((res) => {
             setProject(info)
+            setIsSafed(true)
         }).catch((err) => {
             if (isEmpty(info.projectName)) {
                 setErrorMessage("The project name must not be empty.")
                 setError(true)
+                setIsSafed(false)
             }
         })
     }
 
     const handleChange = (type, event) => {
         if (type === 'name') {
+            setError((!event.target.value && error))
             setInfo({ ...info, projectName: event.target.value })
+            setIsSafed(event.target.value == project.projectName)
         }
     }
-    const handleCancel = () => {
+    const handleBack = () => {
         setView('projectList')
     }
     const handleZipFileReader = (event) => {
@@ -195,8 +189,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
         formData.append('type', 'zip');
         if (zipButtonName == 'Upload Zip') {
             const route = '/api/files/upload/' + info.id;
-            console.log(route);
-            axios.post(TESTHOST + route, formData, {
+            axios.post(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -206,7 +199,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setDisableZipDelete(false);
                 setZipButtonName('Update Zip');
                 setZipFileName(res.data.file.name)
-                console.log(zipId);
                 setZipFile(null);
                 zipRef.current.value = null;
                 setSelectedZipName("None")
@@ -218,8 +210,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
 
         } else if (zipButtonName == 'Update Zip') {
             const route = '/api/files/update/' + zipId;
-            console.log(route);
-            axios.put(TESTHOST + route, formData, {
+            axios.put(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -229,7 +220,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setDisableZipDelete(false);
                 setZipButtonName('Update Zip');
                 setZipFileName(res.data.file.name)
-                console.log(zipId);
                 setZipFile(null);
                 zipRef.current.value = null;
                 setSelectedZipName("None")
@@ -246,8 +236,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
         formData.append('type', 'intrinsic');
         if (intrinsicButtonName == 'Upload Intrinsic') {
             const route = '/api/files/upload/' + info.id;
-            console.log(route);
-            axios.post(TESTHOST + route, formData, {
+            axios.post(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -257,7 +246,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setDisableIntrinsicDelete(false);
                 setIntrinsicButtonName('Update Intrinsic');
                 setIntrinsicFileName(res.data.file.name)
-                console.log(zipId);
                 setIntrinsicFile(null);
                 intrinsicRef.current.value = null;
                 setSelectedIntrinsicName("None")
@@ -269,8 +257,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
 
         } else if (intrinsicButtonName == 'Update Intrinsic') {
             const route = '/api/files/update/' + intrinsicId;
-            console.log(route);
-            axios.put(TESTHOST + route, formData, {
+            axios.put(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -280,7 +267,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setDisableIntrinsicDelete(false);
                 setIntrinsicButtonName('Update Intrinsic');
                 setIntrinsicFileName(res.data.file.name)
-                console.log(intrinsicId);
                 setIntrinsicFile(null);
                 intrinsicRef.current.value = null;
                 setSelectedIntrinsicName("None")
@@ -297,8 +283,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
         formData.append('type', 'extrinsic');
         if (extrinsicButtonName == 'Upload Extrinsic') {
             const route = '/api/files/upload/' + info.id;
-            console.log(route);
-            axios.post(TESTHOST + route, formData, {
+            axios.post(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -319,8 +304,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
 
         } else if (extrinsicButtonName == 'Update Extrinsic') {
             const route = '/api/files/update/' + extrinsicId;
-            console.log(route);
-            axios.put(TESTHOST + route, formData, {
+            axios.put(route, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -330,7 +314,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                 setDisableExtrinsicDelete(false);
                 setExtrinsicButtonName('Update Extrinsic');
                 setExtrinsicFileName(res.data.file.name)
-                console.log(extrinsicId);
                 setExtrinsicFile(null);
                 extrinsicRef.current.value = null;
                 setSelectedExtrinsicName("None")
@@ -344,7 +327,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleZipDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/api/files/delete',
+            url: '/api/files/delete',
             data: {
                 projectId: info.id,
                 id: zipId
@@ -360,7 +343,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleIntrinsicDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/api/files/delete',
+            url: '/api/files/delete',
             data: {
                 projectId: info.id,
                 id: intrinsicId
@@ -376,7 +359,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleExtrinsicDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/api/files/delete',
+            url: '/api/files/delete',
             data: {
                 projectId: info.id,
                 id: extrinsicId
@@ -391,7 +374,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     const handleDelete = () => {
         axios({
             method: 'delete',
-            url: TESTHOST + '/api/projects/' + info.id,
+            url: '/api/projects/' + info.id,
             data: {
             }
         }).then((res) => {
@@ -401,10 +384,9 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
     }
 
     const handleDownload = (id, fileName) => {
-        console.log('/api/files/download/' + id)
         axios({
             method: 'get',
-            url: TESTHOST + '/api/files/download/' + id,
+            url: '/api/files/download/' + id,
             responseType: 'blob'
         }).then((response) => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -415,6 +397,13 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
             link.click();
         })
     }
+
+    const handleOpenBack = () => {
+        if (!isSafed)
+            setOpenBack(!isSafed);
+        else
+            handleBack();
+    };
 
     return (
         <div>
@@ -433,7 +422,6 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                 id="filled-adornment-project-name"
                                 startAdornment={<InputAdornment position="start"></InputAdornment>}
                                 value={info.projectName}
-
                                 onChange={(e) => {
                                     handleChange('name', e)
                                 }}></FilledInput>
@@ -444,6 +432,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                         <Button variant="contained" size="large" onClick={handleSave} sx={{ m: 1 }} margin="16">Save Name</Button>
                         <Button variant="outlined" onClick={handleOpenHelp} size="large">Help</Button>
                         <Dialog open={openHelp} onClose={handleCloseHelp}>
+                            <DialogTitle>Help</DialogTitle>
                             <DialogContent>
                                 <Button className="close-btn" onClick={handleCloseHelp} size="small" variant="contained" style={{ margin: 16, position: 'absolute', top: 5, right: 5, backgroundColor: 'red' }}>
                                     X
@@ -474,7 +463,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                 <CardActions>
                                     <Stack spacing={1}>
                                         <div>
-                                            <Button variant="contained" component="label" style={{ margin: 8 }}>
+                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
                                                 Choose Zip
                                                 <input hidden
                                                     accept=".zip"
@@ -515,7 +504,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                 <CardActions>
                                     <Stack spacing={1}>
                                         <div>
-                                            <Button variant="contained" component="label" style={{ margin: 8 }}>
+                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
                                                 Choose Intrinsic
                                                 <input hidden
                                                     accept=".yml"
@@ -555,7 +544,7 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                                 <CardActions>
                                     <Stack spacing={1}>
                                         <div>
-                                            <Button variant="contained" component="label" style={{ margin: 8 }}>
+                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
                                                 Choose Extrinsic
                                                 <input hidden
                                                     accept=".yml"
@@ -586,11 +575,30 @@ function ProjectEdit({ setView, project, setProject, ...props }) {
                     alignItems="center"
                     margin={16}
                     spacing={1.5}
-                ><Grid item>
+                >
+                    <Grid item>
                         <DeleteButton onDelete={handleDelete} isDisabled={false} deletedThing="project" marginVar={0} size="large" buttonName='Delete Project'></DeleteButton>
-                    </Grid><Grid item>
-                        <Button variant="contained" size="large" onClick={handleCancel}>Back</Button>
-                    </Grid></Grid>
+                    </Grid>
+                    <Grid item>
+                        <Button variant="outlined" onClick={handleOpenBack} size="large">Back</Button>
+                        <Dialog open={openBack} onClose={handleCloseBack}>
+                            <DialogTitle>Confirmation</DialogTitle>
+                            <DialogContent>
+                                <Typography variant='body2' color='black'>
+                                    {'Are you sure you want to disgard the name change?'}
+                                </Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleCloseBack} variant="contained" color="primary">
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleBack} variant="contained" style={{ backgroundColor: 'red', color: 'white' }}>
+                                    Continue
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </Grid>
+                </Grid>
             </Stack>
         </div>
     )

@@ -1,28 +1,22 @@
 import * as React from 'react'
-import Box from '@mui/material/Box'
 import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
-import AccountCircle from '@mui/icons-material/AccountCircle'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import IconButton from '@mui/material/IconButton'
-import Grid from '@mui/material/Grid'
 import Alert from '@mui/material/Alert'
 import isEmail from 'validator/lib/isEmail'
 import isLength from 'validator/lib/isLength'
 import isEmpty from 'validator/lib/isEmpty'
-import { instanceOf } from 'prop-types'
-//import TESTHOST from '../backend/backendAPI'
 
-const TESTHOST = ''
 const axios = require('axios').default
 
-function Login({ setView, setTabValue, ...props }) {
+function Login({ setView, setTabValue, setisLogged,...props }) {
   const [values, setValues] = React.useState({
     email: '',
     password: ''
@@ -49,12 +43,14 @@ function Login({ setView, setTabValue, ...props }) {
   const handlelogin = () => {
     axios({
       method: 'post',
-      url: TESTHOST + '/api/auth/signin/',
+      url: '/api/auth/signin/',
       data: values
     }).then((response) => {
       setError(false)
       setUserInfo(response.data)
+      setisLogged(true)
       setTabValue('projects')
+      
     }).catch((err) => {
       setError(true)
       if(!isEmail(values.email))
@@ -138,7 +134,7 @@ function Signup({ setView, ...props }) {
   const handleSignup = () => {
     axios({
       method: 'post',
-      url: TESTHOST + '/api/auth/signup/',
+      url: '/api/auth/signup/',
       data: values
     }).then((response) => {
       setError(false)
@@ -200,11 +196,11 @@ function Signup({ setView, ...props }) {
   )
 }
 
-function User({ setTabValue, ...props }) {
+function User({ setTabValue, setisLogged,...props }) {
   const [view, setView] = React.useState('login')
   return (
     <div>
-      {view === 'login' && <Login setView={setView} setTabValue={setTabValue} />}
+      {view === 'login' && <Login setView={setView} setTabValue={setTabValue}  setisLogged={setisLogged}/>}
       {view === 'signup' && <Signup setView={setView} />}
     </div>
   )
