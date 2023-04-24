@@ -114,7 +114,6 @@ RUN git clone https://github.com/mmatl/pyopengl.git --depth=1 && \
     deactivate
 
 #RUN rm -rf pyopengl
-#RUN rm -rf pyopengl
 
 ENV PATH /app/venv/bin:$PATH
 
