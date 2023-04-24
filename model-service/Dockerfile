@@ -55,6 +55,7 @@ RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3
     ./configure && \
     make -j4 && make install
 
+
 # Install and build OpenPose
 WORKDIR /app/src
 
@@ -133,4 +134,6 @@ ENV PYOPENGL_PLATFORM=osmesa
 
 COPY . .
 
-CMD ["npm", "start"]
+#CMD ["npm", "start"]
+
+CMD ["/bin/bash"]
