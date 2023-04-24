@@ -55,13 +55,6 @@ RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3
     ./configure && \
     make -j4 && make install
 
-RUN curl -sLo cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz && \
-    tar -xvf cmake.tar.gz && \
-    cd cmake-3.20.1 && \
-    ./configure && \
-    make -j4 && make install
-
-
 # Install and build OpenPose
 WORKDIR /app/src
 
