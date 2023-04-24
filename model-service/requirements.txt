@@ -34,10 +34,10 @@ packaging==23.1
 Pillow==9.5.0 
 plyfile==0.9 
 protobuf==3.19.6  
-pyglet==1.4.10
+pyglet==1.4.10 
 PyMCubes==0.1.4 
 pyparsing==3.0.9 
-pyrender==0.1.35
+pyrender==0.1.35 
 python-dateutil==2.8.2 
 pytorch-lightning==1.9.5 
 PyYAML==6.0 
