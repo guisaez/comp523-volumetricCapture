@@ -10,4 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7' # choose the version you need
       - run: cd model-service && npm install && npm run test:ci
