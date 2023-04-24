@@ -7,6 +7,7 @@ import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
 import { FileUpdatedPublisher } from '../events/publishers/file-updated-publisher';
 import { natsWrapper } from '../nats-wrapper';
+import { handleFileName } from '../utils/uitls';
 
 const router = express.Router();
 
@@ -47,7 +48,9 @@ router.put('/api/files/update/:id',
 
         const bucket = await GridFS.getBucket();
 
-        const uploadStream = bucket.openUploadStreamWithId(file._id, file.name);
+        const file_name = handleFileName(file.type);
+
+        const uploadStream = bucket.openUploadStreamWithId(file._id, file_name);
 
         uploadStream.on('error', (err) => {
             res.status(500).send( err );

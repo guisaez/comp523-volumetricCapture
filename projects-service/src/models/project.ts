@@ -85,8 +85,9 @@ projectSchema.statics.build = (attrs: ProjectAttrs) => {
 
 projectSchema.statics.findByEvent = (event: {projectId: string}) => {
     return Project.findOne({
-        _id: event.projectId
+        _id: new mongoose.Types.ObjectId(event.projectId)
     });
+    
 }
 const Project = mongoose.model<ProjectDoc, ProjectModel>('Project', projectSchema);
 

@@ -7,6 +7,7 @@ import { GridFS } from '../utils/GridFS';
 import { natsWrapper } from '../nats-wrapper';
 import { FileUploadedPublisher } from '../events/publishers/file-uploaded-publisher';
 import mongoose from 'mongoose';
+import { handleFileName } from '../utils/uitls';
 
 const router = express.Router();
 
@@ -42,7 +43,9 @@ router.post('/api/files/upload/:projectId',
             projectId: req.params.projectId
         });
 
-        const uploadStream = bucket.openUploadStreamWithId(file._id, file.name);
+        const file_name = handleFileName(file.type);
+
+        const uploadStream = bucket.openUploadStreamWithId(file._id, file_name);
 
         uploadStream.on('error', (err) => {
            res.status(500).send( err );

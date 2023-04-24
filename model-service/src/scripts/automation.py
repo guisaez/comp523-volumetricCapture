@@ -103,8 +103,8 @@ def automate(
             )
 
         # Move yml files into input directory
-        shutil.move(raw_path + projectid + "/intrinsic.yml", raw_path + projectid + "/mocap_input")
-        shutil.move(raw_path + projectid + "/extrinsic.yml", raw_path + projectid + "/mocap_input")
+        shutil.move(raw_path + projectid + "/intri.yml", raw_path + projectid + "/mocap_input")
+        shutil.move(raw_path + projectid + "/extri.yml", raw_path + projectid + "/mocap_input")
     except Exception as e:
         return e
     
