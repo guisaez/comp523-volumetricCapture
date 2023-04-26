@@ -250,7 +250,7 @@ export class Run {
             await this.unzipp_data();
             console.log('Unzzip complete')
             console.log('Running model....')
-            await this.pythonAutomation()
+            // await this.pythonAutomation()
             console.log('Model Complete')
             console.log('Zipping Output Model...')
             await this.makeIntoZip()
