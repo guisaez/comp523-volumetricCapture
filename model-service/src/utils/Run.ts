@@ -116,8 +116,9 @@ export class Run {
 
     private pythonAutomation = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const automation = spawn('python', ['./src/scripts/automation.py'])
+            const automation = spawn('python', [`src/scripts/automation.py`, this.projectId])
             .on('error', (err) => {
+                console.log(err)
                 reject(err)
             })
 
@@ -249,14 +250,14 @@ export class Run {
             await this.unzipp_data();
             console.log('Unzzip complete')
             console.log('Running model....')
-            //await this.pythonAutomation()
+            await this.pythonAutomation()
             console.log('Model Complete')
             console.log('Zipping Output Model...')
             await this.makeIntoZip()
             console.log('Zip complete')
             return true;
         }catch(err){
-            console.error("Error");
+            console.error(err);
             this.cleanup(this.folderPath + this.projectId);
         }
 
