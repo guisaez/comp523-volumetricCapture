@@ -18,6 +18,8 @@ import ReactMarkdown from 'react-markdown';
 import DeleteButton from "./deleteButton";
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import yaml from 'js-yaml';
 const axios = require('axios').default
 
 function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
@@ -82,14 +84,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
 
     //multi_view_config
     const [multiViewConfigId, setMultiViewConfigId] = React.useState('')
-    const [multiViewConfigFile, setMultiViewConfigFile] = React.useState(null)
-    const [multiViewConfigButtonName, setMultiViewConfigButtonName] = React.useState('')
-    const [multiViewConfigFileName, setMultiViewConfigFileName] = React.useState('None')
-    const multiViewConfigRef = React.useRef(null)
-    const [selectedMultiViewConfigName, setSelectedMultiViewConfigName] = React.useState('None')
-    const [disableMultiViewConfigUpload, setDisableMultiViewConfigUpload] = React.useState(true)
-    const [disableMultiViewConfigDelete, setDisableMultiViewConfigDelete] = React.useState(true)
-
 
     React.useEffect(() => {
         axios({
@@ -140,22 +134,22 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
 
             //initialize multi_view_config           
             if (res.data.project.multi_view_fileId) {
-                setMultiViewConfigButtonName('Update MultiViewConfig')
                 setMultiViewConfigId(res.data.project.multi_view_fileId)
                 axios({
                     method: 'get',
-                    url: '/api/files/' + res.data.project.multi_view_fileId
+                    url: '/api/files/download/' + res.data.project.multi_view_fileId
                 }).then((res) => {
-                    setMultiViewConfigFileName(res.data.file.name)
+                    const data = yaml.load(res.data)
+                    setEpoch(data.train.epoch);
+                    setNumWorkers(data.train.num_workers);
+                    setNumTrainFrame(data.num_train_frame);
+                    setRatio(data.ratio) 
                 })
-            } else {
-                setMultiViewConfigButtonName('Upload MultiViewConfig')
             }
 
             setDisableZipDelete(!res.data.project.zip_fileId)
             setDisableIntrinsicDelete(!res.data.project.intrinsic_fileId)
             setDisableExtrinsicDelete(!res.data.project.extrinsic_fileId)
-            setDisableMultiViewConfigDelete(!res.data.project.multi_view_fileId)
         })
     }, [])
 
@@ -207,12 +201,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
         setSelectedExtrinsicName(selectedFile.name)
         setDisableExtrinsicUpload(false);
 
-    }
-    const handleMultiConfigFileReader = (event) => {
-        const selectedFile = event.target.files[0];
-        setMultiViewConfigFile(selectedFile);
-        setMultiViewConfigFileName(selectedFile.name)
-        setDisableMultiViewConfigUpload(false);
     }
 
     const handleZipUpload = () => {
@@ -357,54 +345,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
         }
     }
 
-    const handleMultiViewConfigUpload = () => {
-        const formData = new FormData();
-        formData.append('file', multiViewConfigFile);
-        formData.append('type', 'multi_view_config');
-        if (multiViewConfigButtonName == 'Upload MultiViewConfig') {
-            const route = '/api/files/upload/' + info.id;
-            axios.post(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setMultiViewConfigId(res.data.file.id);
-                setDisableMultiViewConfigUpload(true);
-                setDisableMultiViewConfigUpload(false);
-                setMultiViewConfigButtonName('Update MultiViewConfig');
-                setMultiViewConfigFileName(res.data.file.name)
-                setMultiViewConfigFile(null);
-                multiViewConfigRef.current.value = null;
-                setSelectedMultiViewConfigName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableMultiViewConfigUpload(false);
-                });
-
-        } else if (multiViewConfigButtonName == 'Update MultiViewConfig') {
-            const route = '/api/files/update/' + multiViewConfigId;
-            axios.put(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setMultiViewConfigId(res.data.file.id);
-                setDisableMultiViewConfigUpload(true);
-                setDisableMultiViewConfigDelete(false);
-                setMultiViewConfigButtonName('Update MultiViewConfig');
-                setMultiViewConfigFileName(res.data.file.name)
-                setMultiViewConfigFile(null);
-               multiViewConfigRef.current.value = null;
-                setSelectedMultiViewConfigName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableMultiViewConfigUpload(false);
-                });
-        }
-    }
-
     const handleZipDelete = () => {
         axios({
             method: 'delete',
@@ -453,22 +393,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
         })
     }
 
-    const handleMultiConfigViewDelete = () => {
-        axios({
-            method: 'delete',
-            url: '/api/files/delete',
-            data: {
-                projectId: info.id,
-                id: multiViewConfigId
-            }
-        }).then((res) => {
-            setDisableMultiViewConfigDelete(true);
-            setMultiViewConfigButtonName('Upload Extrinsic');
-            setDisableMultiViewConfigUpload(!extrinsicFile);
-            setMultiViewConfigFileName("None")
-        })
-    }
-
     const handleDelete = () => {
         axios({
             method: 'delete',
@@ -501,6 +425,56 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
             setOpenBack(!isSafed);
         else
             handleBack();
+    };
+
+    const [epoch, setEpoch] = React.useState(50);
+    const [numWorkers, setNumWorkers] = React.useState(6);
+    const [numTrainFrame, setNumTrainFrame] = React.useState(20);
+    const [ratio, setRatio] = React.useState(0.5)
+
+    const handleUpdateConfig = () => {
+        const data = {
+            task: 'if_nerf',
+            gpus: [0],
+            parent_cfg: 'configs/zju_mocap_exp/latent_xyzc_313.yaml',
+            train_dataset: {
+                data_root: '/app/src/data/' + info.id + '/neural_input',
+                human: 'custom',
+                ann_file: '/app/src/data/' + info.id + '/neural_input/annots.npy',
+                split: 'train'
+            },
+            test_dataset: {
+                data_root: '/app/src/data/' + info.id + '/neural_input',
+                human: 'custom',
+                ann_file: '/app/src/data/' + info.id + '/neural_input/annots.npy',
+                split: 'test'
+            },
+            train: {
+                epoch: epoch,
+                num_workers: numWorkers
+            },
+            ratio: ratio,
+            training_view: [0, 1, 2, 3],
+            num_train_frame: numTrainFrame,
+            smpl: 'smpl',
+            vertices: 'vertices',
+            params: 'params',
+            big_box: true
+        };
+        const yamlData = yaml.dump(data, { indent: 2, quotingType: "'", forceQuotes: true, flowLevel: 4 });
+        const config_yaml = new File([yamlData], info.id +"_config.yaml", { type: "text/plain;charset=utf-8" });
+        const formData = new FormData();
+        formData.append('file', config_yaml);
+        formData.append('type', 'multi_view_config');
+        const route = '/api/files/update/' + multiViewConfigId;
+        console.log(route)
+        axios.put(route, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }).then((res) => {
+        }).catch((err) => {
+        });
     };
 
     return (
@@ -667,43 +641,44 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                     <Grid item xs={6}>
                         <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
                             <Stack spacing={5}>
-                                <CardContent>
-                                    <Typography gutterBottom variant='h5' component='div'>
-                                        MultiViewConfig File
+                            <CardContent>
+                            <Typography gutterBottom variant='h5' component='div'>
+                                        Multi-View Settings
                                     </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Uploaded MultiConfigView File is ' + multiViewConfigFileName}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Chosen File is ' + selectedMultiViewConfigName}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'ProjectId to add to configuration: ' + info.id}
-                                    </Typography>
+                                    <TextField
+                                        label="Epoch"
+                                        variant="outlined"
+                                        type="number"
+                                        value={epoch}
+                                        onChange={(e) => setEpoch(parseInt(e.target.value))}
+                                    />
+                                    <TextField
+                                        label="Number of Workers"
+                                        variant="outlined"
+                                        type="number"
+                                        value={numWorkers}
+                                        onChange={(e) => setNumWorkers(parseInt(e.target.value))}
+                                    />
+                                    <TextField
+                                        label="Ratio"
+                                        variant="outlined"
+                                        type="number"
+                                        value={ratio}
+                                        onChange={(e) => setRatio(parseFloat(e.target.value))}
+                                    />
+                                    <TextField
+                                        label="Number of Train Frames"
+                                        variant="outlined"
+                                        type="number"
+                                        value={numTrainFrame}
+                                        onChange={(e) => setNumTrainFrame(parseInt(e.target.value))}
+                                    />
                                 </CardContent>
                                 <CardActions>
-                                    <Stack spacing={1}>
-                                        <div>
-                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
-                                                Choose MultiConfigView
-                                                <input hidden
-                                                    accept=".yml"
-                                                    id="yml-upload"
-                                                    type="file"
-                                                    onChange={handleMultiConfigFileReader}
-                                                    style={{ display: 'none' }}
-                                                    ref={multiViewConfigRef}
-                                                />
-                                            </Button>
-
-                                            <Button onClick={handleMultiViewConfigUpload} variant="contained" disabled={(disableMultiViewConfigUpload)} style={{ margin: 8 }}>{multiViewConfigButtonName}</Button>
-                                        </div>
-                                        <div>
-                                            <DeleteButton onDelete={handleMultiConfigViewDelete} marginVar={8} isDisabled={disableMultiViewConfigDelete} deletedThing="MultiConfigView file" size="medium" buttonName='Delete MultiConfigView'></DeleteButton>
-                                            <Button onClick={(e) => { handleDownload(multiViewConfigId, multiViewConfigFileName) }} variant="outlined" style={{ margin: 8 }} disabled={multiViewConfigFileName == 'None'}>Download MultiConfigView</Button>
-                                        </div>
-                                    </Stack>
-                                </CardActions>
+                                    <Button variant="contained" onClick={handleUpdateConfig}>
+                                        Update
+                                    </Button>
+                                    </CardActions>
                             </Stack>
                         </Card>
                     </Grid>

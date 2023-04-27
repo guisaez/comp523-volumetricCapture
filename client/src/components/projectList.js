@@ -11,6 +11,8 @@ import Input from '@mui/material/Input'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
 import DeleteButton from "./deleteButton";
+import yaml from 'js-yaml';
+import FileSaver from 'file-saver';
 
 
 const axios = require('axios').default
@@ -186,8 +188,57 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
       }
     }).then((res) => {
       setNumProjects([...numProjects, res.data])
+      generateMultiViewConfig(res.data.id)
     })
   }
+
+  const generateMultiViewConfig = (pid) => {
+    const data = {
+      task: 'if_nerf',
+      gpus: [0],
+      parent_cfg: 'configs/zju_mocap_exp/latent_xyzc_313.yaml',
+      train_dataset: {
+        data_root: '/app/src/data/' + pid + '/neural_input',
+        human: 'custom',
+        ann_file: '/app/src/data/' + pid + '/neural_input/annots.npy',
+        split: 'train'
+      },
+      test_dataset: {
+        data_root: '/app/src/data/' + pid + '/neural_input',
+        human: 'custom',
+        ann_file: '/app/src/data/' + pid + '/neural_input/annots.npy',
+        split: 'test'
+      },
+      train: {
+        epoch: 50,
+        num_workers: 6
+      },
+      ratio: 0.5,
+      training_view: [0, 1, 2, 3],
+      num_train_frame: 20,
+      smpl: 'smpl',
+      vertices: 'vertices',
+      params: 'params',
+      big_box: true
+    };
+    const yamlData = yaml.dump(data, { indent: 2, quotingType: "'", forceQuotes: true, flowLevel: 4 });
+    const config_yaml = new File([yamlData], pid+"_default_config.yaml", { type: "text/plain;charset=utf-8" });
+    const formData = new FormData();
+    formData.append('file', config_yaml);
+    formData.append('type', 'multi_view_config');
+    const route = '/api/files/upload/' + pid;
+    axios.post(route, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then((res) => {
+    })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
+
 
   return (
     <div>
