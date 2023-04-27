@@ -11,6 +11,6 @@ export function handleFileName(type: FileTypes): string {
         case FileTypes.OUTPUT:
             return "output.zip"
         case FileTypes.MULTI_VIEW_CONFIG:
-            return "multi_view_config.yml"
+            return "multi_view_custom.yml"
     }
 }

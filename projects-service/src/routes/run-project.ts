@@ -13,7 +13,7 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
     if(!req.params.projectId || !mongoose.isObjectIdOrHexString(req.params.projectId)){
         throw new BadRequestError('Invalid Project Id');
     }
-    const project = await Project.findById(req.params.projectId).populate('zip_fileId').populate('extrinsic_fileId').populate('intrinsic_fileId');
+    const project = await Project.findById(req.params.projectId).populate('zip_fileId').populate('extrinsic_fileId').populate('intrinsic_fileId').populate('multi_view_fileId');
 
     if(!project){
         throw new BadRequestError('Invalid Project Id');
@@ -31,16 +31,21 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
 
     const intrinsicData: RunData = {
         fileId: project.intrinsic_fileId.id,
-        name: 'intrinsic.yml',
+        name: 'intri.yml',
         type: project.intrinsic_fileId.type
     }
 
     const extrinsicData: RunData = {
         fileId: project.intrinsic_fileId.id,
-        name: 'extrinsic.yml',
+        name: 'extri.yml',
         type: project.extrinsic_fileId.type
     }
 
+    const multiConfigData: RunData = {
+        fileId: project.multi_view_fileId.id,
+        name: 'multi_config_custom.yml',
+        type: project.multi_view_fileId.type
+    }
 
     project.set('processStatus', ProcessStatus.Running);
 
@@ -49,7 +54,7 @@ router.post('/api/projects/run/:projectId', requireAuth, async (req: Request, re
     new ModelRunPublisher(natsWrapper.client).publish({
         projectId: project.id,
         userId: project.userId,
-        files: [intrinsicData, zipData, extrinsicData]
+        files: [intrinsicData, zipData, extrinsicData, multiConfigData]
     })
 
     res.send( { project });

@@ -1,7 +1,7 @@
 import { FileTypes, RunData } from '@teamg2023/common';
 import fs from 'fs';
 import { GridFS } from './GridFS';
-import mongoose, { mongo, set } from 'mongoose';
+import mongoose from 'mongoose';
 import unzipper from 'unzipper';
 import { spawn } from 'child_process';
 import archiver from 'archiver';

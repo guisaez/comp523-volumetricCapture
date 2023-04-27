@@ -1,7 +1,7 @@
 {
   "name": "projects-service",
   "version": "1.0.0",
-  "description": "\"Service to Manage User Projects\"",
+  "description": "\"Service to Manage User Projects and Info\"",
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",

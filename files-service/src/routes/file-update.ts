@@ -7,7 +7,7 @@ import { Readable } from 'stream';
 import { GridFS } from '../utils/GridFS';
 import { FileUpdatedPublisher } from '../events/publishers/file-updated-publisher';
 import { natsWrapper } from '../nats-wrapper';
-import { handleFileName } from '../utils/uitls';
+import { handleFileName } from '../utils/utils';
 
 const router = express.Router();
 

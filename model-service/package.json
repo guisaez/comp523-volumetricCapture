@@ -1,7 +1,7 @@
 {
   "name": "models-service",
   "version": "1.0.0",
-  "description": "\"Service to Save User Uploaded Files and Configurations\"",
+  "description": "\"Service to Run the model\"",
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",

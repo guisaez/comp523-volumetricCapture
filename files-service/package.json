@@ -1,7 +1,7 @@
 {
   "name": "files-service",
   "version": "1.0.0",
-  "description": "\"Service to Save User Uploaded Files and Configurations\"",
+  "description": "\"Service to Save User Uploaded Files and Configuration File\"",
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts",
@@ -18,7 +18,7 @@
   "author": "guisaez",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@teamg2023/common": "^1.0.7",
+    "@teamg2023/common": "^1.0.33",
     "@types/cookie-session": "^2.0.44",
     "@types/express": "^4.17.17",
     "@types/jsonwebtoken": "^9.0.1",

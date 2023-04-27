@@ -80,6 +80,16 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
     const [disableExtrinsicUpload, setDisableExtrinsicUpload] = React.useState(true)
     const [disableExtrinsicDelete, setDisableExtrinsicDelete] = React.useState(true)
 
+    //multi_view_config
+    const [multiViewConfigId, setMultiViewConfigId] = React.useState('')
+    const [multiViewConfigFile, setMultiViewConfigFile] = React.useState(null)
+    const [multiViewConfigButtonName, setMultiViewConfigButtonName] = React.useState('')
+    const [multiViewConfigFileName, setMultiViewConfigFileName] = React.useState('None')
+    const multiViewConfigRef = React.useRef(null)
+    const [selectedMultiViewConfigName, setSelectedMultiViewConfigName] = React.useState('None')
+    const [disableMultiViewConfigUpload, setDisableMultiViewConfigUpload] = React.useState(true)
+    const [disableMultiViewConfigDelete, setDisableMultiViewConfigDelete] = React.useState(true)
+
 
     React.useEffect(() => {
         axios({
@@ -128,9 +138,24 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                 setExtrinsicButtonName('Upload Extrinsic')
             }
 
+            //initialize multi_view_config           
+            if (res.data.project.multi_view_fileId) {
+                setMultiViewConfigButtonName('Update MultiViewConfig')
+                setMultiViewConfigId(res.data.project.multi_view_fileId)
+                axios({
+                    method: 'get',
+                    url: '/api/files/' + res.data.project.multi_view_fileId
+                }).then((res) => {
+                    setMultiViewConfigFileName(res.data.file.name)
+                })
+            } else {
+                setMultiViewConfigButtonName('Upload MultiViewConfig')
+            }
+
             setDisableZipDelete(!res.data.project.zip_fileId)
             setDisableIntrinsicDelete(!res.data.project.intrinsic_fileId)
             setDisableExtrinsicDelete(!res.data.project.extrinsic_fileId)
+            setDisableMultiViewConfigDelete(!res.data.project.multi_view_fileId)
         })
     }, [])
 
@@ -183,6 +208,13 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
         setDisableExtrinsicUpload(false);
 
     }
+    const handleMultiConfigFileReader = (event) => {
+        const selectedFile = event.target.files[0];
+        setMultiViewConfigFile(selectedFile);
+        setMultiViewConfigFileName(selectedFile.name)
+        setDisableMultiViewConfigUpload(false);
+    }
+
     const handleZipUpload = () => {
         const formData = new FormData();
         formData.append('file', zipFile);
@@ -324,6 +356,55 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                 });
         }
     }
+
+    const handleMultiViewConfigUpload = () => {
+        const formData = new FormData();
+        formData.append('file', multiViewConfigFile);
+        formData.append('type', 'multi_view_config');
+        if (multiViewConfigButtonName == 'Upload MultiViewConfig') {
+            const route = '/api/files/upload/' + info.id;
+            axios.post(route, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }).then((res) => {
+                setMultiViewConfigId(res.data.file.id);
+                setDisableMultiViewConfigUpload(true);
+                setDisableMultiViewConfigUpload(false);
+                setMultiViewConfigButtonName('Update MultiViewConfig');
+                setMultiViewConfigFileName(res.data.file.name)
+                setMultiViewConfigFile(null);
+                multiViewConfigRef.current.value = null;
+                setSelectedMultiViewConfigName("None")
+            })
+                .catch((err) => {
+                    console.error(err);
+                    setDisableMultiViewConfigUpload(false);
+                });
+
+        } else if (multiViewConfigButtonName == 'Update MultiViewConfig') {
+            const route = '/api/files/update/' + multiViewConfigId;
+            axios.put(route, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }).then((res) => {
+                setMultiViewConfigId(res.data.file.id);
+                setDisableMultiViewConfigUpload(true);
+                setDisableMultiViewConfigDelete(false);
+                setMultiViewConfigButtonName('Update MultiViewConfig');
+                setMultiViewConfigFileName(res.data.file.name)
+                setMultiViewConfigFile(null);
+               multiViewConfigRef.current.value = null;
+                setSelectedMultiViewConfigName("None")
+            })
+                .catch((err) => {
+                    console.error(err);
+                    setDisableMultiViewConfigUpload(false);
+                });
+        }
+    }
+
     const handleZipDelete = () => {
         axios({
             method: 'delete',
@@ -371,6 +452,23 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
             setExtrinsicFileName("None")
         })
     }
+
+    const handleMultiConfigViewDelete = () => {
+        axios({
+            method: 'delete',
+            url: '/api/files/delete',
+            data: {
+                projectId: info.id,
+                id: multiViewConfigId
+            }
+        }).then((res) => {
+            setDisableMultiViewConfigDelete(true);
+            setMultiViewConfigButtonName('Upload Extrinsic');
+            setDisableMultiViewConfigUpload(!extrinsicFile);
+            setMultiViewConfigFileName("None")
+        })
+    }
+
     const handleDelete = () => {
         axios({
             method: 'delete',
@@ -443,10 +541,10 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                     </Grid></Grid>
                 {error && <Alert severity="error">{errorMessage}</Alert>}
 
-                <Grid container spacing={1} style={{ display: 'flex', direction: 'column' }} justifyContent="flex-end"
+                <Grid container spacing={1} style={{ display: 'flex', direction: 'column' }} justifyContent="center"
                     alignItems="center"
                 >
-                    <Grid item xs={20} md={4}>
+                    <Grid item xs={6}>
                         <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
                             <Stack spacing={5}>
                                 <CardContent>
@@ -480,14 +578,13 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                                         <div>
                                             <DeleteButton onDelete={handleZipDelete} marginVar={8} isDisabled={disableZipDelete} deletedThing="zip file" size="medium" buttonName='Delete Zip'></DeleteButton>
                                             <Button onClick={(e) => { handleDownload(zipId, zipFileName) }} variant="outlined" style={{ margin: 8 }} disabled={zipFileName == 'None'}>Download Zip</Button>
-
                                         </div>
                                     </Stack>
                                 </CardActions>
                             </Stack>
                         </Card>
                     </Grid>
-                    <Grid item xs={20} md={4}>
+                    <Grid item xs={6}>
                         <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
                             <Stack spacing={5}>
                                 <CardContent>
@@ -527,7 +624,7 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                             </Stack>
                         </Card>
                     </Grid>
-                    <Grid item xs={20} md={4}>
+                    <Grid item xs={6}>
                         <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
                             <Stack spacing={5}>
                                 <CardContent>
@@ -561,6 +658,49 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                                         <div>
                                             <DeleteButton onDelete={handleExtrinsicDelete} marginVar={8} isDisabled={disableExtrinsicDelete} deletedThing="extrinsic file" size="medium" buttonName='Delete Extrinsic'></DeleteButton>
                                             <Button onClick={(e) => { handleDownload(extrinsicId, extrinsicFileName) }} variant="outlined" style={{ margin: 8 }} disabled={extrinsicFileName == 'None'}>Download Extrinsic</Button>
+                                        </div>
+                                    </Stack>
+                                </CardActions>
+                            </Stack>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
+                            <Stack spacing={5}>
+                                <CardContent>
+                                    <Typography gutterBottom variant='h5' component='div'>
+                                        MultiViewConfig File
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                        {'Uploaded MultiConfigView File is ' + multiViewConfigFileName}
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                        {'Chosen File is ' + selectedMultiViewConfigName}
+                                    </Typography>
+                                    <Typography variant='body2' color='text.secondary'>
+                                        {'ProjectId to add to configuration: ' + info.id}
+                                    </Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <Stack spacing={1}>
+                                        <div>
+                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
+                                                Choose MultiConfigView
+                                                <input hidden
+                                                    accept=".yml"
+                                                    id="yml-upload"
+                                                    type="file"
+                                                    onChange={handleMultiConfigFileReader}
+                                                    style={{ display: 'none' }}
+                                                    ref={multiViewConfigRef}
+                                                />
+                                            </Button>
+
+                                            <Button onClick={handleMultiViewConfigUpload} variant="contained" disabled={(disableMultiViewConfigUpload)} style={{ margin: 8 }}>{multiViewConfigButtonName}</Button>
+                                        </div>
+                                        <div>
+                                            <DeleteButton onDelete={handleMultiConfigViewDelete} marginVar={8} isDisabled={disableMultiViewConfigDelete} deletedThing="MultiConfigView file" size="medium" buttonName='Delete MultiConfigView'></DeleteButton>
+                                            <Button onClick={(e) => { handleDownload(multiViewConfigId, multiViewConfigFileName) }} variant="outlined" style={{ margin: 8 }} disabled={multiViewConfigFileName == 'None'}>Download MultiConfigView</Button>
                                         </div>
                                     </Stack>
                                 </CardActions>

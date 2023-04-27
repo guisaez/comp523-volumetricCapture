@@ -21,6 +21,7 @@ interface ProjectDoc extends mongoose.Document {
     zip_fileId: FilesDoc;
     extrinsic_fileId: FilesDoc;
     intrinsic_fileId: FilesDoc;
+    multi_view_fileId: FilesDoc;
     output_fileId: FilesDoc;
 }
 
@@ -60,6 +61,10 @@ const projectSchema = new mongoose.Schema({
         ref: 'File'
     },
     intrinsic_fileId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'File'
+    },
+    multi_view_fileId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'File'
     },
