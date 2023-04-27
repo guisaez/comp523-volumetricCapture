@@ -68,7 +68,7 @@ RUN cd openpose && \
     mkdir build && \
     cd build
 
-RUN cd openpose/build && cmake -DUSE_CUDNN=OFF .. 
+RUN cd openpose/build && cmake -DGPU_MODE=CPU_ONLY -DUSE_CUDNN=OFF .. 
 RUN cd openpose/build && make -j`nproc`
 
 # Switch to Bash
@@ -134,6 +134,6 @@ ENV PYOPENGL_PLATFORM=osmesa
 
 COPY . .
 
-#CMD ["npm", "start"]
+CMD ["npm", "start"]
 
-CMD ["/bin/bash"]
+#CMD ["/bin/bash"]

@@ -48,21 +48,22 @@ def automate(
     projectid
 ):
     """Automates the volumetric capture workflow. Creates 3D meshes from raw images."""
-    print(WORK_DIR)
+
     ### Run MakeDatasets
     try:
         click.echo("Running CIHP_PGN")
         # Store output in CIHP_PGN so test_pgn.py does not need to be modified
         subprocess.check_output(
-            "python scripts/make_dataset.py --delete "
+            "python /app/src/scripts/make_dataset.py --delete "
             + raw_path + projectid
-            + " CIHP2 "
+            + " CIHP "
             + raw_path + projectid,
             shell=True,
         )
         click.echo("Created dataset")
     except Exception as e:
-        return e
+        raise e
+    
     """
     ### Run CIHP_PGN
     try:
@@ -74,16 +75,16 @@ def automate(
         # CD back to main directory
         os.chdir(WORK_DIR)
     except Exception as e:
-        return e
-    """
+        raise e
     
+    """
     ### Run EasyMocap
     try:
         click.echo("Running EasyMocap")
         # Create input structure for EasyMocap
         # Separate raw images by camera
         subprocess.check_output(
-            "python scripts/separate.py "
+            "python /app/src/scripts/separate.py "
             + raw_path + projectid
             + " "
             + raw_path + projectid,
@@ -95,7 +96,7 @@ def automate(
         for cam in cams:
             click.echo(str(cam))
             subprocess.check_output(
-                " python scripts/raw_to_easymocap.py "
+                " python /app/src/scripts/raw_to_easymocap.py "
                 + str(cam)
                 + " "
                 + raw_path + projectid + "/mocap_input",
@@ -106,14 +107,14 @@ def automate(
         shutil.move(raw_path + projectid + "/intri.yml", raw_path + projectid + "/mocap_input")
         shutil.move(raw_path + projectid + "/extri.yml", raw_path + projectid + "/mocap_input")
     except Exception as e:
-        return e
-    
+        raise e
+    """
     try:
         # Generate OpenPose parameters
         output = subprocess.check_output(
             "python "
             + mocap
-            + "/scripts/preprocess/extract_video.py "
+            + "/app/src/scripts/preprocess/extract_video.py "
             + raw_path + projectid + "/mocap_input"
             + " --openpose "
             + openpose
@@ -146,7 +147,7 @@ def automate(
         # Run easymocap_to_neuralbody script
         subprocess.Popen(["python", fpath, "--src", raw_path + projectid + "/mocap_input/output/smpl/smpl", "--dst", raw_path + projectid + "/neural_input"]).wait()
     except Exception as e:
-        return e
+        raise e
     
     ### Run Neuralbody
     try:
@@ -177,9 +178,9 @@ def automate(
         # Generate meshes
         subprocess.Popen([env, "./run.py", "--type", "visualize", "--cfg_file", "./configs/multi_view_custom.yaml", "exp_name", "neuralbodydata", "vis_mesh", "True", "mesh_th", "10"]).wait()
         
-    except:
-        return RuntimeError("Neuralbody Error")
-    
+    except Exception as e:
+        raise e
+    """
 
 
 if __name__ == "__main__":

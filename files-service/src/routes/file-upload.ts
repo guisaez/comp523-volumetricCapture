@@ -7,7 +7,7 @@ import { GridFS } from '../utils/GridFS';
 import { natsWrapper } from '../nats-wrapper';
 import { FileUploadedPublisher } from '../events/publishers/file-uploaded-publisher';
 import mongoose from 'mongoose';
-import { handleFileName } from '../utils/uitls';
+import { handleFileName } from '../utils/utils';
 
 const router = express.Router();
 

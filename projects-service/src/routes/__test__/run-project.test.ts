@@ -36,15 +36,25 @@ const setup = async () => {
         name: 'intri.yml'
     })
 
+    const multi = File.build({
+        id: new mongoose.Types.ObjectId().toHexString(),
+        type: FileTypes.MULTI_VIEW_CONFIG,
+        userId: project.userId,
+        name: 'multi.yml'
+    })
+
     await zip.save();
 
     await intri.save();
 
     await extri.save();
 
+    await multi.save();
+
     project.set('zip_fileId', zip);
     project.set('intrinsic_fileId', intri);
     project.set('extrinsic_fileId', extri);
+    project.set('multi_view_fileId', multi)
 
     await project.save();
 
