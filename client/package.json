@@ -11,7 +11,7 @@
   },
   "keywords": [],
   "author": "wjh0706",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
