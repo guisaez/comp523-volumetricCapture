@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-import ProjectList from './projectList'
-import ProjectEdit from './projectEdit'
+import ProjectList from './ProjectList'
+import ProjectEdit from './ProjectEdit'
 
 
 function ProjectView({ setTabValue, setisLogged }) {

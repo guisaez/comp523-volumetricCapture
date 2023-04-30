@@ -8,18 +8,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import Typography from '@mui/material/Typography'
-import { useEffect, useState } from "react";
-import ProjectView from '../components/projectView'
-import User from '../components/user'
+import ProjectView from '../components/ProjectView'
+import User from '../components/User'
 
 const axios = require('axios').default
 
 function LandingPage() {
-    const [isLogged, setisLogged] = useState(false);
+    const [isLogged, setisLogged] = React.useState(false);
     const [tabValue, setTabValue] = React.useState('');
     const [openLogout, setOpenLogout] = React.useState(false);
 
-    useEffect(() => {
+    React.useEffect(() => {
         checkIsLogIn();
         return () => { };
     }, [isLogged]);
@@ -35,6 +34,8 @@ function LandingPage() {
                 setisLogged(true)
                 setTabValue('projects')
             }
+        }).catch((err) =>{
+            console.log(err)
         })
     }
 
