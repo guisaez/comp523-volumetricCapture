@@ -1,11 +1,9 @@
 name: tests-client
 
 on: 
-  push:
-    branches:
-      - 'client-multiview'
+  pull_request:
     paths:
-      - 'client/**'
+      - 'files-service/**'
 
 jobs:
   build:
