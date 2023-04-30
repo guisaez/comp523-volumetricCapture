@@ -1,5 +1,12 @@
 name: tests-client
 
+on: 
+  push:
+    branches:
+      - 'client-multiview'
+    paths:
+      - 'client/**'
+
 jobs:
   build:
     runs-on: ubuntu-latest
