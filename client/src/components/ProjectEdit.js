@@ -86,7 +86,7 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                     </Grid>
                     <Grid item>
                         <Button variant="contained" size="large" onClick={handleSave} sx={{ m: 1 }} margin="16">Save Name</Button>
-                        <Help helpMarkDown='https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md'/>
+                        <Help helpMarkDown='https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md' />
                     </Grid>
 
                 </Grid>
