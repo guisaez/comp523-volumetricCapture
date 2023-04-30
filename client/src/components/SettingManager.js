@@ -40,14 +40,14 @@ function SettingManager({ info }) {
         }).then((res) => {
             //initialize multi_view_config           
             if (res.data.project.multi_view_fileId) {
-                setMultiViewConfigId(res.data.project.multi_view_fileId)                
+                setMultiViewConfigId(res.data.project.multi_view_fileId)
                 setId(res.data.project.multi_view_fileId)
                 axios({
                     method: 'get',
                     url: '/api/files/' + res.data.project.multi_view_fileId
                 }).then((res) => {
                     setFileName(res.data.file.name)
-                }).catch((err) =>{
+                }).catch((err) => {
                     console.log(err)
                 })
                 axios({
@@ -61,12 +61,12 @@ function SettingManager({ info }) {
                     setRatio(data.ratio)
                     setBatchTest(data.test.batch_size)
                     setBatchTrain(data.train.batch_size)
-                }).catch((err) =>{
+                }).catch((err) => {
                     console.log(err)
                 })
             }
 
-        }).catch((err) =>{
+        }).catch((err) => {
             console.log(err)
         })
     })
@@ -199,12 +199,12 @@ function SettingManager({ info }) {
 
     const performFileCheck = (yamlFile) => {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          const yamlData = event.target.result;
-          const data = yaml.load(yamlData);
-          let result = data.train && data.test && data.train.epoch && data.train.num_workers && data.num_train_frame && data.ratio && data.test.batch_size && data.train.batch_size
-          setError(!result);
-          setDisableUpload(!result);
+        reader.onload = function (event) {
+            const yamlData = event.target.result;
+            const data = yaml.load(yamlData);
+            let result = data.train && data.test && data.train.epoch && data.train.num_workers && data.num_train_frame && data.ratio && data.test.batch_size && data.train.batch_size
+            setError(!result);
+            setDisableUpload(!result);
         };
         reader.readAsText(yamlFile);
     }
@@ -232,21 +232,21 @@ function SettingManager({ info }) {
                                         variant="outlined"
                                         type="number"
                                         value={epoch}
-                                        onChange={(e) => {if(e.target.value) setEpoch(parseInt(e.target.value)); else setEpoch(0)}}
+                                        onChange={(e) => { if (e.target.value) setEpoch(parseInt(e.target.value)); else setEpoch(0) }}
                                     />
                                     <TextField
                                         label="Number of Workers"
                                         variant="outlined"
                                         type="number"
                                         value={numWorkers}
-                                        onChange={(e) => {if(e.target.value) setNumWorkers(parseInt(e.target.value)); else setNumWorkers(0)}}
+                                        onChange={(e) => { if (e.target.value) setNumWorkers(parseInt(e.target.value)); else setNumWorkers(0) }}
                                     />
                                     <TextField
                                         label="Batch Size of Training"
                                         variant="outlined"
                                         type="number"
                                         value={batchTrain}
-                                        onChange={(e) => {if(e.target.value) setBatchTrain(parseInt(e.target.value)); else setBatchTrain(0)}}
+                                        onChange={(e) => { if (e.target.value) setBatchTrain(parseInt(e.target.value)); else setBatchTrain(0) }}
                                     />
                                 </div>
                                 <div>
@@ -255,21 +255,21 @@ function SettingManager({ info }) {
                                         variant="outlined"
                                         type="number"
                                         value={numTrainFrame}
-                                        onChange={(e) => {if(e.target.value) setNumTrainFrame(parseInt(e.target.value)); else setNumTrainFrame(0)}}
+                                        onChange={(e) => { if (e.target.value) setNumTrainFrame(parseInt(e.target.value)); else setNumTrainFrame(0) }}
                                     />
                                     <TextField
                                         label="Ratio"
                                         variant="outlined"
                                         type="number"
                                         value={ratio}
-                                        onChange={(e) => {if(e.target.value) setRatio(parseInt(e.target.value)); else setRatio(0)}}
+                                        onChange={(e) => { if (e.target.value) setRatio(parseInt(e.target.value)); else setRatio(0) }}
                                     />
                                     <TextField
                                         label="Batch Size of Testing"
                                         variant="outlined"
                                         type="number"
                                         value={batchTest}
-                                        onChange={(e) => {if(e.target.value) setBatchTest(parseInt(e.target.value)); else setBatchTest(0)}}
+                                        onChange={(e) => { if (e.target.value) setBatchTest(parseInt(e.target.value)); else setBatchTest(0) }}
                                     />
                                 </div>
                             </Stack>
