@@ -9,24 +9,29 @@
  * Child components:
  * Login : a child component for user login
  * Signup : a child component for user signup
-*/
-import * as React from 'react'
-import Login from './Login'
-import Signup from './Signup'
+ */
+import * as React from "react";
+import Login from "./Login";
+import Signup from "./Signup";
 
 // Functional component for the User interface
 function User({ setTabValue, setisLogged, ...props }) {
-
   // State variables to control the current view
-  const [view, setView] = React.useState('login')
+  const [view, setView] = React.useState("login");
 
   // Render the appropriate component based on the current view
   return (
     <div>
-      {view === 'login' && <Login setView={setView} setTabValue={setTabValue} setisLogged={setisLogged} />}
-      {view === 'signup' && <Signup setView={setView} />}
+      {view === "login" && (
+        <Login
+          setView={setView}
+          setTabValue={setTabValue}
+          setisLogged={setisLogged}
+        />
+      )}
+      {view === "signup" && <Signup setView={setView} />}
     </div>
-  )
+  );
 }
 
-export default User
+export default User;

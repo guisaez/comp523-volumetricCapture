@@ -14,15 +14,15 @@
  * handleDelete: A function that handles the delete action and closes the confirmation dialog
  * States:
  * open: A boolean that manages the visibility of the confirmation dialog
-*/
+ */
 
-import React, { useState } from 'react';
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import Typography from '@mui/material/Typography';
+import React, { useState } from "react";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import Typography from "@mui/material/Typography";
 
 // This component renders a delete button with a confirmation dialog.
 function DeleteButton(props) {
@@ -49,18 +49,37 @@ function DeleteButton(props) {
   return (
     <>
       {/* Render the button as enabled or disabled depending on the isDisabled prop. */}
-      {!props.isDisabled && <Button variant="contained" size={props.size} style={{ margin: props.marginVar, backgroundColor: 'red', color: 'white' }} onClick={handleClickOpen}>
-        {props.buttonName}
-      </Button>}
-      {props.isDisabled && <Button variant="contained" size={props.size} style={{ margin: props.marginVar }} disabled onClick={handleClickOpen}>
-        {props.buttonName}
-      </Button>}
+      {!props.isDisabled && (
+        <Button
+          variant="contained"
+          size={props.size}
+          style={{
+            margin: props.marginVar,
+            backgroundColor: "red",
+            color: "white",
+          }}
+          onClick={handleClickOpen}
+        >
+          {props.buttonName}
+        </Button>
+      )}
+      {props.isDisabled && (
+        <Button
+          variant="contained"
+          size={props.size}
+          style={{ margin: props.marginVar }}
+          disabled
+          onClick={handleClickOpen}
+        >
+          {props.buttonName}
+        </Button>
+      )}
       {/* Render the confirmation dialog with the appropriate title and message. */}
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Delete Confirmation</DialogTitle>
         <DialogContent>
-          <Typography variant='body2' color='black'>
-            {'Are you sure you want to delete this ' + props.deletedThing + '?'}
+          <Typography variant="body2" color="black">
+            {"Are you sure you want to delete this " + props.deletedThing + "?"}
           </Typography>
         </DialogContent>
         {/* Render two buttons to allow the user to confirm or cancel the delete action. */}
@@ -68,7 +87,11 @@ function DeleteButton(props) {
           <Button onClick={handleClose} variant="contained" color="primary">
             Cancel
           </Button>
-          <Button onClick={handleDelete} variant="contained" style={{ backgroundColor: 'red', color: 'white' }}>
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            style={{ backgroundColor: "red", color: "white" }}
+          >
             Delete
           </Button>
         </DialogActions>

@@ -9,23 +9,36 @@
  * States:
  * view: a string state to determine which component to render. It can have the value of either 'projectList' or 'projectEdit'.
  * project: a state to store the currently selected project object.
-*/
-import * as React from 'react'
+ */
+import * as React from "react";
 
-import ProjectList from './ProjectList'
-import ProjectEdit from './ProjectEdit'
-
+import ProjectList from "./ProjectList";
+import ProjectEdit from "./ProjectEdit";
 
 function ProjectView({ setTabValue, setisLogged }) {
-  const [view, setView] = React.useState('projectList')
-  const [project, setProject] = React.useState(null)
+  const [view, setView] = React.useState("projectList");
+  const [project, setProject] = React.useState(null);
 
   return (
     <>
-      {view === 'projectList' && <ProjectList setView={setView} setProject={setProject} setTabValue={setTabValue} setisLogged={setisLogged} />}
-      {view === 'projectEdit' && <ProjectEdit setView={setView} project={project} setProject={setProject} setisLogged={setisLogged} />}
+      {view === "projectList" && (
+        <ProjectList
+          setView={setView}
+          setProject={setProject}
+          setTabValue={setTabValue}
+          setisLogged={setisLogged}
+        />
+      )}
+      {view === "projectEdit" && (
+        <ProjectEdit
+          setView={setView}
+          project={project}
+          setProject={setProject}
+          setisLogged={setisLogged}
+        />
+      )}
     </>
-  )
+  );
 }
 
-export default ProjectView
+export default ProjectView;
