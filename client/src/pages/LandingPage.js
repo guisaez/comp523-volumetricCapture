@@ -34,6 +34,8 @@ function LandingPage() {
                 setisLogged(true)
                 setTabValue('projects')
             }
+        }).catch((err) =>{
+            console.log(err)
         })
     }
 

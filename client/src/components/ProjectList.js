@@ -21,6 +21,8 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
       url: '/api/auth/user/'
     }).then((res) => {
       setEmail(res.data.currentUser.email)
+    }).catch((err) => {
+      console.log(err)
     })
   }, [])
   React.useEffect(() => {
@@ -30,7 +32,7 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
     }).then((res) => {
       setNumProjects(res.data.projects)
     }).catch((err) => {
-
+      console.log(err)
     })
   }, [])
   const handleChange = (type, event) => {
@@ -110,7 +112,7 @@ function ProjectList({ setView, setTabValue, setProject, ...props }) {
         <div>
           <h3 style={{ margin: 16 }}>{'Welcome, ' + email + '!'}</h3>
         </div>
-        <FormControl variant='contained' style={{ margin: 16 }}>
+        <FormControl style={{ margin: 16 }}>
           <InputLabel >Project Name</InputLabel>
           <Input
             value={projectName}

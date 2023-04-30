@@ -47,6 +47,8 @@ function SettingManager({ info }) {
                     url: '/api/files/' + res.data.project.multi_view_fileId
                 }).then((res) => {
                     setFileName(res.data.file.name)
+                }).catch((err) =>{
+                    console.log(err)
                 })
                 axios({
                     method: 'get',
@@ -59,11 +61,15 @@ function SettingManager({ info }) {
                     setRatio(data.ratio)
                     setBatchTest(data.test.batch_size)
                     setBatchTrain(data.train.batch_size)
+                }).catch((err) =>{
+                    console.log(err)
                 })
             }
 
+        }).catch((err) =>{
+            console.log(err)
         })
-    }, [])
+    })
 
 
 
@@ -133,7 +139,7 @@ function SettingManager({ info }) {
                 })
             }
         })
-    }, [])
+    })
 
     const handleFileReader = (event) => {
         const selectedFile = event.target.files[0];
@@ -307,7 +313,7 @@ function SettingManager({ info }) {
                                         />
                                     </Button>
                                     <Button onClick={handleUpload} variant="contained" disabled={(disableUpload)} style={{ margin: 8 }}>Update Configuration</Button>
-                                    <Button onClick={(e) => { handleDownload(Id, FileName) }} variant="outlined" style={{ margin: 8 }} disabled={FileName == 'None'}>Download Configuration</Button>
+                                    <Button onClick={(e) => { handleDownload(Id, FileName) }} variant="outlined" style={{ margin: 8 }} disabled={FileName === 'None'}>Download Configuration</Button>
                                 </div>
                                 {error && <Alert severity="error">You must have train.batch_size, train.epoch, train.num_workers, num_train_frame ,ratio, test.batch_size defined in the file.</Alert>}
                             </Stack>

@@ -29,18 +29,18 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
     id: value.id
   })
   React.useEffect(() => {
-    if (projectInfo.processStatus == 'not-started') {
+    if (projectInfo.processStatus === 'not-started') {
       setButtonName("Run Model")
-    } else if (projectInfo.processStatus == 'running') {
+    } else if (projectInfo.processStatus === 'running') {
       setButtonName("Running")
-    } else if (projectInfo.processStatus == 'error') {
+    } else if (projectInfo.processStatus === 'error') {
       setButtonName("Try Again")
       setError(true)
       setErrorMsg("Errors happened!")
-    } else if (projectInfo.processStatus == 'completed') {
+    } else if (projectInfo.processStatus === 'completed') {
       setButtonName("Download Model")
     }
-  })
+  }, [projectInfo.processStatus]);
   const handleEdit = () => {
     setProject(value)
     setView('projectEdit')
@@ -55,14 +55,16 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
         url: '/api/projects/'
       }).then((res) => {
         setNumProjects(res.data.projects)
-      }).catch((err) => {
-
-      })
-    }, [])
+      }).catch((err) =>{
+        console.log(err)
+    })
+    }).catch((err) =>{
+      console.log(err)
+  })
   }
 
   const handleDownload = () => {
-    if (projectInfo.processStatus == 'not-started' || projectInfo.processStatus == 'error') {
+    if (projectInfo.processStatus === 'not-started' || projectInfo.processStatus === 'error') {
       axios({
         method: 'post',
         url: '/api/projects/run/' + value.id
@@ -95,7 +97,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
         setError(true)
         setErrorMsg("Failed! Please check the files!")
       })
-    } else if (projectInfo.processStatus == 'completed') {
+    } else if (projectInfo.processStatus === 'completed') {
       axios({
         method: 'get',
         url: '/api/files/download/' + projectInfo.output_fileId.id,
@@ -132,10 +134,10 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
           alignItems="center"
           margin="auto"
         >
-          <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus == 'running'}>Edit</Button></Grid>
+          <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus === 'running'}>Edit</Button></Grid>
           <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={false} deletedThing="project" size="medium" buttonName='Delete'></DeleteButton></Grid>
-          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus == 'running') ||
-            (buttonName == 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
+          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus === 'running') ||
+            (buttonName === 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
           </Grid>
         </Grid>
       </CardActions>

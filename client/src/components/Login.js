@@ -20,7 +20,6 @@ function Login({ setView, setTabValue, setisLogged,...props }) {
     email: '',
     password: ''
   })
-  const [userInfo, setUserInfo] = React.useState(null)
   const [error, setError] = React.useState(false)
   const [showPassword, setShowPassword] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
@@ -46,7 +45,6 @@ function Login({ setView, setTabValue, setisLogged,...props }) {
       data: values
     }).then((response) => {
       setError(false)
-      setUserInfo(response.data)
       setisLogged(true)
       setTabValue('projects')
       

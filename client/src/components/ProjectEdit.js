@@ -45,7 +45,7 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
         if (type === 'name') {
             setError((!event.target.value && error))
             setInfo({ ...info, projectName: event.target.value })
-            setIsSafed(event.target.value == project.projectName)
+            setIsSafed(event.target.value === project.projectName)
         }
     }
 

@@ -26,11 +26,11 @@ function FileManager({ info, fileType, format }) {
             url: '/api/projects/' + info.id
         }).then((res) => {
             let resFileId='';
-            if(fileType=='zip'){
+            if(fileType==='zip'){
                 resFileId = res.data.project.zip_fileId;
-            }else if(fileType=='extrinsic'){
+            }else if(fileType==='extrinsic'){
                 resFileId = res.data.project.extrinsic_fileId;
-            }else if(fileType=='intrinsic'){
+            }else if(fileType==='intrinsic'){
                 resFileId = res.data.project.intrinsic_fileId;
             }
             //initialize 
@@ -48,8 +48,10 @@ function FileManager({ info, fileType, format }) {
             }
 
             setDisableDelete(!resFileId)
+        }).catch((err) =>{
+            console.log(err)
         })
-    }, [])
+    })
 
     const handleFileReader = (event) => {
         const selectedFile = event.target.files[0];
@@ -62,7 +64,7 @@ function FileManager({ info, fileType, format }) {
         const formData = new FormData();
         formData.append('file', File);
         formData.append('type', fileType);
-        if (ButtonName == 'Upload '+fileType) {
+        if (ButtonName === 'Upload '+fileType) {
             const route = '/api/files/upload/' + info.id;
             axios.post(route, formData, {
                 headers: {
@@ -82,7 +84,7 @@ function FileManager({ info, fileType, format }) {
                     setDisableUpload(false);
                 });
 
-        } else if (ButtonName == 'Update '+fileType) {
+        } else if (ButtonName === 'Update '+fileType) {
             const route = '/api/files/update/' + Id;
             console.log("update zip " + route)
             axios.put(route, formData, {
@@ -169,7 +171,7 @@ function FileManager({ info, fileType, format }) {
                             </div>
                             <div>
                                 <DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={disableDelete} deletedThing={fileType+" file"} size="medium" buttonName={'Delete '+fileType}></DeleteButton>
-                                <Button onClick={(e) => { handleDownload(Id, FileName) }} variant="outlined" style={{ margin: 8 }} disabled={FileName == 'None'}>{'Download '+fileType }</Button>
+                                <Button onClick={(e) => { handleDownload(Id, FileName) }} variant="outlined" style={{ margin: 8 }} disabled={FileName === 'None'}>{'Download '+fileType }</Button>
                             </div>
                         </Stack>
                     </CardActions>
