@@ -1,16 +1,12 @@
 import * as React from 'react'
-import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import FormControl from '@mui/material/FormControl'
-import Input from '@mui/material/Input'
-import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
-import DeleteButton from "./deleteButton";
+import DeleteButton from "./DeleteButton";
 
 
 const axios = require('axios').default
@@ -33,18 +29,18 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
     id: value.id
   })
   React.useEffect(() => {
-    if (projectInfo.processStatus == 'not-started') {
+    if (projectInfo.processStatus === 'not-started') {
       setButtonName("Run Model")
-    } else if (projectInfo.processStatus == 'running') {
+    } else if (projectInfo.processStatus === 'running') {
       setButtonName("Running")
-    } else if (projectInfo.processStatus == 'error') {
+    } else if (projectInfo.processStatus === 'error') {
       setButtonName("Try Again")
       setError(true)
       setErrorMsg("Errors happened!")
-    } else if (projectInfo.processStatus == 'completed') {
+    } else if (projectInfo.processStatus === 'completed') {
       setButtonName("Download Model")
     }
-  })
+  }, [projectInfo.processStatus]);
   const handleEdit = () => {
     setProject(value)
     setView('projectEdit')
@@ -59,14 +55,16 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
         url: '/api/projects/'
       }).then((res) => {
         setNumProjects(res.data.projects)
-      }).catch((err) => {
-
-      })
-    }, [])
+      }).catch((err) =>{
+        console.log(err)
+    })
+    }).catch((err) =>{
+      console.log(err)
+  })
   }
 
   const handleDownload = () => {
-    if (projectInfo.processStatus == 'not-started' || projectInfo.processStatus == 'error') {
+    if (projectInfo.processStatus === 'not-started' || projectInfo.processStatus === 'error') {
       axios({
         method: 'post',
         url: '/api/projects/run/' + value.id
@@ -99,7 +97,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
         setError(true)
         setErrorMsg("Failed! Please check the files!")
       })
-    } else if (projectInfo.processStatus == 'completed') {
+    } else if (projectInfo.processStatus === 'completed') {
       axios({
         method: 'get',
         url: '/api/files/download/' + projectInfo.output_fileId.id,
@@ -136,10 +134,10 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
           alignItems="center"
           margin="auto"
         >
-          <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus == 'running'}>Edit</Button></Grid>
+          <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus === 'running'}>Edit</Button></Grid>
           <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={false} deletedThing="project" size="medium" buttonName='Delete'></DeleteButton></Grid>
-          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus == 'running') ||
-            (buttonName == 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
+          <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus === 'running') ||
+            (buttonName === 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
           </Grid>
         </Grid>
       </CardActions>
@@ -148,72 +146,4 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
   )
 }
 
-function ProjectList({ setView, setTabValue, setProject, ...props }) {
-  const [numProjects, setNumProjects] = React.useState([])
-  const [uid, setUid] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [projectName, setProjectName] = React.useState('')
-  React.useEffect(() => {
-    axios({
-      method: 'get',
-      url: '/api/auth/user/'
-    }).then((res) => {
-      setUid(res.data.currentUser.id)
-      setEmail(res.data.currentUser.email)
-    })
-  }, [])
-  React.useEffect(() => {
-    axios({
-      method: 'get',
-      url: '/api/projects/'
-    }).then((res) => {
-      setNumProjects(res.data.projects)
-    }).catch((err) => {
-
-    })
-  }, [])
-  const handleChange = (type, event) => {
-    if (type === 'projectName') {
-      setProjectName(event.target.value)
-    }
-  }
-  const handleAddProject = () => {
-    axios({
-      method: 'post',
-      url: '/api/projects/',
-      data: {
-        projectName: projectName || "New Project"
-      }
-    }).then((res) => {
-      setNumProjects([...numProjects, res.data])
-    })
-  }
-
-  return (
-    <div>
-      <div>
-        <div>
-          <h3 style={{ margin: 16 }}>{'Welcome, ' + email + '!'}</h3>
-        </div>
-        <FormControl variant='contained' style={{ margin: 16 }}>
-          <InputLabel >Project Name</InputLabel>
-          <Input
-            value={projectName}
-            onChange={(e) => { handleChange('projectName', e) }}
-          />
-        </FormControl>
-        <Button variant='contained' style={{
-          margin: 16
-        }} onClick={handleAddProject}>New Project</Button>
-      </div>
-      <Box sx={{ flexGrow: 1 }} style={{ margin: 16 }}>
-        <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-          {numProjects && numProjects.map((value) => (
-            <ProjectCard key={value.id} setView={setView} value={value} setProject={setProject} setNumProjects={setNumProjects} />
-          ))}
-        </Grid>
-      </Box>
-    </div>
-  )
-}
-export default ProjectList
+export default ProjectCard
