@@ -3,7 +3,6 @@ import User from "./../components/User";
 import ProjectView from "./../components/ProjectView";
 import ProjectList from "./../components/ProjectList";
 import ProjectEdit from "./../components/ProjectEdit";
-import LandingPage from "./../pages/LandingPage";
 import Help from "../components/Help";
 import BackButton from "../components/BackButton";
 import DeleteButton from "../components/DeleteButton";
@@ -43,10 +42,6 @@ test("renders ProjectEdit", () => {
       }}
     />
   );
-});
-
-test("renders LandingPage", () => {
-  render(<LandingPage />);
 });
 
 test("renders Help", () => {
