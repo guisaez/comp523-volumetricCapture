@@ -1,10 +1,5 @@
 name: tests-client
 
-on: 
-  pull_request:
-    paths:
-      - 'client/**'
-
 jobs:
   build:
     runs-on: ubuntu-latest
