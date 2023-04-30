@@ -1,3 +1,17 @@
+/**
+ * Components: LandingPage
+ * This component is the main page of the application. It displays either the User component or the ProjectView component based on the value of the 'tabValue' state.
+ * Props: None
+ * Functions:
+ * checkIsLogIn : function that sends a GET request to the '/api/auth/user/' endpoint to check if the user is logged in or not.
+ * handleLogout : function that sends a POST request to the '/api/auth/signout/' endpoint to log out the user.
+ * handleOpenLogOut : function that sets the 'openLogout' state to true to open the logout dialog box.
+ * handleCloseLogOut : function that sets the 'openLogout' state to false to close the logout dialog box.
+ * States:
+ * isLogged : state that stores whether the user is logged in or not.
+ * tabValue : state that stores the current tab value ('auth' or 'projects').
+ * openLogout : state that stores whether the logout dialog box is open or not.
+*/
 import * as React from 'react'
 import Button from "@mui/material/Button";
 import AppBar from '@mui/material/AppBar'
@@ -14,14 +28,18 @@ import User from '../components/User'
 const axios = require('axios').default
 
 function LandingPage() {
+    // state variables
     const [isLogged, setisLogged] = React.useState(false);
     const [tabValue, setTabValue] = React.useState('');
     const [openLogout, setOpenLogout] = React.useState(false);
 
+    // useEffect hook to check if user is logged in
     React.useEffect(() => {
         checkIsLogIn();
         return () => { };
     }, [isLogged]);
+
+    // function to check if user is logged in
     function checkIsLogIn() {
         axios({
             method: 'get',
@@ -29,16 +47,17 @@ function LandingPage() {
         }).then((res) => {
             if (!res.data.currentUser) {
                 setisLogged(false)
-                setTabValue('vcp');
+                setTabValue('auth');
             } else {
                 setisLogged(true)
                 setTabValue('projects')
             }
-        }).catch((err) =>{
+        }).catch((err) => {
             console.log(err)
         })
     }
 
+    // function to handle logout
     const handleLogout = () => {
         axios({
             method: 'post',
@@ -48,11 +67,11 @@ function LandingPage() {
         }).then((res) => {
             setisLogged(false);
             setOpenLogout(false);
-            setTabValue('vcp');
+            setTabValue('auth');
         })
     }
 
-
+    // functions to handle opening and closing of logout dialog box
     const handleOpenLogOut = () => {
         setOpenLogout(true);
     };
@@ -63,6 +82,7 @@ function LandingPage() {
 
     return (
         <div>
+            {/* App bar with VCP logo and logout button (if user is logged in) */}
             <div>
                 <AppBar position='static' style={{ backgroundColor: '#222222' }}>
                     <Toolbar variant='dense'>
@@ -78,6 +98,7 @@ function LandingPage() {
                                 >
                                     Log out
                                 </Button>
+                                {/* Dialog box for logout confirmation */}
                                 <Dialog open={openLogout} onClose={handleCloseLogOut}>
                                     <DialogTitle>Log Out Confirmation</DialogTitle>
                                     <DialogContent>
@@ -95,20 +116,20 @@ function LandingPage() {
                                     </DialogActions>
                                 </Dialog>
                             </>
-
                         )}
                     </Toolbar>
-
                 </AppBar>
             </div>
+            {/* User or ProjectView components rendered based on tabValue state */}
             <div>
-                {tabValue === 'vcp' && <User setTabValue={setTabValue} setisLogged={setisLogged} />}
+                {tabValue === 'auth' && <User setTabValue={setTabValue} setisLogged={setisLogged} />}
             </div>
             <div>
                 {tabValue === 'projects' && <ProjectView setTabValue={setTabValue} setisLogged={setisLogged} />}
             </div>
         </div>
     )
-
 }
+
 export default LandingPage
+

@@ -1,3 +1,22 @@
+/**
+ * Components: ProjectCard
+ * This component represents the project card component that shows the project name, creation date, and status. It also contains buttons to edit, delete, and download the project, depending on the project's status.
+ * Props:
+ * setNumProjects: a function to set the total number of projects.
+ * setView: a function to set the current view of the user.
+ * value: an object containing the project's information.
+ * setProject: a function to set the current project being edited.
+ * setisLogged: a function to set the current logged-in status of the user.
+ * Functions:
+ * handleEdit: a function to handle the edit button click.
+ * handleDelete: a function to handle the delete button click.
+ * handleDownload: a function to handle the download button click.
+ * States:
+ * errorMsg: a string representing the error message if there's any.
+ * error: a boolean value indicating if there's an error.
+ * buttonName: a string representing the name of the button displayed in the project card.
+ * projectInfo: an object containing the project's information such as the project name, creation date, status, etc.
+*/
 import * as React from 'react'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
@@ -12,10 +31,12 @@ import DeleteButton from "./DeleteButton";
 const axios = require('axios').default
 
 function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, ...props }) {
+  // Define state variables using React.useState hook
   const [errorMsg, setErrorMsg] = React.useState('')
   const [error, setError] = React.useState(false)
   const [buttonName, setButtonName] = React.useState("")
   const [projectInfo, setInfo] = React.useState({
+    // Initialize state with default values
     projectName: value.projectName,
     userId: value.userId,
     createdAt: value.createdAt,
@@ -28,6 +49,8 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
     output_fileId: value.output_fileId,
     id: value.id
   })
+
+  // Use the useEffect hook to update buttonName when projectInfo.processStatus changes
   React.useEffect(() => {
     if (projectInfo.processStatus === 'not-started') {
       setButtonName("Run Model")
@@ -41,10 +64,13 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
       setButtonName("Download Model")
     }
   }, [projectInfo.processStatus]);
+
+  // Define event handler functions
   const handleEdit = () => {
     setProject(value)
     setView('projectEdit')
   }
+
   const handleDelete = () => {
     axios({
       method: 'delete',
@@ -64,6 +90,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
   }
 
   const handleDownload = () => {
+    // If project status is not-started or error, start a new run
     if (projectInfo.processStatus === 'not-started' || projectInfo.processStatus === 'error') {
       axios({
         method: 'post',
@@ -98,6 +125,7 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
         setErrorMsg("Failed! Please check the files!")
       })
     } else if (projectInfo.processStatus === 'completed') {
+      // Download the output file
       axios({
         method: 'get',
         url: '/api/files/download/' + projectInfo.output_fileId.id,
@@ -134,8 +162,11 @@ function ProjectCard({ setNumProjects, setView, value, setProject, setisLogged, 
           alignItems="center"
           margin="auto"
         >
-          <Grid item><Button variant='contained' onClick={handleEdit} disabled={projectInfo.processStatus === 'running'}>Edit</Button></Grid>
-          <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={false} deletedThing="project" size="medium" buttonName='Delete'></DeleteButton></Grid>
+          {/*Edit button*/}
+          <Grid item><Button variant='contained' onClick={handleEdit}>Edit</Button></Grid>
+          {/*Delete button (disabled when the project is running)*/}
+          <Grid item><DeleteButton onDelete={handleDelete} marginVar={8} isDisabled={projectInfo.processStatus === 'running'} deletedThing="project" size="medium" buttonName='Delete'></DeleteButton></Grid>
+          {/*Download/Run/Try Again button (disabled when the project is running, only showing running)*/}
           <Grid item><Button variant="outlined" onClick={handleDownload} disabled={(projectInfo.processStatus === 'running') ||
             (buttonName === 'Run Model' && (!projectInfo.zip_fileId || !projectInfo.extrinsic_fileId || !projectInfo.intrinsic_fileId))}>{buttonName}</Button>
           </Grid>
