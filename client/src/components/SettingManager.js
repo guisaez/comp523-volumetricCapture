@@ -1,3 +1,32 @@
+/**
+ * Components: SettingManager
+ * This component renders the Setting Manager that allows the user to modify settings for their application.
+ * Props:
+ * info : An object containing the id of the project whose settings need to be modified.
+ * States:
+ * multiViewConfigId : A string of the id of the multi-view configuration file.
+ * epoch :  A integer of the number of epochs for which the model is to be trained.
+ * batchTrain :  A integer of the batch size for training.
+ * batchTest :  A integer of the batch size for testing.
+ * numWorkers :  A integer of the number of workers to be used for training.
+ * numTrainFrame : A integer of the number of frames to be used for training.
+ * ratio : A float of the ratio of frames to be used for training and testing.
+ * isUpload : A boolean that indicates whether a file is being uploaded or not.
+ * Id : A string of the id of the uploaded file.
+ * file : An object if the uploaded file.
+ * FileName : A string of the name of the uploaded file.
+ * firstLoad : A boolean that check if it is first-time loading.
+ * selectedName : A string of the name of the selected file.
+ * disableUpload : A boolean that indicates whether the upload button is disabled or not.
+ * error : A boolean that indicates whether there is an error while uploading the file or not.
+ * Functions:
+ * handleUpdateConfig : A function that handles the update of the multi-view configuration file.
+ * handleFileReader: A function that handles the chosen file.
+ * handleUpload: A function that updates a new config file.
+ * handleDownload: A function that downloads the current config file.
+ * performFileCheck: A function that checks if the chosen file meets the minimum requirements.
+ * 
+*/
 import * as React from 'react'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
@@ -17,6 +46,7 @@ import yaml from 'js-yaml';
 const axios = require('axios').default
 
 function SettingManager({ info }) {
+    // initialize state variables
     const [multiViewConfigId, setMultiViewConfigId] = React.useState('')
     const [epoch, setEpoch] = React.useState(50);
     const [batchTrain, setBatchTrain] = React.useState(1);
@@ -32,13 +62,15 @@ function SettingManager({ info }) {
     const [selectedName, setSelectedName] = React.useState('None')
     const [disableUpload, setDisableUpload] = React.useState(true)
     const [error, setError] = React.useState(false)
+    const [firstLoad,setFirstLoad] = React.useState(true)
 
+    // useEffect hook to initialize state variables and retrieve data from the server on component mount
     React.useEffect(() => {
         axios({
             method: 'get',
             url: '/api/projects/' + info.id
         }).then((res) => {
-            //initialize multi_view_config           
+            //initialize multi_view_config if it exists
             if (res.data.project.multi_view_fileId) {
                 setMultiViewConfigId(res.data.project.multi_view_fileId)
                 setId(res.data.project.multi_view_fileId)
@@ -54,13 +86,17 @@ function SettingManager({ info }) {
                     method: 'get',
                     url: '/api/files/download/' + res.data.project.multi_view_fileId
                 }).then((res) => {
+                    if(firstLoad){
                     const data = yaml.load(res.data)
+                    // update state variables with data from the server
                     setEpoch(data.train.epoch);
                     setNumWorkers(data.train.num_workers);
                     setNumTrainFrame(data.num_train_frame);
                     setRatio(data.ratio)
                     setBatchTest(data.test.batch_size)
                     setBatchTrain(data.train.batch_size)
+                    setFirstLoad(false);
+                    }
                 }).catch((err) => {
                     console.log(err)
                 })
@@ -71,8 +107,7 @@ function SettingManager({ info }) {
         })
     })
 
-
-
+    // function to handle update of config.yaml file
     const handleUpdateConfig = () => {
         const data = {
             task: 'if_nerf',
@@ -121,26 +156,7 @@ function SettingManager({ info }) {
         });
     };
 
-
-    React.useEffect(() => {
-        axios({
-            method: 'get',
-            url: '/api/projects/' + info.id
-        }).then((res) => {
-            let resFileId = res.data.project.multi_view_fileId;
-            //initialize 
-            if (resFileId) {
-                setId(resFileId)
-                axios({
-                    method: 'get',
-                    url: '/api/files/' + resFileId
-                }).then((res) => {
-                    setFileName(res.data.file.name)
-                })
-            }
-        })
-    })
-
+    //handle the chosen file
     const handleFileReader = (event) => {
         const selectedFile = event.target.files[0];
         setFile(selectedFile);
@@ -148,6 +164,7 @@ function SettingManager({ info }) {
         performFileCheck(selectedFile)
     }
 
+    //update new config file
     const handleUpload = () => {
         const formData = new FormData();
         formData.append('file', file);
@@ -182,6 +199,7 @@ function SettingManager({ info }) {
             });
     }
 
+    //download current config file
     const handleDownload = (id, fileName) => {
         axios({
             method: 'get',
@@ -197,6 +215,7 @@ function SettingManager({ info }) {
         })
     }
 
+    //check if the chosen file meets the minimum requirements
     const performFileCheck = (yamlFile) => {
         const reader = new FileReader();
         reader.onload = function (event) {
@@ -218,12 +237,14 @@ function SettingManager({ info }) {
                         <Typography gutterBottom variant='h5' component='div'>
                             Multi-View Settings
                         </Typography>
-
+                        {/* switch the option (input values directly or upload a file) */}
                         <FormGroup>
                             <FormControlLabel control={<Switch checked={isUpload} onChange={(e) => setIsupload(e.target.checked)} size='large' />} label="Upload a configuration file?" />
                         </FormGroup>
                     </CardContent>
+                    {/* if the switched is unchecked, display 6 text fields for input */}
                     {!isUpload &&
+
                         <CardContent>
                             <Stack spacing={2}>
                                 <div>
@@ -277,6 +298,7 @@ function SettingManager({ info }) {
 
 
                     }
+                    {/* if the switched is checked, display the project and config file info */}
                     {isUpload &&
                         <CardContent>
                             <Typography variant='body2' color='text.secondary'>
@@ -291,6 +313,7 @@ function SettingManager({ info }) {
                         </CardContent>
 
                     }
+                    {/* if the switched is unchecked, display an update button */}
                     {!isUpload &&
                         <CardActions>
                             <Button variant="contained" onClick={handleUpdateConfig}>
@@ -298,6 +321,7 @@ function SettingManager({ info }) {
                             </Button>
                         </CardActions>
                     }
+                    {/* if the switched is checked, display buttons for managing the config file */}
                     {isUpload &&
                         <CardActions>
                             <Stack spacing={1}>
