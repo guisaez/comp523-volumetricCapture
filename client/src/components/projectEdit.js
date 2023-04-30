@@ -3,155 +3,24 @@ import InputLabel from '@mui/material/InputLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
-import CardActions from '@mui/material/CardActions'
-import Typography from '@mui/material/Typography'
 import FilledInput from '@mui/material/FilledInput'
 import isEmpty from 'validator/lib/isEmpty'
 import Alert from '@mui/material/Alert'
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import ReactMarkdown from 'react-markdown';
-import DeleteButton from "./deleteButton";
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import TextField from '@mui/material/TextField';
-import yaml from 'js-yaml';
+import DeleteButton from "./DeleteButton";
+import FileManager from './FileManager'
+import Help from './Help'
+import BackButton from './BackButton'
+import SettingManager from './SettingManager'
+
 const axios = require('axios').default
 
 function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
     const [info, setInfo] = React.useState(project)
     const [error, setError] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState('');
-    const [openHelp, setOpenHelp] = React.useState(false);
-    const [markdown, setMarkdown] = React.useState('');
     const [isSafed, setIsSafed] = React.useState(true);
-    const [openBack, setOpenBack] = React.useState(false);
-
-    const handleOpenHelp = () => {
-
-        axios({
-            method: 'get',
-            url: 'https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md'
-        }).then((response) => {
-            setMarkdown(response.data)
-        }
-        ).catch(error => console.error(error));
-        setOpenHelp(true);
-    };
-
-    const handleCloseHelp = () => {
-        setOpenHelp(false);
-    };
-
-    const handleCloseBack = () => {
-        setOpenBack(false);
-    };
-
-
-    //zip
-    const [zipId, setZipId] = React.useState('')
-    const [zipFile, setZipFile] = React.useState(null)
-    const [zipButtonName, setZipButtonName] = React.useState('')
-    const [zipFileName, setZipFileName] = React.useState('None')
-    const zipRef = React.useRef(null)
-    const [selectedZipName, setSelectedZipName] = React.useState('None')
-    const [disableZipUpload, setDisableZipUpload] = React.useState(true)
-    const [disableZipDelete, setDisableZipDelete] = React.useState(true)
-
-    //intrinsic
-    const [intrinsicId, setIntrinsicId] = React.useState('')
-    const [intrinsicFile, setIntrinsicFile] = React.useState(null)
-    const [intrinsicButtonName, setIntrinsicButtonName] = React.useState('')
-    const [intrinsicFileName, setIntrinsicFileName] = React.useState('None')
-    const intrinsicRef = React.useRef(null)
-    const [selectedIntrinsicName, setSelectedIntrinsicName] = React.useState('None')
-    const [disableIntrinsicUpload, setDisableIntrinsicUpload] = React.useState(true)
-    const [disableIntrinsicDelete, setDisableIntrinsicDelete] = React.useState(true)
-
-    //extrinsic
-    const [extrinsicId, setExtrinsicId] = React.useState('')
-    const [extrinsicFile, setExtrinsicFile] = React.useState(null)
-    const [extrinsicButtonName, setExtrinsicButtonName] = React.useState('')
-    const [extrinsicFileName, setExtrinsicFileName] = React.useState('None')
-    const extrinsicRef = React.useRef(null)
-    const [selectedExtrinsicName, setSelectedExtrinsicName] = React.useState('None')
-    const [disableExtrinsicUpload, setDisableExtrinsicUpload] = React.useState(true)
-    const [disableExtrinsicDelete, setDisableExtrinsicDelete] = React.useState(true)
-
-    //multi_view_config
-    const [multiViewConfigId, setMultiViewConfigId] = React.useState('')
-
-    React.useEffect(() => {
-        axios({
-            method: 'get',
-            url: '/api/projects/' + info.id
-        }).then((res) => {
-            //initialize zip
-            if (res.data.project.zip_fileId) {
-                setZipButtonName('Update Zip')
-                setZipId(res.data.project.zip_fileId)
-                axios({
-                    method: 'get',
-                    url: '/api/files/' + res.data.project.zip_fileId
-                }).then((res) => {
-                    setZipFileName(res.data.file.name)
-                })
-            } else {
-                setZipButtonName('Upload Zip')
-            }
-
-            //initialize intrinsic
-            if (res.data.project.intrinsic_fileId) {
-                setIntrinsicButtonName('Update Intrinsic')
-                setIntrinsicId(res.data.project.intrinsic_fileId)
-                axios({
-                    method: 'get',
-                    url: '/api/files/' + res.data.project.intrinsic_fileId
-                }).then((res) => {
-                    setIntrinsicFileName(res.data.file.name)
-                })
-            } else {
-                setIntrinsicButtonName('Upload Intrinsic')
-            }
-
-            //initialize extrinsic           
-            if (res.data.project.extrinsic_fileId) {
-                setExtrinsicButtonName('Update Extrinsic')
-                setExtrinsicId(res.data.project.extrinsic_fileId)
-                axios({
-                    method: 'get',
-                    url: '/api/files/' + res.data.project.extrinsic_fileId
-                }).then((res) => {
-                    setExtrinsicFileName(res.data.file.name)
-                })
-            } else {
-                setExtrinsicButtonName('Upload Extrinsic')
-            }
-
-            //initialize multi_view_config           
-            if (res.data.project.multi_view_fileId) {
-                setMultiViewConfigId(res.data.project.multi_view_fileId)
-                axios({
-                    method: 'get',
-                    url: '/api/files/download/' + res.data.project.multi_view_fileId
-                }).then((res) => {
-                    const data = yaml.load(res.data)
-                    setEpoch(data.train.epoch);
-                    setNumWorkers(data.train.num_workers);
-                    setNumTrainFrame(data.num_train_frame);
-                    setRatio(data.ratio) 
-                })
-            }
-
-            setDisableZipDelete(!res.data.project.zip_fileId)
-            setDisableIntrinsicDelete(!res.data.project.intrinsic_fileId)
-            setDisableExtrinsicDelete(!res.data.project.extrinsic_fileId)
-        })
-    }, [])
 
     const handleSave = () => {
         axios({
@@ -179,219 +48,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
             setIsSafed(event.target.value == project.projectName)
         }
     }
-    const handleBack = () => {
-        setView('projectList')
-    }
-    const handleZipFileReader = (event) => {
-        const selectedFile = event.target.files[0];
-        setZipFile(selectedFile);
-        setSelectedZipName(selectedFile.name)
-        setDisableZipUpload(false);
-    }
-    const handleIntrinsicFileReader = (event) => {
-        const selectedFile = event.target.files[0];
-        setIntrinsicFile(selectedFile);
-        setSelectedIntrinsicName(selectedFile.name)
-        setDisableIntrinsicUpload(false);
-
-    }
-    const handleExtrinsicFileReader = (event) => {
-        const selectedFile = event.target.files[0];
-        setExtrinsicFile(selectedFile);
-        setSelectedExtrinsicName(selectedFile.name)
-        setDisableExtrinsicUpload(false);
-
-    }
-
-    const handleZipUpload = () => {
-        const formData = new FormData();
-        formData.append('file', zipFile);
-        formData.append('type', 'zip');
-        if (zipButtonName == 'Upload Zip') {
-            const route = '/api/files/upload/' + info.id;
-            axios.post(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setZipId(res.data.file.id);
-                setDisableZipUpload(true);
-                setDisableZipDelete(false);
-                setZipButtonName('Update Zip');
-                setZipFileName(res.data.file.name)
-                setZipFile(null);
-                zipRef.current.value = null;
-                setSelectedZipName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableZipUpload(false);
-                });
-
-        } else if (zipButtonName == 'Update Zip') {
-            const route = '/api/files/update/' + zipId;
-            axios.put(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setZipId(res.data.file.id);
-                setDisableZipUpload(true);
-                setDisableZipDelete(false);
-                setZipButtonName('Update Zip');
-                setZipFileName(res.data.file.name)
-                setZipFile(null);
-                zipRef.current.value = null;
-                setSelectedZipName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableZipUpload(false);
-                });
-        }
-    }
-    const handleIntrinsicUpload = () => {
-        const formData = new FormData();
-        formData.append('file', intrinsicFile);
-        formData.append('type', 'intrinsic');
-        if (intrinsicButtonName == 'Upload Intrinsic') {
-            const route = '/api/files/upload/' + info.id;
-            axios.post(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setIntrinsicId(res.data.file.id);
-                setDisableIntrinsicUpload(true);
-                setDisableIntrinsicDelete(false);
-                setIntrinsicButtonName('Update Intrinsic');
-                setIntrinsicFileName(res.data.file.name)
-                setIntrinsicFile(null);
-                intrinsicRef.current.value = null;
-                setSelectedIntrinsicName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableIntrinsicUpload(false);
-                });
-
-        } else if (intrinsicButtonName == 'Update Intrinsic') {
-            const route = '/api/files/update/' + intrinsicId;
-            axios.put(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setIntrinsicId(res.data.file.id);
-                setDisableIntrinsicUpload(true);
-                setDisableIntrinsicDelete(false);
-                setIntrinsicButtonName('Update Intrinsic');
-                setIntrinsicFileName(res.data.file.name)
-                setIntrinsicFile(null);
-                intrinsicRef.current.value = null;
-                setSelectedIntrinsicName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableIntrinsicUpload(false);
-                });
-        }
-    }
-    const handleExtrinsicUpload = () => {
-        const formData = new FormData();
-        formData.append('file', extrinsicFile);
-        formData.append('type', 'extrinsic');
-        if (extrinsicButtonName == 'Upload Extrinsic') {
-            const route = '/api/files/upload/' + info.id;
-            axios.post(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setExtrinsicId(res.data.file.id);
-                setDisableExtrinsicUpload(true);
-                setDisableExtrinsicDelete(false);
-                setExtrinsicButtonName('Update Extrinsic');
-                setExtrinsicFileName(res.data.file.name)
-                setExtrinsicFile(null);
-                extrinsicRef.current.value = null;
-                setSelectedExtrinsicName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableExtrinsicUpload(false);
-                });
-
-        } else if (extrinsicButtonName == 'Update Extrinsic') {
-            const route = '/api/files/update/' + extrinsicId;
-            axios.put(route, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }).then((res) => {
-                setExtrinsicId(res.data.file.id);
-                setDisableExtrinsicUpload(true);
-                setDisableExtrinsicDelete(false);
-                setExtrinsicButtonName('Update Extrinsic');
-                setExtrinsicFileName(res.data.file.name)
-                setExtrinsicFile(null);
-                extrinsicRef.current.value = null;
-                setSelectedExtrinsicName("None")
-            })
-                .catch((err) => {
-                    console.error(err);
-                    setDisableExtrinsicUpload(false);
-                });
-        }
-    }
-
-    const handleZipDelete = () => {
-        axios({
-            method: 'delete',
-            url: '/api/files/delete',
-            data: {
-                projectId: info.id,
-                id: zipId
-            }
-        }).then((res) => {
-            setDisableZipDelete(true);
-            setZipButtonName('Upload Zip');
-            setDisableZipUpload(!zipFile);
-            setZipFileName("None")
-        }).catch((err) => {
-        })
-    }
-    const handleIntrinsicDelete = () => {
-        axios({
-            method: 'delete',
-            url: '/api/files/delete',
-            data: {
-                projectId: info.id,
-                id: intrinsicId
-            }
-        }).then((res) => {
-            setDisableIntrinsicDelete(true);
-            setIntrinsicButtonName('Upload Intrinsic');
-            setDisableIntrinsicUpload(!intrinsicFile);
-            setIntrinsicFileName("None")
-        }).catch((err) => {
-        })
-    }
-    const handleExtrinsicDelete = () => {
-        axios({
-            method: 'delete',
-            url: '/api/files/delete',
-            data: {
-                projectId: info.id,
-                id: extrinsicId
-            }
-        }).then((res) => {
-            setDisableExtrinsicDelete(true);
-            setExtrinsicButtonName('Upload Extrinsic');
-            setDisableExtrinsicUpload(!extrinsicFile);
-            setExtrinsicFileName("None")
-        })
-    }
 
     const handleDelete = () => {
         axios({
@@ -404,78 +60,6 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
             setView('projectList')
         })
     }
-
-    const handleDownload = (id, fileName) => {
-        axios({
-            method: 'get',
-            url: '/api/files/download/' + id,
-            responseType: 'blob'
-        }).then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-        })
-    }
-
-    const handleOpenBack = () => {
-        if (!isSafed)
-            setOpenBack(!isSafed);
-        else
-            handleBack();
-    };
-
-    const [epoch, setEpoch] = React.useState(50);
-    const [numWorkers, setNumWorkers] = React.useState(6);
-    const [numTrainFrame, setNumTrainFrame] = React.useState(20);
-    const [ratio, setRatio] = React.useState(0.5)
-
-    const handleUpdateConfig = () => {
-        const data = {
-            task: 'if_nerf',
-            gpus: [0],
-            parent_cfg: 'configs/zju_mocap_exp/latent_xyzc_313.yaml',
-            train_dataset: {
-                data_root: '/app/src/data/' + info.id + '/neural_input',
-                human: 'custom',
-                ann_file: '/app/src/data/' + info.id + '/neural_input/annots.npy',
-                split: 'train'
-            },
-            test_dataset: {
-                data_root: '/app/src/data/' + info.id + '/neural_input',
-                human: 'custom',
-                ann_file: '/app/src/data/' + info.id + '/neural_input/annots.npy',
-                split: 'test'
-            },
-            train: {
-                epoch: epoch,
-                num_workers: numWorkers
-            },
-            ratio: ratio,
-            training_view: [0, 1, 2, 3],
-            num_train_frame: numTrainFrame,
-            smpl: 'smpl',
-            vertices: 'vertices',
-            params: 'params',
-            big_box: true
-        };
-        const yamlData = yaml.dump(data, { indent: 2, quotingType: "'", forceQuotes: true, flowLevel: 4 });
-        const config_yaml = new File([yamlData], info.id +"_config.yaml", { type: "text/plain;charset=utf-8" });
-        const formData = new FormData();
-        formData.append('file', config_yaml);
-        formData.append('type', 'multi_view_config');
-        const route = '/api/files/update/' + multiViewConfigId;
-        console.log(route)
-        axios.put(route, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        }).then((res) => {
-        }).catch((err) => {
-        });
-    };
 
     return (
         <div>
@@ -502,186 +86,19 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                     </Grid>
                     <Grid item>
                         <Button variant="contained" size="large" onClick={handleSave} sx={{ m: 1 }} margin="16">Save Name</Button>
-                        <Button variant="outlined" onClick={handleOpenHelp} size="large">Help</Button>
-                        <Dialog open={openHelp} onClose={handleCloseHelp}>
-                            <DialogTitle>Help</DialogTitle>
-                            <DialogContent>
-                                <Button className="close-btn" onClick={handleCloseHelp} size="small" variant="contained" style={{ margin: 16, position: 'absolute', top: 5, right: 5, backgroundColor: 'red' }}>
-                                    X
-                                </Button>
-                                <ReactMarkdown>{markdown}</ReactMarkdown>
-                            </DialogContent>
-                        </Dialog>
-                    </Grid></Grid>
+                        <Help helpMarkDown='https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md'/>
+                    </Grid>
+
+                </Grid>
                 {error && <Alert severity="error">{errorMessage}</Alert>}
 
                 <Grid container spacing={1} style={{ display: 'flex', direction: 'column' }} justifyContent="center"
                     alignItems="center"
                 >
-                    <Grid item xs={6}>
-                        <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                            <Stack spacing={5}>
-                                <CardContent>
-                                    <Typography gutterBottom variant='h5' component='div'>
-                                        Zip File
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Uploaded Zip File is ' + zipFileName}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Chosen File is ' + selectedZipName}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Stack spacing={1}>
-                                        <div>
-                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
-                                                Choose Zip
-                                                <input hidden
-                                                    accept=".zip"
-                                                    id="zip-upload"
-                                                    type="file"
-                                                    onChange={handleZipFileReader}
-                                                    style={{ display: 'none' }}
-                                                    ref={zipRef}
-                                                />
-                                            </Button>
-
-                                            <Button onClick={handleZipUpload} variant="contained" disabled={(disableZipUpload)} style={{ margin: 8 }}>{zipButtonName}</Button>
-                                        </div>
-                                        <div>
-                                            <DeleteButton onDelete={handleZipDelete} marginVar={8} isDisabled={disableZipDelete} deletedThing="zip file" size="medium" buttonName='Delete Zip'></DeleteButton>
-                                            <Button onClick={(e) => { handleDownload(zipId, zipFileName) }} variant="outlined" style={{ margin: 8 }} disabled={zipFileName == 'None'}>Download Zip</Button>
-                                        </div>
-                                    </Stack>
-                                </CardActions>
-                            </Stack>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                            <Stack spacing={5}>
-                                <CardContent>
-                                    <Typography gutterBottom variant='h5' component='div'>
-                                        Intrinsic File
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Uploaded Intrinsic File is ' + intrinsicFileName}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Chosen File is ' + selectedIntrinsicName}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Stack spacing={1}>
-                                        <div>
-                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
-                                                Choose Intrinsic
-                                                <input hidden
-                                                    accept=".yml"
-                                                    id="yml-upload"
-                                                    type="file"
-                                                    onChange={handleIntrinsicFileReader}
-                                                    style={{ display: 'none' }}
-                                                    ref={intrinsicRef}
-                                                />
-                                            </Button>
-
-                                            <Button onClick={handleIntrinsicUpload} variant="contained" disabled={(disableIntrinsicUpload)} style={{ margin: 8 }}>{intrinsicButtonName}</Button>
-                                        </div>
-                                        <div>
-                                            <DeleteButton onDelete={handleIntrinsicDelete} marginVar={8} isDisabled={disableIntrinsicDelete} deletedThing="intrinsic file" size="medium" buttonName='Delete Intrinsic'></DeleteButton>
-                                            <Button onClick={(e) => { handleDownload(intrinsicId, intrinsicFileName) }} variant="outlined" style={{ margin: 8 }} disabled={intrinsicFileName == 'None'}>Download Intrinsic</Button>
-                                        </div>
-                                    </Stack>
-                                </CardActions>
-                            </Stack>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                            <Stack spacing={5}>
-                                <CardContent>
-                                    <Typography gutterBottom variant='h5' component='div'>
-                                        Extrinsic File
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Uploaded Extrinsic File is ' + extrinsicFileName}
-                                    </Typography>
-                                    <Typography variant='body2' color='text.secondary'>
-                                        {'Chosen File is ' + selectedExtrinsicName}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Stack spacing={1}>
-                                        <div>
-                                            <Button variant="outlined" component="label" style={{ margin: 8 }}>
-                                                Choose Extrinsic
-                                                <input hidden
-                                                    accept=".yml"
-                                                    id="yml-upload"
-                                                    type="file"
-                                                    onChange={handleExtrinsicFileReader}
-                                                    style={{ display: 'none' }}
-                                                    ref={extrinsicRef}
-                                                />
-                                            </Button>
-
-                                            <Button onClick={handleExtrinsicUpload} variant="contained" disabled={(disableExtrinsicUpload)} style={{ margin: 8 }}>{extrinsicButtonName}</Button>
-                                        </div>
-                                        <div>
-                                            <DeleteButton onDelete={handleExtrinsicDelete} marginVar={8} isDisabled={disableExtrinsicDelete} deletedThing="extrinsic file" size="medium" buttonName='Delete Extrinsic'></DeleteButton>
-                                            <Button onClick={(e) => { handleDownload(extrinsicId, extrinsicFileName) }} variant="outlined" style={{ margin: 8 }} disabled={extrinsicFileName == 'None'}>Download Extrinsic</Button>
-                                        </div>
-                                    </Stack>
-                                </CardActions>
-                            </Stack>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Card style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start' }}>
-                            <Stack spacing={5}>
-                            <CardContent>
-                            <Typography gutterBottom variant='h5' component='div'>
-                                        Multi-View Settings
-                                    </Typography>
-                                    <TextField
-                                        label="Epoch"
-                                        variant="outlined"
-                                        type="number"
-                                        value={epoch}
-                                        onChange={(e) => setEpoch(parseInt(e.target.value))}
-                                    />
-                                    <TextField
-                                        label="Number of Workers"
-                                        variant="outlined"
-                                        type="number"
-                                        value={numWorkers}
-                                        onChange={(e) => setNumWorkers(parseInt(e.target.value))}
-                                    />
-                                    <TextField
-                                        label="Ratio"
-                                        variant="outlined"
-                                        type="number"
-                                        value={ratio}
-                                        onChange={(e) => setRatio(parseFloat(e.target.value))}
-                                    />
-                                    <TextField
-                                        label="Number of Train Frames"
-                                        variant="outlined"
-                                        type="number"
-                                        value={numTrainFrame}
-                                        onChange={(e) => setNumTrainFrame(parseInt(e.target.value))}
-                                    />
-                                </CardContent>
-                                <CardActions>
-                                    <Button variant="contained" onClick={handleUpdateConfig}>
-                                        Update
-                                    </Button>
-                                    </CardActions>
-                            </Stack>
-                        </Card>
-                    </Grid>
+                    <FileManager info={info} fileType={"zip"} format={'.zip'}></FileManager>
+                    <FileManager info={info} fileType={"intrinsic"} format={'.yml'}></FileManager>
+                    <FileManager info={info} fileType={"extrinsic"} format={'.yml'}></FileManager>
+                    <SettingManager info={info}></SettingManager>
                 </Grid>
                 <Grid
                     container
@@ -694,28 +111,11 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
                     <Grid item>
                         <DeleteButton onDelete={handleDelete} isDisabled={false} deletedThing="project" marginVar={0} size="large" buttonName='Delete Project'></DeleteButton>
                     </Grid>
-                    <Grid item>
-                        <Button variant="outlined" onClick={handleOpenBack} size="large">Back</Button>
-                        <Dialog open={openBack} onClose={handleCloseBack}>
-                            <DialogTitle>Confirmation</DialogTitle>
-                            <DialogContent>
-                                <Typography variant='body2' color='black'>
-                                    {'Are you sure you want to disgard the name change?'}
-                                </Typography>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={handleCloseBack} variant="contained" color="primary">
-                                    Cancel
-                                </Button>
-                                <Button onClick={handleBack} variant="contained" style={{ backgroundColor: 'red', color: 'white' }}>
-                                    Continue
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                    </Grid>
+                    <BackButton setView={setView} isSafed={isSafed}></BackButton>
                 </Grid>
             </Stack>
         </div>
     )
+
 }
 export default ProjectEdit
