@@ -3,7 +3,7 @@ name: tests-client
 on: 
   pull_request:
     paths:
-      - 'files-service/**'
+      - 'client/**'
 
 jobs:
   build:
