@@ -39,7 +39,9 @@ def cli(src, dst, smplx_path):
         vertices_out_dir = Path(dst, "vertices")
         Path.mkdir(params_out_dir, parents=True, exist_ok=True)
         Path.mkdir(vertices_out_dir, parents=True, exist_ok=True)
-        np.save(Path(params_out_dir, str(int(path.stem)) + ".npy"), params)  # Remove leading '0's for neuralbody
+        np.save(
+            Path(params_out_dir, str(int(path.stem)) + ".npy"), params
+        )  # Remove leading '0's for neuralbody
         np.save(Path(vertices_out_dir, str(int(path.stem)) + ".npy"), vertices)
 
 

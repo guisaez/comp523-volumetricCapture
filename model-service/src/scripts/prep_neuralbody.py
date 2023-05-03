@@ -15,7 +15,7 @@ def rename(raw_path, dst):
     # Move raw images to input directory for neuralbody
     paths = list(Path(raw_path).glob("Cam*"))
     for path in paths:
-        #shutil.copytree(path, dst)
+        # shutil.copytree(path, dst)
         i = 0
         out_dir = Path(dst, path.stem)
         Path.mkdir(out_dir, exist_ok=True)

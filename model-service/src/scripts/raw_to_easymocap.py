@@ -7,6 +7,7 @@ import shutil
 DATA_TYPE = [".png", ".jpg"]
 OFFSET = 3
 
+
 @click.command()
 @click.argument("src")
 @click.argument("dst")
