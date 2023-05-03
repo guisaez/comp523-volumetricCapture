@@ -40,14 +40,14 @@ NUM_STEPS = int(SAVE_PRED_EVERY) * 100 + 1  # 100 epoch
 
 def main():
     RANDOM_SEED = random.randint(1000, 9999)
-    tf.compat.v1.set_random_seed(RANDOM_SEED)
+    tf.set_random_seed(RANDOM_SEED)
 
     ## Create queue coordinator.
     coord = tf.train.Coordinator()
     h, w = INPUT_SIZE
 
     ## Load reader.
-    with tf.compat.v1.name_scope("create_inputs"):
+    with tf.name_scope("create_inputs"):
         reader = ImageReaderPGN(DATA_DIR, LIST_PATH, DATA_ID_LIST, INPUT_SIZE, RANDOM_SCALE, RANDOM_MIRROR, SHUFFLE, coord)
         image_batch, label_batch, edge_batch = reader.dequeue(BATCH_SIZE)
 
@@ -55,13 +55,13 @@ def main():
     reuse1 = False
     # Define loss and optimisation parameters.
     base_lr = tf.constant(LEARNING_RATE)
-    step_ph = tf.compat.v1.placeholder(dtype=tf.float32, shape=())
+    step_ph = tf.placeholder(dtype=tf.float32, shape=())
     learning_rate = tf.scalar_mul(base_lr, tf.pow((1 - step_ph / NUM_STEPS), POWER))
-    optim = tf.compat.v1.train.MomentumOptimizer(learning_rate, MOMENTUM)
+    optim = tf.train.MomentumOptimizer(learning_rate, MOMENTUM)
 
     for i in range(num_gpus):
         with tf.device('/gpu:%d' % i):
-            with tf.compat.v1.name_scope('Tower_%d' % (i)) as scope:
+            with tf.name_scope('Tower_%d' % (i)) as scope:
                 if i == 0:
                     reuse1 = False
                 else:
@@ -70,7 +70,7 @@ def main():
                 next_label = label_batch[i*BATCH_I:(i+1)*BATCH_I,:]
                 next_edge = edge_batch[i*BATCH_I:(i+1)*BATCH_I,:]
                 # Create network.
-                with tf.compat.v1.variable_scope('', reuse=reuse1):
+                with tf.variable_scope('', reuse=reuse1):
                     net = PGNModel({'data': next_image}, is_training=False, n_classes=N_CLASSES, keep_prob=0.9)
 
                 # parsing net
@@ -85,34 +85,34 @@ def main():
                 edge_out2_final = net.layers['edge_rf_fc']
 
                 # combine resize
-                edge_out1 = tf.image.resize(edge_out1_final, tf.shape(input=next_image)[1:3,])
-                edge_out2 = tf.image.resize(edge_out2_final, tf.shape(input=next_image)[1:3,])
-                edge_out1_res5 = tf.image.resize(edge_out1_res5, tf.shape(input=next_image)[1:3,])
-                edge_out1_res4 = tf.image.resize(edge_out1_res4, tf.shape(input=next_image)[1:3,])
-                edge_out1_res3 = tf.image.resize(edge_out1_res3, tf.shape(input=next_image)[1:3,])
+                edge_out1 = tf.image.resize_images(edge_out1_final, tf.shape(next_image)[1:3,])
+                edge_out2 = tf.image.resize_images(edge_out2_final, tf.shape(next_image)[1:3,])
+                edge_out1_res5 = tf.image.resize_images(edge_out1_res5, tf.shape(next_image)[1:3,])
+                edge_out1_res4 = tf.image.resize_images(edge_out1_res4, tf.shape(next_image)[1:3,])
+                edge_out1_res3 = tf.image.resize_images(edge_out1_res3, tf.shape(next_image)[1:3,])
 
                 ### Predictions: ignoring all predictions with labels greater or equal than n_classes
                 raw_prediction_p1 = tf.reshape(parsing_out1, [-1, N_CLASSES])
                 raw_prediction_p2 = tf.reshape(parsing_out2, [-1, N_CLASSES])
                 label_proc = prepare_label(next_label, tf.stack(parsing_out1.get_shape()[1:3]), one_hot=False) # [batch_size, h, w]
                 raw_gt = tf.reshape(label_proc, [-1,])
-                indices = tf.squeeze(tf.compat.v1.where(tf.less_equal(raw_gt, N_CLASSES - 1)), 1)
+                indices = tf.squeeze(tf.where(tf.less_equal(raw_gt, N_CLASSES - 1)), 1)
                 gt = tf.cast(tf.gather(raw_gt, indices), tf.int32)
                 prediction_p1 = tf.gather(raw_prediction_p1, indices)
                 prediction_p2 = tf.gather(raw_prediction_p2, indices)
 
                 raw_edge = tf.reshape(tf.sigmoid(edge_out2_final), [-1,])
                 edge_cond = tf.multiply(tf.cast(tf.greater(raw_edge, 0.1), tf.int32), tf.cast(tf.less_equal(raw_gt, N_CLASSES - 1), tf.int32))
-                edge_mask = tf.squeeze(tf.compat.v1.where(tf.equal(edge_cond, 1)), 1)
+                edge_mask = tf.squeeze(tf.where(tf.equal(edge_cond, 1)), 1)
                 gt_edge = tf.cast(tf.gather(raw_gt, edge_mask), tf.int32)
                 p1_lc = tf.gather(raw_prediction_p1, edge_mask)
                 p2_lc = tf.gather(raw_prediction_p2, edge_mask)
 
                 ### Pixel-wise softmax loss.
-                loss_p1_gb = tf.reduce_mean(input_tensor=tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction_p1, labels=gt))
-                loss_p2_gb = tf.reduce_mean(input_tensor=tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction_p2, labels=gt))
-                loss_p1_lc = tf.reduce_mean(input_tensor=tf.nn.sparse_softmax_cross_entropy_with_logits(logits=p1_lc, labels=gt_edge))
-                loss_p2_lc = tf.reduce_mean(input_tensor=tf.nn.sparse_softmax_cross_entropy_with_logits(logits=p2_lc, labels=gt_edge))
+                loss_p1_gb = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction_p1, labels=gt))
+                loss_p2_gb = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=prediction_p2, labels=gt))
+                loss_p1_lc = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=p1_lc, labels=gt_edge))
+                loss_p2_lc = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=p2_lc, labels=gt_edge))
                 loss_p1 = loss_p1_lc + loss_p1_gb
                 loss_p2 = loss_p2_lc + loss_p2_gb
 
@@ -122,8 +122,8 @@ def main():
                 edge_pos_mask = tf.cast(edge_pos_mask, tf.float32)
                 edge_neg_mask = tf.cast(edge_neg_mask, tf.float32)
 
-                total_pixels = tf.cast(tf.shape(input=next_edge)[1] * tf.shape(input=next_edge)[2], tf.int32)
-                pos_pixels = tf.reduce_sum(input_tensor=tf.cast(next_edge, dtype=tf.int32))
+                total_pixels = tf.cast(tf.shape(next_edge)[1] * tf.shape(next_edge)[2], tf.int32)
+                pos_pixels = tf.reduce_sum(tf.to_int32(next_edge))
                 neg_pixels = tf.subtract(total_pixels, pos_pixels)
                 pos_weight = tf.cast(tf.divide(neg_pixels, total_pixels), tf.float32)
                 neg_weight = tf.cast(tf.divide(pos_pixels, total_pixels), tf.float32)
@@ -132,90 +132,90 @@ def main():
                 edge_gt = tf.cast(next_edge, tf.float32)
 
                 t_loss_e1 = tf.nn.sigmoid_cross_entropy_with_logits(logits=edge_out1, labels=edge_gt)
-                loss_e1_pos_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1, edge_pos_mask), axis=[1, 2])
-                loss_e1_neg_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1, edge_neg_mask), axis=[1, 2])
-                loss_e1_pos_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1, parsing_mask), edge_pos_mask), axis=[1, 2])
-                loss_e1_neg_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1, parsing_mask), edge_neg_mask), axis=[1, 2])
+                loss_e1_pos_gb = tf.reduce_sum(tf.multiply(t_loss_e1, edge_pos_mask), [1, 2])
+                loss_e1_neg_gb = tf.reduce_sum(tf.multiply(t_loss_e1, edge_neg_mask), [1, 2])
+                loss_e1_pos_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1, parsing_mask), edge_pos_mask), [1, 2])
+                loss_e1_neg_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1, parsing_mask), edge_neg_mask), [1, 2])
                 loss_e1_pos = (loss_e1_pos_gb + loss_e1_pos_lc)* pos_weight
                 loss_e1_neg = (loss_e1_neg_gb + loss_e1_neg_lc) * neg_weight
-                loss_e1 = tf.reduce_mean(input_tensor=loss_e1_pos * Edge_Pos_W + loss_e1_neg)
+                loss_e1 = tf.reduce_mean(loss_e1_pos * Edge_Pos_W + loss_e1_neg)
 
                 t_loss_e2 = tf.nn.sigmoid_cross_entropy_with_logits(logits=edge_out2, labels=edge_gt)
-                loss_e2_pos_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e2, edge_pos_mask), axis=[1, 2])
-                loss_e2_neg_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e2, edge_neg_mask), axis=[1, 2])
-                loss_e2_pos_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e2, parsing_mask), edge_pos_mask), axis=[1, 2])
-                loss_e2_neg_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e2, parsing_mask), edge_neg_mask), axis=[1, 2])
+                loss_e2_pos_gb = tf.reduce_sum(tf.multiply(t_loss_e2, edge_pos_mask), [1, 2])
+                loss_e2_neg_gb = tf.reduce_sum(tf.multiply(t_loss_e2, edge_neg_mask), [1, 2])
+                loss_e2_pos_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e2, parsing_mask), edge_pos_mask), [1, 2])
+                loss_e2_neg_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e2, parsing_mask), edge_neg_mask), [1, 2])
                 loss_e2_pos = (loss_e2_pos_gb + loss_e2_pos_lc)* pos_weight
                 loss_e2_neg = (loss_e2_neg_gb + loss_e2_neg_lc) * neg_weight
-                loss_e2 = tf.reduce_mean(input_tensor=loss_e2_pos * Edge_Pos_W + loss_e2_neg)
+                loss_e2 = tf.reduce_mean(loss_e2_pos * Edge_Pos_W + loss_e2_neg)
 
                 t_loss_e1_res5 = tf.nn.sigmoid_cross_entropy_with_logits(logits=edge_out1_res5, labels=edge_gt)
-                loss_e1_res5_pos_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res5, edge_pos_mask), axis=[1, 2])
-                loss_e1_res5_neg_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res5, edge_neg_mask), axis=[1, 2])
-                loss_e1_res5_pos_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res5, parsing_mask), edge_pos_mask), axis=[1, 2])
-                loss_e1_res5_neg_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res5, parsing_mask), edge_neg_mask), axis=[1, 2])
+                loss_e1_res5_pos_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res5, edge_pos_mask), [1, 2])
+                loss_e1_res5_neg_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res5, edge_neg_mask), [1, 2])
+                loss_e1_res5_pos_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res5, parsing_mask), edge_pos_mask), [1, 2])
+                loss_e1_res5_neg_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res5, parsing_mask), edge_neg_mask), [1, 2])
                 loss_e1_res5_pos = (loss_e1_res5_pos_gb + loss_e1_res5_pos_lc)* pos_weight
                 loss_e1_res5_neg = (loss_e1_res5_neg_gb + loss_e1_res5_neg_lc) * neg_weight
-                loss_e1_res5 = tf.reduce_mean(input_tensor=loss_e1_res5_pos * Edge_Pos_W + loss_e1_res5_neg)
+                loss_e1_res5 = tf.reduce_mean(loss_e1_res5_pos * Edge_Pos_W + loss_e1_res5_neg)
 
                 t_loss_e1_res4 = tf.nn.sigmoid_cross_entropy_with_logits(logits=edge_out1_res4, labels=edge_gt)
-                loss_e1_res4_pos_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res4, edge_pos_mask), axis=[1, 2])
-                loss_e1_res4_neg_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res4, edge_neg_mask), axis=[1, 2])
-                loss_e1_res4_pos_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res4, parsing_mask), edge_pos_mask), axis=[1, 2])
-                loss_e1_res4_neg_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res4, parsing_mask), edge_neg_mask), axis=[1, 2])
+                loss_e1_res4_pos_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res4, edge_pos_mask), [1, 2])
+                loss_e1_res4_neg_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res4, edge_neg_mask), [1, 2])
+                loss_e1_res4_pos_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res4, parsing_mask), edge_pos_mask), [1, 2])
+                loss_e1_res4_neg_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res4, parsing_mask), edge_neg_mask), [1, 2])
                 loss_e1_res4_pos = (loss_e1_res4_pos_gb + loss_e1_res4_pos_lc)* pos_weight
                 loss_e1_res4_neg = (loss_e1_res4_neg_gb + loss_e1_res4_neg_lc) * neg_weight
-                loss_e1_res4 = tf.reduce_mean(input_tensor=loss_e1_res4_pos * Edge_Pos_W + loss_e1_res4_neg)
+                loss_e1_res4 = tf.reduce_mean(loss_e1_res4_pos * Edge_Pos_W + loss_e1_res4_neg)
 
                 t_loss_e1_res3 = tf.nn.sigmoid_cross_entropy_with_logits(logits=edge_out1_res3, labels=edge_gt)
-                loss_e1_res3_pos_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res3, edge_pos_mask), axis=[1, 2])
-                loss_e1_res3_neg_gb = tf.reduce_sum(input_tensor=tf.multiply(t_loss_e1_res3, edge_neg_mask), axis=[1, 2])
-                loss_e1_res3_pos_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res3, parsing_mask), edge_pos_mask), axis=[1, 2])
-                loss_e1_res3_neg_lc = tf.reduce_sum(input_tensor=tf.multiply(tf.multiply(t_loss_e1_res3, parsing_mask), edge_neg_mask), axis=[1, 2])
+                loss_e1_res3_pos_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res3, edge_pos_mask), [1, 2])
+                loss_e1_res3_neg_gb = tf.reduce_sum(tf.multiply(t_loss_e1_res3, edge_neg_mask), [1, 2])
+                loss_e1_res3_pos_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res3, parsing_mask), edge_pos_mask), [1, 2])
+                loss_e1_res3_neg_lc = tf.reduce_sum(tf.multiply(tf.multiply(t_loss_e1_res3, parsing_mask), edge_neg_mask), [1, 2])
                 loss_e1_res3_pos = (loss_e1_res3_pos_gb + loss_e1_res3_pos_lc)* pos_weight
                 loss_e1_res3_neg = (loss_e1_res3_neg_gb + loss_e1_res3_neg_lc) * neg_weight
-                loss_e1_res3 = tf.reduce_mean(input_tensor=loss_e1_res3_pos * Edge_Pos_W + loss_e1_res3_neg)
+                loss_e1_res3 = tf.reduce_mean(loss_e1_res3_pos * Edge_Pos_W + loss_e1_res3_neg)
 
                 loss_parsing = loss_p1 + loss_p2
                 loss_edge = loss_e1 + loss_e2 + loss_e1_res5 + loss_e1_res4 + loss_e1_res3
                 reduced_loss = loss_parsing * p_Weight + loss_edge * e_Weight
 
-                trainable_variable = tf.compat.v1.trainable_variables()
+                trainable_variable = tf.trainable_variables()
                 grads = optim.compute_gradients(reduced_loss, var_list=trainable_variable)
 
                 tower_grads.append(grads)
 
-                tf.compat.v1.add_to_collection('loss_p', loss_parsing)
-                tf.compat.v1.add_to_collection('loss_e', loss_edge)
-                tf.compat.v1.add_to_collection('reduced_loss', reduced_loss)
+                tf.add_to_collection('loss_p', loss_parsing)
+                tf.add_to_collection('loss_e', loss_edge)
+                tf.add_to_collection('reduced_loss', reduced_loss)
 
     # Average the gradients
     grads_ave = average_gradients(tower_grads)
     # apply the gradients with our optimizers
     train_op = optim.apply_gradients(grads_ave)
 
-    loss_p_ave = tf.reduce_mean(input_tensor=tf.compat.v1.get_collection('loss_p'))
-    loss_e_ave = tf.reduce_mean(input_tensor=tf.compat.v1.get_collection('loss_e'))
-    loss_ave = tf.reduce_mean(input_tensor=tf.compat.v1.get_collection('reduced_loss'))
+    loss_p_ave = tf.reduce_mean(tf.get_collection('loss_p'))
+    loss_e_ave = tf.reduce_mean(tf.get_collection('loss_e'))
+    loss_ave = tf.reduce_mean(tf.get_collection('reduced_loss'))
 
-    loss_summary_p = tf.compat.v1.summary.scalar("loss_p_ave", loss_p_ave)
-    loss_summary_e = tf.compat.v1.summary.scalar("loss_e_ave", loss_e_ave)
-    loss_summary_ave = tf.compat.v1.summary.scalar("loss_ave", loss_ave)
-    loss_summary = tf.compat.v1.summary.merge([loss_summary_ave, loss_summary_p, loss_summary_e])
-    summary_writer = tf.compat.v1.summary.FileWriter(LOG_DIR, graph=tf.compat.v1.get_default_graph())
+    loss_summary_p = tf.summary.scalar("loss_p_ave", loss_p_ave)
+    loss_summary_e = tf.summary.scalar("loss_e_ave", loss_e_ave)
+    loss_summary_ave = tf.summary.scalar("loss_ave", loss_ave)
+    loss_summary = tf.summary.merge([loss_summary_ave, loss_summary_p, loss_summary_e])
+    summary_writer = tf.summary.FileWriter(LOG_DIR, graph=tf.get_default_graph())
 
 
     # Saver for storing checkpoints of the model.
-    all_saver_var = tf.compat.v1.global_variables()
+    all_saver_var = tf.global_variables()
     restore_var = [v for v in all_saver_var if 'parsing' not in v.name and 'edge' not in v.name and 'Momentum' not in v.name]
-    saver = tf.compat.v1.train.Saver(var_list=all_saver_var, max_to_keep=100)
-    loader = tf.compat.v1.train.Saver(var_list=restore_var)
+    saver = tf.train.Saver(var_list=all_saver_var, max_to_keep=100)
+    loader = tf.train.Saver(var_list=restore_var)
 
     # Set up tf session and initialize variables.
-    config = tf.compat.v1.ConfigProto(allow_soft_placement=True,log_device_placement=False)
+    config = tf.ConfigProto(allow_soft_placement=True,log_device_placement=False)
     config.gpu_options.allow_growth = True
-    sess = tf.compat.v1.Session(config=config)
-    init = tf.compat.v1.global_variables_initializer()
+    sess = tf.Session(config=config)
+    init = tf.global_variables_initializer()
     sess.run(init)
 
     if load(loader, sess, SNAPSHOT_DIR):
@@ -224,7 +224,7 @@ def main():
         print(" [!] Load failed...")
 
     # Start queue threads.
-    threads = tf.compat.v1.train.start_queue_runners(coord=coord, sess=sess)
+    threads = tf.train.start_queue_runners(coord=coord, sess=sess)
 
     # Iterate over training steps.
     for step in range(NUM_STEPS):
@@ -268,7 +268,7 @@ def average_gradients(tower_grads):
 
     # Average over the 'tower' dimension.
     grad = tf.concat(axis=0, values=grads)
-    grad = tf.reduce_mean(input_tensor=grad, axis=0)
+    grad = tf.reduce_mean(grad, 0)
 
     # Keep in mind that the Variables are redundant because they are shared
     # across towers. So .. we will just return the first tower's pointer to

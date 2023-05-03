@@ -16,12 +16,12 @@ def image_scaling(img):
       label: Segmentation mask to scale.
     """
 
-    scale = tf.random.uniform([1], minval=0.5, maxval=2.0, dtype=tf.float32,
+    scale = tf.random_uniform([1], minval=0.5, maxval=2.0, dtype=tf.float32,
                               seed=None)
-    h_new = tf.cast(tf.multiply(tf.cast(tf.shape(input=img)[0], dtype=tf.float32), scale), dtype=tf.int32)
-    w_new = tf.cast(tf.multiply(tf.cast(tf.shape(input=img)[1], dtype=tf.float32), scale), dtype=tf.int32)
-    new_shape = tf.squeeze(tf.stack([h_new, w_new]), axis=[1])
-    img = tf.image.resize(img, new_shape)
+    h_new = tf.to_int32(tf.multiply(tf.to_float(tf.shape(img)[0]), scale))
+    w_new = tf.to_int32(tf.multiply(tf.to_float(tf.shape(img)[1]), scale))
+    new_shape = tf.squeeze(tf.stack([h_new, w_new]), squeeze_dims=[1])
+    img = tf.image.resize_images(img, new_shape)
     # label = tf.image.resize_nearest_neighbor(tf.expand_dims(label, 0),
     #                                          new_shape)
     # label = tf.squeeze(label, squeeze_dims=[0])
@@ -40,9 +40,9 @@ def image_mirroring(img):
     """
 
     distort_left_right_random = \
-    tf.random.uniform([1], 0, 1.0, dtype=tf.float32)[0]
+    tf.random_uniform([1], 0, 1.0, dtype=tf.float32)[0]
     mirror = tf.less(tf.stack([1.0, distort_left_right_random, 1.0]), 0.5)
-    mirror = tf.boolean_mask(tensor=[0, 1, 2], mask=mirror)
+    mirror = tf.boolean_mask([0, 1, 2], mirror)
     img = tf.reverse(img, mirror)
     # label = tf.reverse(label, mirror)
     # edge = tf.reverse(edge, mirror)
@@ -50,25 +50,25 @@ def image_mirroring(img):
 
 
 def random_resize_img_labels(image, label, resized_h, resized_w):
-    scale = tf.random.uniform([1], minval=0.75, maxval=1.25, dtype=tf.float32,
+    scale = tf.random_uniform([1], minval=0.75, maxval=1.25, dtype=tf.float32,
                               seed=None)
-    h_new = tf.cast(tf.multiply(tf.cast(resized_h, dtype=tf.float32), scale), dtype=tf.int32)
-    w_new = tf.cast(tf.multiply(tf.cast(resized_w, dtype=tf.float32), scale), dtype=tf.int32)
+    h_new = tf.to_int32(tf.multiply(tf.to_float(resized_h), scale))
+    w_new = tf.to_int32(tf.multiply(tf.to_float(resized_w), scale))
 
-    new_shape = tf.squeeze(tf.stack([h_new, w_new]), axis=[1])
-    img = tf.image.resize(image, new_shape)
-    label = tf.image.resize(tf.expand_dims(label, 0),
-                                             new_shape, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-    label = tf.squeeze(label, axis=[0])
+    new_shape = tf.squeeze(tf.stack([h_new, w_new]), squeeze_dims=[1])
+    img = tf.image.resize_images(image, new_shape)
+    label = tf.image.resize_nearest_neighbor(tf.expand_dims(label, 0),
+                                             new_shape)
+    label = tf.squeeze(label, squeeze_dims=[0])
     return img, label
 
 
 def resize_img_labels(image, label, resized_h, resized_w):
-    new_shape = tf.stack([tf.cast(resized_h, dtype=tf.int32), tf.cast(resized_w, dtype=tf.int32)])
-    img = tf.image.resize(image, new_shape)
-    label = tf.image.resize(tf.expand_dims(label, 0),
-                                             new_shape, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-    label = tf.squeeze(label, axis=[0])
+    new_shape = tf.stack([tf.to_int32(resized_h), tf.to_int32(resized_w)])
+    img = tf.image.resize_images(image, new_shape)
+    label = tf.image.resize_nearest_neighbor(tf.expand_dims(label, 0),
+                                             new_shape)
+    label = tf.squeeze(label, squeeze_dims=[0])
     return img, label
 
 
@@ -90,16 +90,16 @@ def random_crop_and_pad_image_and_labels(image, crop_h, crop_w,
     # edge = edge - 0
 
     combined = tf.concat([image, label, edge], 2)
-    image_shape = tf.shape(input=image)
+    image_shape = tf.shape(image)
     combined_pad = tf.image.pad_to_bounding_box(combined, 0, 0,
                                                 tf.maximum(crop_h,
                                                            image_shape[0]),
                                                 tf.maximum(crop_w,
                                                            image_shape[1]))
 
-    last_image_dim = tf.shape(input=image)[-1]
-    last_label_dim = tf.shape(input=label)[-1]
-    combined_crop = tf.image.random_crop(combined_pad, [crop_h, crop_w, 4 + 1])
+    last_image_dim = tf.shape(image)[-1]
+    last_label_dim = tf.shape(label)[-1]
+    combined_crop = tf.random_crop(combined_pad, [crop_h, crop_w, 4 + 1])
     img_crop = combined_crop[:, :, :last_image_dim]
     label_crop = combined_crop[:, :,
                  last_image_dim:last_image_dim + last_label_dim]
@@ -190,7 +190,7 @@ def read_images_from_disk(input_queue, input_size, random_scale,
       Two tensors: the decoded image and its mask.
     """
 
-    img_contents = tf.io.read_file(input_queue[0])
+    img_contents = tf.read_file(input_queue[0])
     # label_contents = tf.read_file(input_queue[1])
     # edge_contents = tf.read_file(input_queue[2])
 
@@ -247,7 +247,7 @@ class ImageReader(object):
         # self.image_list, self.label_list = read_labeled_image_list(
         #     self.data_dir, self.data_list)
         # self.edge_list = read_edge_list(self.data_dir, self.data_id_list)
-        self.images = tf.convert_to_tensor(value=self.image_list, dtype=tf.string)
+        self.images = tf.convert_to_tensor(self.image_list, dtype=tf.string)
         # self.labels = tf.convert_to_tensor(self.label_list, dtype=tf.string)
         # self.edges = tf.convert_to_tensor(self.edge_list, dtype=tf.string)
         self.queue = tf.compat.v1.train.slice_input_producer([self.images],
@@ -268,6 +268,6 @@ class ImageReader(object):
         Returns:
           Two tensors of size (batch_size, h, w, {3, 1}) for images and masks.'''
         batch_list = [self.image, self.label, self.edge]
-        image_batch, label_batch, edge_batch = tf.compat.v1.train.batch(
+        image_batch, label_batch, edge_batch = tf.train.batch(
             [self.image, self.label, self.edge], num_elements)
         return image_batch, label_batch, edge_batch
