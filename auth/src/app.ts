@@ -18,6 +18,7 @@ app.use(cookieSession({
     secure: false // To be configured later since JEST uses HTTP instead of HTTPS
     })
 );
+// User Errorhandler middleware
 app.use(errorHandler);
 
 // Server Routes
