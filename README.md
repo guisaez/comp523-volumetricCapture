@@ -1,13 +1,16 @@
 # Volumetric Capture
 
 ## Table of Contents
-* ### [Installation](#installation-1)
+* ### [Run in Development Environment](#installation-1)
 * ### [Folder Structure](#folder-structure-1)
 * ### [Running Tests](#running-tests-1)
 * ### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
 * ### [Client Service](./documentation/client/ClientServiceDocumentation.md)
 * ### [Acknowledgements](#acknowledgements-1)
 ---
+<<<<<<< HEAD
+
+=======
 ## Installation
 ### Setting Up  Docker Environment
 1. Install [Docker](https://docs.docker.com/engine/install/).
@@ -23,6 +26,7 @@ git submodule update --init --recursive
 ```
 docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
 ```
+>>>>>>> 0293a8a69893f56bd86f009fe09da725ce59228c
 
 ---
 ## Folder Structure
