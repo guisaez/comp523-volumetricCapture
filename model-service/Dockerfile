@@ -30,7 +30,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Install Python dependencies globally.
 RUN python3.7 -m pip install click 
-RUN pip3 install --no-cache-dir virtualenv Pillow Flask
+RUN pip3 install --no-cache-dir virtualenv Pillow
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
