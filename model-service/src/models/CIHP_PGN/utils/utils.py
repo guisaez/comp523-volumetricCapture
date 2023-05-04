@@ -54,9 +54,9 @@ def prepare_label(input_batch, new_size, one_hot=True):
       Outputs a tensor of shape [batch_size h w 21]
       with last dimension comprised of 0's and 1's only.
     """
-    with tf.compat.v1.name_scope('label_encode'):
-        input_batch = tf.image.resize(input_batch, new_size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR) # as labels are integer numbers, need to use NN interp.
-        input_batch = tf.squeeze(input_batch, axis=[3]) # reducing the channel dimension.
+    with tf.name_scope('label_encode'):
+        input_batch = tf.image.resize_nearest_neighbor(input_batch, new_size) # as labels are integer numbers, need to use NN interp.
+        input_batch = tf.squeeze(input_batch, squeeze_dims=[3]) # reducing the channel dimension.
         if one_hot:
           input_batch = tf.one_hot(input_batch, depth=n_classes)
     return input_batch
@@ -95,7 +95,7 @@ def save(saver, sess, logdir, step):
       
     if not os.path.exists(logdir):
       os.makedirs(logdir)
-    saver.save(sess, checkpoint_path, global_step=step, save_format='h5')
+    saver.save(sess, checkpoint_path, global_step=step)
     print('The checkpoint has been created.')
 
 def load(saver, sess, ckpt_path):
