@@ -1,39 +1,35 @@
 ## Guide to Run and Test Application in Development Environment
 
-1. Make sure you install `Docker Desktop`
-    * [Get Docker](https://docs.docker.com/get-docker/)
-    * Make sure to login with with the team credentials.
-        * `username`: teamg2023
-        * `password`: TeamG2023
-2. In your terminal verify that `docker CLI` is installed.
+This guide is to be able to run the application in  a development environment, that is inside a local computer.
+
+### Steps
+1. Install [Docker Desktop](https://docs.docker.com/get-docker/)
+2. Verify that `docker` was successfully installed and you are able to access it through the terminal.
 ```shell
 docker --version
 ```
-3. Login to the `docker CLI` using the following command.
+2. Login into docker with the following credentials either through the application or the CLI.
+    * `username`: teamg2023
+    * `password`: TeamG2023
 ```shell
 docker login
-
-// This should indicate you are already authenticated
 ```
+3. Enable Kubernetes in Docker desktop.
+![Kubernetes Enabled](./images/kubernetes_enabled.png)
 4. Verify  `kubectl` was installed with Docker Desktop
 ```shell
 kubectl version --short
 ```
-5. Make sure that in Docker Desktop Kubernetes is enabled.
-![Kubernetes Enabled](./images/kubernetes_enabled.png)
-6. You should see that Kubernetes is running when starting Docker Client. (Top right of your screen for MacOS)
+5. You should see that Kubernetes is running when starting Docker Client. (Top right of your screen for MacOS)
 ![Kubernetes Running](./images/kubernetes_running.png)
-7. Install Skaffold
+6. Install Skaffold
 [Skaffold Setup](https://skaffold.dev/docs/install/)
 
 
 ### Context Environment
-
-1. Verify your `kubectl` context using the following command.
+1. Verify your `kubectl` context using the following command. Should default to `docker-desktop`
 ```shell
 kubectl config current-context
-
-// docker-desktop
 ```
 2. Create JWT secret within the context
 ```shell
@@ -46,7 +42,9 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 4. Verify `ingress-nginx` was created
 ```shell
 kubectl get pods --namespace=ingress-nginx
-
+```
+```shell
+// Output
 NAME                                        READY   STATUS      RESTARTS       AGE
 ingress-nginx-admission-create-s87ql        0/1     Completed   0              5d19h
 ingress-nginx-admission-patch-qphfl         0/1     Completed   1              5d19h
@@ -64,9 +62,15 @@ ingress-nginx-controller-7d9674b7cf-2nwgg   1/1     Running     8 (167m ago)   5
 ```
 kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
 ```
+* This will redirect PORT 8080 in your local computer to the ingress-nginx load balancer.
 2. Open a second terminal window and run the following command.
 ```shell
 skaffold dev
 ```
+* This command will run all deployments needed for the application, that is all services that are being used. If it is the first time installing them, it might take several minutes.
 
-After all deployments have initialized, you will be able to access the application at: [http://volumetric.dev](http://volumetric.dev)
+It is recommended to open the application in `Google Chrome` as it is being deployed in a development environment and does not have a valid SSL certificate. In case you are prompted a message of this page is unsafe. While having that same window open just type in your `thisisunsafe`.
+
+After all deployments have initialized, you will be able to access the application at: [https://volumetric.dev](http://volumetric.dev)
+
+
