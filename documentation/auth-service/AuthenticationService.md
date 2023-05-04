@@ -5,20 +5,52 @@ This services runs in a separate container or pod in our application. It handles
 * UserCreation
 * UserSignOut
 
-| Endpoint | Method | Request Body | Description |
-| :---: | :---:  | :---:| :---:   |
-| /api/auth/signup | POST | { email: string, password: string } | Create a new user |
-| /api/auth/signin | POST | { email: string, password: string} | Sign in into application |
-| /api/auth/user | GET | { } | Get current user information based on cookie session | 
-| /api/auth/signout | POST | { } | Signout from application |
-
-
 ### Server
 
 * This application establishes a connection, listening for requests on PORT 3000. 
 * It also connects to a defined MongoDB database service. 
 * Utilizes cookies and JWT to store user information.
 * Ensures that user password is hashed before saving it in the database.
+
+### Folder Structure
+
+| Name | Description |
+| ---- |  ---- |
+| package.json | Contains server information such as required dependencies, scripts and jest configuration.|
+| tsconfig.json | Typescript configuration. |
+Dockerfile | Creates a Docker image that will install all node dependencies listed in package.json and starts the server using the `npm start` command. |
+| src | Server implementation
+
+### Src Directory Structure
+
+1. `index.ts`
+    * Checks for required environment variables.
+    * Establishes a connection to the mongoose using the provided `MONGO_URI` environment variable.
+    * Initializes the server and sets it up to listen in PORT: 3000
+2. `app.ts`
+    * Configure express server.
+    * Configure cookie-session
+    * Add endpoints to the express server.
+    * Ensure that unknown requests return a `NotFoundError()`
+3. `models/user-model.ts`
+    * Define the User model to be saved in the database.
+    * UserAttrs corresponds to the attributes required to create a user.
+    * UserDoc represents a single record from the database.
+    * UserModel represents the entire collection of data.
+    * Defines a pre-save function that ensures the password is hashed.
+4. `utils/password.ts`
+    * Handles password encryption and comparison.
+5. `test`
+    * Adds test configuration for jest.
+6. `routes/*`
+    * Server routes are defined here.
+
+| Endpoint | Method | Request Body | Description |
+| :---: | :---:  | :---:| :---:   |
+| /api/auth/signup | POST | { email: string, password: string } | Create a new user |
+| /api/auth/signin | POST | { email: string, password: string} | Sign in into application |
+| /api/auth/user | GET | { } | Get current user information based on cookie session | 
+| /api/auth/signout | POST | { } | Signout from application |
 
 ### JWT
 
@@ -36,30 +68,10 @@ The JWT is being access through the environment and it is used to sign user data
             jwt: JWT
         }
 ```
-### User Model
-
-The User Table has the following schema:
-
-```typescript
-// Interface that describes the properties that are needed to create a new User.
-interface UserAttrs {
-    email: string;
-    password: string;
-}
-
-// Represents on single record from the database
-interface UserDoc extends mongoose.Document {
-    email: string,
-    password: string
-}
-
-// Represents the entire collection of data
-interface UserModel extends mongoose.Model<UserDoc> {
-    build(attrs: UserAttrs): UserDoc
-}
-```
 
 ### Testing Service 
+
+Tests can be added to the `__test__` directory with the same route name. Example: `auth-signin.test.ts`
 
 In order to test this service locally:
 * Navigate to the root directory of this service.

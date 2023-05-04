@@ -5,19 +5,23 @@
 * ### [Folder Structure](#folder-structure-1)
 * ### [Running Tests](#running-tests-1)
 * ### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
+* ### [Client Service](./documentation/client/ClientServiceDocumentation.md)
+* ### [Acknowledgements](#acknowledgements-1)
 ---
 ## Installation
 ### Setting Up  Docker Environment
-1. Install [Docker](https://docs.docker.com/engine/install/)
-2. From inside project directory run
+1. Install [Docker](https://docs.docker.com/engine/install/).
+2. From inside project directory run:
 ```
 git submodule update --init --recursive
 ```
-3. Follow step `0.1` in [this](https://github.com/zju3dv/EasyMocap/blob/master/doc/installation.md) guide to download and place the necessary SMPL models for EasyMocap. This must be done before building Docker Image.
-4. Place `raw` images, `intri.yml`, and `extri.yml` files into `volumetricCapture/app/src/data` 
-5. Build Docker Image by running
+3. Download the pre-trained model for CIHP [here](https://github.com/Engineering-Course/CIHP_PGN).
+4. Follow step `0.1` in [this](https://github.com/zju3dv/EasyMocap/blob/master/doc/installation.md) guide to download and place the necessary SMPL models for EasyMocap. This must be done before building Docker Image.
+4. Place `raw` images, `intri.yml`, and `extri.yml` files into `volumetricCapture/app/src/data` before building Docker Image. If changes are made to these files after building, the image must be rebuilt.
+5. Make modifications to `multi_view_custom.yaml` in `volumetricCapture/app/src/data` to configure Neuralbody.
+6. Build Docker Image by running:
 ```
-docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
+docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
 ```
 
 ---
@@ -48,9 +52,23 @@ The raw images may be placed anywhere on the file system, but the correct path m
 1. Make sure you reviewed the [Folder Structure](#folder-structure-1).
 2. Start Docker Image by running the following command in your terminal
 ```
-docker run --gpus all -it --rm volumetric-capture
+docker run --ipc=host --gpus all -it --rm volumetric-capture
 ```
 3. In your terminal, go to the project directory and run
 ```shell
-python scripts/automation.py
+python3 scripts/automation.py 
 ```
+
+---
+## Acknowledgements
+
+This project would not have been possible without the following repositories:
+
+* [CIHP_PGN](https://github.com/Engineering-Course/CIHP_PGN) was used to create segmented images.
+* [EasyMocap](https://github.com/zju3dv/EasyMocap) was used for SMPL keypoints.
+* [Neuralbody](https://github.com/zju3dv/neuralbody) was used to create 3D meshes.
+* SMPL models were obtained from the following websites from MPII [SMPL-X model](https://github.com/vchoutas/smplx):  
+  * [SMPL](https://smpl.is.tue.mpg.de/) (male and female models)
+  * [SMPL](https://smplify.is.tue.mpg.de/) (gender neutral model)
+  * [SMPL+H](https://mano.is.tue.mpg.de/)
+  * [SMPL-X](https://smpl-x.is.tue.mpg.de/)

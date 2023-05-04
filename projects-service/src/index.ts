@@ -34,6 +34,12 @@ const start = async () => {
 
         await natsWrapper.connect(process.env.NATS_CLUSTER_ID, process.env.NATS_CLIENT_ID, process.env.NATS_URL);
 
+        natsWrapper.client.on('error', (err) => {
+            console.log('NATS connection closed');
+            console.error(err);
+            process.exit();
+        })
+
         natsWrapper.client.on('close', () => {
             console.log('NATS connection closed');
 
