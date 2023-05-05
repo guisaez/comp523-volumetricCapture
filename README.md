@@ -1,12 +1,12 @@
 # Volumetric Capture
 
 ## Table of Contents
-* ### [Installation](#installation-1)
-* ### [Folder Structure](#folder-structure-1)
-* ### [Running Tests](#running-tests-1)
-* ### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
-* ### [Client Service](./documentation/client/ClientServiceDocumentation.md)
-* ### [Acknowledgements](#acknowledgements-1)
+* #### [Installation](#installation-1)
+* #### [Folder Structure](#folder-structure-1)
+* #### [Running Tests](#running-tests-1)
+* #### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
+* #### [Client Service](./documentation/client/ClientServiceDocumentation.md)
+* #### [Acknowledgements](#acknowledgements-1)
 ---
 ## Installation
 ### Setting Up  Docker Environment
@@ -15,7 +15,7 @@
 ```
 git submodule update --init --recursive
 ```
-3. Download the pre-trained model for CIHP [here](https://github.com/Engineering-Course/CIHP_PGN).
+3. Download the pre-trained model for CIHP [here](https://github.com/Engineering-Course/CIHP_PGN) and store in `volumetricCapture/app/src/models/CIHP_PGN/checkpoint`.
 4. Follow step `0.1` in [this](https://github.com/zju3dv/EasyMocap/blob/master/doc/installation.md) guide to download and place the necessary SMPL models for EasyMocap. This must be done before building Docker Image.
 4. Place `raw` images, `intri.yml`, and `extri.yml` files into `volumetricCapture/app/src/data` before building Docker Image. If changes are made to these files after building, the image must be rebuilt.
 5. Make modifications to `multi_view_custom.yaml` in `volumetricCapture/app/src/data` to configure Neuralbody.
