@@ -7,9 +7,9 @@ deploy:
       - ./infra/k8s-dev/*
 build:
   local:
-    push: false
+    push: true
   artifacts:
-    - image: guisaez/volumetric-files
+    - image: teamg/volumetric-files
       context: files-service
       docker:
         dockerfile: Dockerfile
@@ -17,7 +17,7 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: guisaez/volumetric-auth
+    - image: teamg/volumetric-auth
       context: auth
       docker:
         dockerfile: Dockerfile
@@ -25,7 +25,7 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: guisaez/volumetric-projects
+    - image: teamg/volumetric-projects
       context: projects-service
       docker:
         dockerfile: Dockerfile
@@ -33,17 +33,7 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: guisaez/volumetric-model
-      context: model-service
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
-          - src: 'src/**/*.py'
-            dest: .
-    - image: guisaez/volumetric-client
+    - image: teamg/volumetric-client
       context: client
       docker:
         dockerfile: Dockerfile
