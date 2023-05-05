@@ -8,7 +8,6 @@ import click
 from pathlib import Path
 
 
-# data_dir = r'/home/bhargavb/neuralbody/RIL_test_1'
 @click.command()
 @click.argument("src")
 def cli(src):
