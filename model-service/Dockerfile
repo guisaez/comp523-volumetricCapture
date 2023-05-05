@@ -30,7 +30,7 @@ ENV LC_ALL en_US.UTF-8
 
 # Install Python dependencies globally.
 RUN python3.7 -m pip install click 
-RUN pip3 install --no-cache-dir virtualenv Pillow Flask
+RUN pip3 install --no-cache-dir virtualenv Pillow
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
@@ -137,16 +137,10 @@ ENV CUDA_HOME="/usr/local/cuda-11.1"
 RUN source /app/env/NEURAL_ENV/bin/activate && python3 -m pip install --upgrade pip && \
     pip3 install imageio pillow && pip3 install --upgrade pillow imageio
     
-
-WORKDIR /app/src
+WORKDIR /app
 
 CMD ["npm", "start"]
 
 #CMD ["/bin/bash"]
-
-# TRY
-
-# docker build -t volumetric-capture --build-arg BASE_IMAGE=nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04 --build-arg RUNTIME=nvidia .
-# docker run --ipc=host --gpus all -it --rm volumetric-capture
 
 # This will not work on macOS and requires cuda 11 compatabile GPU
