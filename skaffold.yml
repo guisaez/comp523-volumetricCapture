@@ -9,7 +9,7 @@ build:
   local:
     push: true
   artifacts:
-    - image: teamg/volumetric-files
+    - image: teamg2023/volumetric-files
       context: files-service
       docker:
         dockerfile: Dockerfile
@@ -17,7 +17,7 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: teamg/volumetric-auth
+    - image: teamg2023/volumetric-auth
       context: auth
       docker:
         dockerfile: Dockerfile
@@ -25,7 +25,7 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: teamg/volumetric-projects
+    - image: teamg2023/volumetric-projects
       context: projects-service
       docker:
         dockerfile: Dockerfile
@@ -33,8 +33,16 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: teamg/volumetric-client
+    - image: teamg2023/volumetric-client
       context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: teamg2023/volumetric-model
+      context: model-service
       docker:
         dockerfile: Dockerfile
       sync:

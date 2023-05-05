@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: teamg/volumetric-client
+          image: teamg2023/volumetric-client
 
 ---
 apiVersion: v1
