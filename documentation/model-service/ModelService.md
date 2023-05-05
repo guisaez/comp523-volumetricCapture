@@ -5,6 +5,7 @@
 * #### [Folder Structure](#folder-structure-1)
 * #### [Running Tests](#running-tests-1)
 * #### [Scripts](#scripts-1)
+* #### [Future Development](#future-development-1)
 ---
 
 ## Installation
@@ -74,3 +75,8 @@ All scripts make use of the python `click` package to provide a CLI. To learn mo
 * `easymocap_to_neuralbody.py`: This script converts output from EasyMocap into the proper input structure required by Neuralbody.
 
 * `get_annots.py`: This script is provided by Neuralbody to generate the annots.npy files before running. A CLI was added with `click` to take an argument `src` for the input directory.
+
+---
+## Future Development
+
+The `docker` folder contains a Dockerfile that attempts to setup one virtual environment that can run CIHP, EasyMocap, and Neuralbody. It is unfinished, but attempts were made to migrate CIHP to be compatabile with `tensorflow 2`. In particular, this image would need `tensorflow 2.4.0`, but other dependencies present within the `requirements.txt` would need to be updated to be compatabile with this version. This version of tensorflow would also require a softlink to solve an issue with finding the proper `libcusolver.so` files for CUDA 11.1. [This](https://github.com/tensorflow/tensorflow/issues/43947#issuecomment-715295153) issues page may be helpful for solving it.

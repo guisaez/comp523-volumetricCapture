@@ -1,13 +1,24 @@
 # Volumetric Capture
 
 ## Table of Contents
+* #### [Getting Started](#getting-started-1)
 * #### [Run in Development Environment](./documentation/RunInDevelopmentEnv.md)
 * #### [Authentication Service](./documentation/auth-service/AuthenticationService.md)
 * #### [Client Service](./documentation/client/ClientServiceDocumentation.md)
 * #### [Model Service](./documentation/model-service/ModelService.md)
 * #### [Acknowledgements](#acknowledgements-1)
----
 
+---
+## Getting Started
+
+* To get the application running in a development environment follow [this](./documentation/RunInDevelopmentEnv.md) guide.
+
+* The key services provided from this repository have their corresponding documentation linked within the table of contents.
+
+* The `documentation` folder contains information relating to all components of this repository.
+
+
+---
 ## Acknowledgements
 
 This project would not have been possible without the following repositories:
