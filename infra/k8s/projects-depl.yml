@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: projects
-          image: guisaez/volumetric-projects
+          image: teamg/volumetric-projects
           env: 
             - name: MONGO_URI
               value: 'mongodb://projects-mongo-srv:27017/projects'
