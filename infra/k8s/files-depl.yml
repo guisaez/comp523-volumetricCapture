@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: files
-          image: teamg/volumetric-files
+          image: teamg2023/volumetric-files
           env: 
             - name: MONGO_URI
               value: 'mongodb://files-mongo-srv:27017/files'
