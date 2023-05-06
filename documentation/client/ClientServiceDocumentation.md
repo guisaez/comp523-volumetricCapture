@@ -210,6 +210,7 @@ This component represents the project card component that shows the project name
 ### ProjectEdit
 
 A component for editing project information, including project name, file management, settings, and deleting the project.
+You may change the content of the makrdown file by changing the path defined in the `helpMarkdown` constant in `src/components/ProjectEdit.js` line `37` to `39`.
 
 #### Props:
 - `setView`: A function to switch views.
