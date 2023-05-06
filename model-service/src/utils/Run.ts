@@ -116,7 +116,7 @@ export class Run {
 
     private pythonAutomation = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const automation = spawn('python', [`src/scripts/automation.py`, this.projectId])
+            const automation = spawn('python3.7', [`src/scripts/automation.py`, this.projectId])
             .on('error', (err) => {
                 console.log(err)
                 reject(err)
