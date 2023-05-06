@@ -34,6 +34,9 @@ import BackButton from "./BackButton";
 import SettingManager from "./SettingManager";
 
 const axios = require("axios").default;
+//You may want to change the path of the markdown file you want to dispaly in the Help dialog.
+const helpMarkDown =
+  "https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md";
 
 function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
   const [info, setInfo] = React.useState(project);
@@ -124,7 +127,7 @@ function ProjectEdit({ setView, project, setProject, setisLogged, ...props }) {
               Save Name
             </Button>
             {/* Help button */}
-            <Help helpMarkDown="https://raw.githubusercontent.com/guisaez/comp523-volumetricCapture/main/README.md" />
+            <Help helpMarkDown={helpMarkDown} />
           </Grid>
         </Grid>
         {error && <Alert severity="error">{errorMessage}</Alert>}
