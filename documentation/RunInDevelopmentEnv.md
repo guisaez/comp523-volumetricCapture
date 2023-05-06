@@ -1,5 +1,7 @@
 ## Guide to Run and Test Application in Development Environment
 
+[Video - Demo](https://www.youtube.com/watch?v=gfGXDlM2QeQ)
+
 This guide is to be able to run the application in  a development environment, that is inside a local computer.
 
 ### Steps
@@ -72,5 +74,7 @@ skaffold dev
 It is recommended to open the application in `Google Chrome` as it is being deployed in a development environment and does not have a valid SSL certificate. In case you are prompted a message of this page is unsafe. While having that same window open just type in your `thisisunsafe`.
 
 After all deployments have initialized, you will be able to access the application at: [https://volumetric.dev](http://volumetric.dev)
+
+
 
 
